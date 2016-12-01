@@ -387,7 +387,7 @@ define('MFCS_INSURANCE_PROVIDED_NOT', 4);
  */
 define('MFCS_USER_CALENDAR_NONE', 0);
 define('MFCS_USER_CALENDAR_ORIGINAL', 1);
-define('MFCS_USER_CALENDAR_FULL_IO', 2);
+define('MFCS_USER_CALENDAR_FULL', 2);
 
 /**
  * Implements hook_init().
@@ -13884,7 +13884,6 @@ function mcneese_fcs_text_capitalization($text) {
 
   return implode(' ', $fixed);
 }
-
 
 /**
  * @} End of '@defgroup mfcs McNeese Facilities Use'.

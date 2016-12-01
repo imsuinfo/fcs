@@ -260,7 +260,64 @@ function mfcs_dashboard_page() {
       $buildings = array();
     }
 
+    // Holidays and Unavailabilities are setup on a per-year basis.
+    // If absolute_start is a previous or next year, additional function calls are required.
+    $year = date('Y', $month_start);
+    $year_start = strtotime('midnight january 1 ' . $year);
+    $year_stop = strtotime('next year', $year_start);
+
+    $holidays = mfcs_get_holidays($year, $absolute_start, $absolute_stop);
+    if (!is_array($holidays)) {
+      $holidays = array();
+    }
+
     $rows = array();
+    if ($absolute_start < $year_start) {
+      $holidays_previous = mfcs_get_holidays($year - 1, $absolute_start, $year_start);
+      if (is_array($holidays_previous)) {
+        foreach ($holidays_previous as $holiday_key => $holiday_value) {
+          $holidays[$holiday_key] = $holiday_value;
+        }
+      }
+      unset($holiday_key);
+      unset($holiday_value);
+      unset($holidays_previous);
+    }
+    if ($absolute_stop > $year_stop) {
+      $holidays_next = mfcs_get_holidays($year + 1, $year_stop, $absolute_stop);
+      if (is_array($holidays_next)) {
+        foreach ($holidays_next as $holiday_key => $holiday_value) {
+          $holidays[$holiday_key] = $holiday_value;
+        }
+      }
+      unset($holiday_key);
+      unset($holiday_value);
+      unset($holidays_next);
+    }
+
+    foreach ($holidays as $holiday) {
+      $day = date('j', $holiday->date);
+      $month = date('n', $holiday->date);
+      $month_day = $month . '-' . $day;
+      if (!isset($rows[$month_day])) {
+        $rows[$month_day] = array();
+      }
+
+      $rows[$month_day]['holiday-' . $holiday->id] = array(
+        'is' => 'holiday',
+        'id' => $holiday->id,
+        'title' => check_plain($holiday->title),
+        'title-raw' => $holiday->title,
+        'tooltip' => str_replace('"', '&quot;', check_plain($holiday->description)),
+        'year' => $year,
+        'month' => $month,
+        'day' => $day,
+        'date' => $holiday->date,
+      );
+    }
+    unset($holiday);
+    unset($holidays);
+
     $current_date = $absolute_start;
     while ($current_date < $absolute_stop) {
       $next_date = strtotime('+1 days', $current_date);
@@ -297,7 +354,8 @@ function mfcs_dashboard_page() {
             }
 
             if (isset($rows[$month_day][$item->id])) {
-              $rows[$month_day][$item->id]['time_start'][] = array('start' => $item->time_start, 'stop' => $item->time_stop);
+              $rows[$month_day][$item->id]['times'][$delta]['start'] = $item->time_start[$delta];
+              $rows[$month_day][$item->id]['times'][$delta]['stop'] = $item->time_stop[$delta];
             }
             else {
               $room_name = '';
@@ -317,14 +375,19 @@ function mfcs_dashboard_page() {
                 $month_name_lower = strtolower($month_name);
 
                 $rows[$month_day][$item->id] = array(
+                  'is' => 'more',
                   'href' => $base_path . 'requests/calendar-0/day/' . $year . '/' . $month_name_lower . '/' . $day . $url_arguments,
                   'title' => '. . .',
+                  'title-raw' => '. . .',
                   'tooltip' => 'View more requests on ' . $month_name . ' ' . $day . ', ' . $year,
                   'date' => $date,
                   'month' => $month,
                   'day' => $day,
-                  'times' => NULL,
+                  'times' => FALSE,
                 );
+
+                $rows[$month_day][$item->id]['times'][$delta]['start'] = $item->time_start[$delta];
+                $rows[$month_day][$item->id]['times'][$delta]['stop'] = $item->time_stop[$delta];
 
                 unset($year);
                 unset($month_name);
@@ -339,8 +402,10 @@ function mfcs_dashboard_page() {
                 $type = (int) $item->type;
 
                 $rows[$month_day][$item->id] = array(
+                  'is' => 'event',
                   'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
                   'title' => $item_title,
+                  'title-raw' => $item->title,
                   'tooltip' => '[' . $item->id . '] ' . $building_name . ' ' . $room_name . ': ' . $item_title,
                   'date' => $date,
                   'year' => $year,
@@ -352,7 +417,12 @@ function mfcs_dashboard_page() {
                   'type' => $type,
                   'building_name' => $building_name,
                   'room_name' => $room_name,
+                  'times' => array(),
                 );
+
+                $rows[$month_day][$item->id]['times'][$delta]['start'] = $item->time_start[$delta];
+                $rows[$month_day][$item->id]['times'][$delta]['stop'] = $item->time_stop[$delta];
+
                 unset($item_title);
               }
             }
@@ -365,8 +435,8 @@ function mfcs_dashboard_page() {
 
     mfcs_include(MFCS_INCLUDE_OUTPUT);
 
-    $title = '<h3><a href="' . $base_path . 'requests/calendar-0/month' . $url_arguments . '">' . "Requests for " . date("F, Y", $month_start) . '</a></h3>';
-    $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, 'mfcs-calendar-0-month', 3);
+    $title = '<h3><a href="' . $base_path . 'requests/calendar-0/month' . $url_arguments . '">Requests for ' . date('F, Y', $month_start) . '</a></h3>';
+    $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, NULL, 3);
     if ($result !== FALSE) {
       $markup .= $result;
     }

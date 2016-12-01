@@ -14,6 +14,9 @@
 /**
  * Build a month calendar display.
  *
+ * This is a wrapper used to determine which calendar theme to use.
+ * The specific calendar theme is based on each individual users settings.
+ *
  * @param array $items
  *   An array of request items to link to.
  * @param int $month_start
@@ -38,6 +41,88 @@
  *   The generate HTML markup or FALSE on error.
  */
 function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id = NULL, $max_items = NULL) {
+  $user = cf_current_user();
+
+  $calendar = MFCS_USER_CALENDAR_ORIGINAL;
+  if (isset($user->mfcs['calendar']) && is_numeric($user->mfcs['calendar'])) {
+    $calendar = (int) $user->mfcs['calendar'];
+  }
+
+  if ($calendar === MFCS_USER_CALENDAR_FULL) {
+    $success = TRUE;
+
+    // load the moment library (required by fullcalendar).
+    $library = libraries_load('moment');
+    if (isset($library['error'])) {
+      $success = FALSE;
+      watchdog(MFCS_WATCHDOG_ID, 'Unable to load moment library, reason: @reason.', array('@reason' => $library['error']), WATCHDOG_ERROR);
+    }
+    elseif (empty($library['loaded'])) {
+      $success = FALSE;
+      watchdog(MFCS_WATCHDOG_ID, 'Unable to load moment library, reason: unknown.', array(), WATCHDOG_ERROR);
+    }
+    unset($library);
+
+    // load the fullcalendar library.
+    $library = libraries_load('fullcalendar');
+    if (isset($library['error'])) {
+      $success = FALSE;
+      watchdog(MFCS_WATCHDOG_ID, 'Unable to load fullcalendar library, reason: @reason.', array('@reason' => $library['error']), WATCHDOG_ERROR);
+    }
+    elseif (empty($library['loaded'])) {
+      $success = FALSE;
+      watchdog(MFCS_WATCHDOG_ID, 'Unable to load fullcalendar library, reason: unknown.', array(), WATCHDOG_ERROR);
+    }
+    unset($library);
+
+    // load the qtip library.
+    $library = libraries_load('qtip');
+    if (isset($library['error'])) {
+      $success = FALSE;
+      watchdog(MFCS_WATCHDOG_ID, 'Unable to load qtip library, reason: @reason.', array('@reason' => $library['error']), WATCHDOG_ERROR);
+    }
+    elseif (empty($library['loaded'])) {
+      $success = FALSE;
+      watchdog(MFCS_WATCHDOG_ID, 'Unable to load qtip library, reason: unknown.', array(), WATCHDOG_ERROR);
+    }
+    unset($library);
+
+    if ($success) {
+      return mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id, $max_items);
+    }
+  }
+
+  // the original is the default or the fallback theme.
+  return mfcs_build_calendar_month_markup_original($items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id, $max_items);
+}
+
+/**
+ * Build a month calendar display using the original calendar theme.
+ *
+ * @param array $items
+ *   An array of request items to link to.
+ * @param int $month_start
+ *   Unix timestamp for the start of the month.
+ * @param int $month_stop
+ *   Unix timestamp for the first day of the next month.
+ * @param int $absolute_start
+ *   Unix timestamp for the first day of the week in which the first day of
+ *   the month may be found.
+ * @param int $absolute_stop
+ *   Unix timestamp for the last day of the week in which the last day of
+ *   the month may be found.
+ * @param string $title
+ *   An HTML title for describing the calendar.
+ * @param string $id
+ *   (optional) A unique HTML id to associate with the calendar.
+ * @param int|null $max_items
+ *   (optional) Maximum number of items to display before a 'more' links is
+ *   added. A value of NULL means no maximum limit.
+ *
+ * @return string|bool
+ *   The generate HTML markup or FALSE on error.
+ */
+function mfcs_build_calendar_month_markup_original($items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id = NULL, $max_items = NULL) {
   if (!is_array($items)) {
     cf_error::invalid_array('items');
     return FALSE;
@@ -210,19 +295,27 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
             $markup .= '<div class="calendar-item calendar-unavailable year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '" title="' . $item['tooltip'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
           }
           else {
-            $markup .= '<div class="calendar-item location-' . $item['location'] . ' building-' . $item['building'] . ' room-' . $item['room'] . ' type-' . $item['type'] . ' year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+            $markup .= '<div class="calendar-item calendar-event location-' . $item['location'] . ' building-' . $item['building'] . ' room-' . $item['room'] . ' type-' . $item['type'] . ' year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
           }
         }
       }
       else {
         $items_count = 0;
         foreach ($items[$current_month_day] as $item_id => $item) {
-          $markup .= '<div class="calendar-item location-' . $item['location'] . ' building-' . $item['building'] . ' room-' . $item['room'] . ' type-' . $item['type'] . ' year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+          if ($item['is'] == 'holiday') {
+            $markup .= '<div class="strong calendar-item calendar-holiday year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</div>';
+          }
+          elseif ($item['is'] == 'unavailable') {
+            $markup .= '<div class="calendar-item calendar-unavailable year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '" title="' . $item['tooltip'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+          }
+          else {
+            $markup .= '<div class="calendar-item calendar-event location-' . $item['location'] . ' building-' . $item['building'] . ' room-' . $item['room'] . ' type-' . $item['type'] . ' year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
 
-          $items_count++;
-          if ($items_count == $max_items) {
-            $markup .= '<div class="calendar-item item-more year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $url_base_day . '/' . $current_year . '/' . $current_month_name . '/' . $current_day . $url_arguments . '" title="View more.">More...</a></div>';
-            break;
+            $items_count++;
+            if ($items_count == $max_items) {
+              $markup .= '<div class="calendar-item item-more year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $url_base_day . '/' . $current_year . '/' . $current_month_name . '/' . $current_day . $url_arguments . '" title="View more.">More...</a></div>';
+              break;
+            }
           }
         }
       }
@@ -260,6 +353,359 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
 
   // end wrapper (calendar-month-wrapper)
   $markup .= '</div>';
+
+  return $markup;
+}
+
+/**
+ * Build a month calendar display using the full calendar theme.
+ *
+ * @param array $items
+ *   An array of request items to link to.
+ * @param int $month_start
+ *   Unix timestamp for the start of the month.
+ * @param int $month_stop
+ *   Unix timestamp for the first day of the next month.
+ * @param int $absolute_start
+ *   Unix timestamp for the first day of the week in which the first day of
+ *   the month may be found.
+ * @param int $absolute_stop
+ *   Unix timestamp for the last day of the week in which the last day of
+ *   the month may be found.
+ * @param string $title
+ *   An HTML title for describing the calendar.
+ * @param string $id
+ *   (optional) A unique HTML id to associate with the calendar.
+ * @param int|null $max_items
+ *   (optional) Maximum number of items to display before a 'more' links is
+ *   added. A value of NULL means no maximum limit.
+ *
+ * @return string|bool
+ *   The generate HTML markup or FALSE on error.
+ */
+function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id = NULL, $max_items = NULL) {
+  if (!is_array($items)) {
+    cf_error::invalid_array('items');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($month_start)) {
+    cf_error::invalid_integer('month_start');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($month_stop)) {
+    cf_error::invalid_integer('month_stop');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($absolute_start)) {
+    cf_error::invalid_integer('absolute_start');
+    return FALSE;
+  }
+
+  if (!cf_is_integer($absolute_stop)) {
+    cf_error::invalid_integer('absolute_stop');
+    return FALSE;
+  }
+
+  if (!is_string($title)) {
+    cf_error::invalid_string('title');
+    return FALSE;
+  }
+
+  $id_string = 'mfcs-calendar-0-month';
+  if (!empty($id)) {
+    if (!is_string($id)) {
+      cf_error::invalid_string('id');
+      return FALSE;
+    }
+
+    $id_string = check_plain($id);
+  }
+
+  if (!is_null($max_items) && !cf_is_integer($max_items)) {
+    cf_error::invalid_integer('max_items');
+    $max_items = NULL;
+  }
+
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
+  $room_options = mfcs_get_request_room_list_options(NULL, NULL, FALSE, TRUE);
+  $building_options = mfcs_get_request_building_list_options(NULL, NULL, FALSE, TRUE);
+  $type_options = mfcs_get_request_type_list_options(NULL, NULL, FALSE, TRUE);
+
+  $instance = mfcs_instance();
+  $this_year = date('Y', $instance);
+  $this_month = date('n', $instance);
+  $this_day = date('j', $instance);
+
+
+  // navigation
+  $last_month = strtotime('midnight first day of last month', $month_start);
+  $next_month = strtotime('midnight first day of next month', $month_start);
+
+  $url_base_month = $base_path . 'requests/calendar-0/month';
+  $url_base_day = $base_path . 'requests/calendar-0/day';
+
+  $last_url = $url_base_month . '/' . date('Y', $last_month) . '/' . strtolower(date('F', $last_month)) . $url_arguments;
+  $this_url = $url_base_month . $url_arguments;
+  $next_url = $url_base_month . '/' . date('Y', $next_month) . '/' . strtolower(date('F', $next_month)) . $url_arguments;
+
+
+  // full calendar javascript.
+  $javascript = '(function ($) {' . "\n";
+  $javascript .= 'Drupal.behaviors.mfcs_monthly_calendar_fullcalendar = {' . "\n";
+  $javascript .= '  attach:function(context) {' . "\n";
+
+  $javascript .= '$(\'#' . $id_string . '\').fullCalendar({' . "\n";
+
+  // add custom buttons.
+  $javascript .= '  customButtons: {' . "\n";
+  $javascript .= '    previousMonthUrl: {' . "\n";
+  $javascript .= '      text: \'Previous\',' . "\n";
+  $javascript .= '      click: function() {' . "\n";
+  $javascript .= '        location.assign(\'' . $last_url . '\');' . "\n";
+  $javascript .= '        return false;' . "\n";
+  $javascript .= '      }' . "\n";
+  $javascript .= '    },' . "\n";
+  $javascript .= '    nextMonthUrl: {' . "\n";
+  $javascript .= '      text: \'Next\',' . "\n";
+  $javascript .= '      click: function() {' . "\n";
+  $javascript .= '        location.assign(\'' . $next_url . '\');' . "\n";
+  $javascript .= '        return false;' . "\n";
+  $javascript .= '      }' . "\n";
+  $javascript .= '    }' . "\n";
+  $javascript .= '  },' . "\n";
+
+  // main settings
+  $javascript .= '  header: {' . "\n";
+  $javascript .= '    left: \'previousMonthUrl,nextMonthUrl\',' . "\n";
+  $javascript .= '    center: \'title\',' . "\n";
+  $javascript .= '    right: \'month,listMonth\'' . "\n";
+  $javascript .= '  },' . "\n";
+  $javascript .= '  defaultView: \'month\',' . "\n";
+  $javascript .= '  defaultDate: \'' . date('Y-m-d', $month_start) . '\',' . "\n";
+  $javascript .= '  height: \'auto\',' . "\n";
+  $javascript .= '  contentHeight: \'auto\',' . "\n";
+  #$javascript .= '  now: \'' . date('Y-m-d', $instance) . '\',' . "\n";
+  $javascript .= '  navLinks: true,' . "\n";
+  $javascript .= '  editable: false,' . "\n";
+  $javascript .= '  eventLimit: true,' . "\n";
+  $javascript .= '  allDaySlot: true,' . "\n";
+  $javascript .= '  slotDuration: \'01:00:00\',' . "\n";
+  $javascript .= '  slotEventOverlap: true,' . "\n";
+
+  if (is_null($max_items)) {
+    $javascript .= '  eventLimit: false,' . "\n";
+  }
+  else {
+    $javascript .= '  eventLimit: ' . $max_items . ',' . "\n";
+  }
+
+  // add qtip support.
+  $javascript .= '  eventRender: function(event, element) {' . "\n";
+  $javascript .= '    element.qtip({' . "\n";
+  $javascript .= '      content: { title: event.tooltipTitle, text: event.tooltipText },' . "\n";
+  $javascript .= '      style: event.tooltipClass,' . "\n";
+  $javascript .= '      position: {' . "\n";
+  $javascript .= '        my: \'top left\',' . "\n";
+  $javascript .= '        at: \'bottom center\'' . "\n";
+  $javascript .= '      }' . "\n";
+  $javascript .= '    });' . "\n";
+  $javascript .= '  },' . "\n";
+
+  // add each event.
+  $current_date = $absolute_start;
+
+  $javascript_items = NULL;
+  $space = '      ';
+  while ($current_date < $absolute_stop) {
+    $current_year = date('Y', $current_date);
+    $current_month = date('n', $current_date);
+    $current_month_name = strtolower(date('F', $current_date));
+    $current_day = date('j', $current_date);
+    $current_month_day = $current_month . '-' . $current_day;
+
+    $extra_class = ' month-current';
+    if ($current_date < $month_start) {
+      $extra_class = ' month-previous';
+    }
+    elseif ($current_date >= $month_stop) {
+      $extra_class = ' month-next';
+    }
+
+    if ($current_year == $this_year && $current_month == $this_month && $current_day == $this_day) {
+      $extra_class .= ' today';
+    }
+
+    if (!empty($items[$current_month_day])) {
+      foreach ($items[$current_month_day] as $item_id => $item) {
+        $javascript_item_common = '';
+
+        $tooltip_text = '';
+        $tooltip_text_suffix = '';
+        $tooltip_class = 'tooltip-calendar-monthly tooltip-calendar-item';
+
+        // fullcalendar performs sanitization, so send it raw title text.
+        $processed_title_for_fullcalendar = str_replace('\'', '\\\'', $item['title-raw']);
+
+        if ($item['is'] == 'holiday') {
+          $javascript_item_common .= $space . 'title: \'' . $processed_title_for_fullcalendar . '\',' . "\n";
+
+          $class_names = array(
+            '\'calendar-item\'',
+            '\'calendar-holiday\'',
+            '\'year-' . $item['year'] .'\'',
+            '\'month-' . $item['month'] .'\'',
+            '\'day-' . $item['day'] .'\'',
+          );
+
+          $tooltip_class .= ' tooltip-calendar-holiday year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
+
+          if (!empty($item['tooltip'])) {
+            $tooltip_text .= '<div class="tooltip-item tooltip-item-holiday_text">';
+            $tooltip_text .= '<span class="tooltip-item-text">' . $item['tooltip'] . '</span>';
+            $tooltip_text .= '</div>';
+            $tooltip_text .= '<br>';
+          }
+
+          $javascript_item_common .= $space . 'className: [ ' . implode(', ', $class_names) . ' ]' . "\n";
+        }
+        elseif ($item['is'] == 'unavailable') {
+          $javascript_item_common .= $space . 'title: \'' . $processed_title_for_fullcalendar . '\',' . "\n";
+          $javascript_item_common .= $space . 'url: \'' . $item['href'] . '\',' . "\n";
+
+          $class_names = array(
+            '\'calendar-item\'',
+            '\'calendar-unavailable\'',
+            '\'year-' . $item['year'] .'\'',
+            '\'month-' . $item['month'] .'\'',
+            '\'day-' . $item['day'] .'\'',
+          );
+
+          $tooltip_class .= ' tooltip-calendar-unavailable year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
+
+          $javascript_item_common .= $space . 'className: [ ' . implode(', ', $class_names) . ' ]' . "\n";
+        }
+        else {
+          $javascript_item_common .= $space . 'title: \'' . $processed_title_for_fullcalendar . '\',' . "\n";
+          $javascript_item_common .= $space . 'url: \'' . $item['href'] . '\',' . "\n";
+
+          if (array_key_exists($item['building'], $building_options)) {
+            $tooltip_text .= '<div class="tooltip-item tooltip-item-building">';
+            $tooltip_text .= '<span class="tooltip-item-name">Building:</span> ';
+            $tooltip_text .= '<span class="tooltip-item-value">' . $building_options[$item['building']] . '</span>';
+            $tooltip_text .= '</div>';
+          }
+
+          if (array_key_exists($item['room'], $room_options)) {
+            $tooltip_text .= '<div class="tooltip-item tooltip-item-room">';
+            $tooltip_text .= '<span class="tooltip-item-name">Room:</span> ';
+            $tooltip_text .= '<span class="tooltip-item-value">' . $room_options[$item['room']] . '</span>';
+            $tooltip_text .= '</div>';
+          }
+
+          if (!empty($tooltip_text)) {
+            $tooltip_text .= '<br>';
+          }
+
+          $tooltip_text_suffix .= '<div class="tooltip-item tooltip-item-footer">';
+          $tooltip_text_suffix .= '<span class="tooltip-item-request_id">' . (int) $item_id . '</span> ';
+          $tooltip_text_suffix .= '<span class="tooltip-item-request_type">' . $type_options[$item['type']] . '</span>';
+          $tooltip_text_suffix .= '</div>';
+
+          $class_names = array(
+            '\'calendar-item\'',
+            '\'calendar-event\'',
+            '\'location-' . $item['location'] .'\'',
+            '\'room-' . $item['room'] .'\'',
+            '\'type-' . $item['type'] .'\'',
+            '\'year-' . $item['year'] .'\'',
+            '\'month-' . $item['month'] .'\'',
+            '\'day-' . $item['day'] .'\'',
+          );
+
+          $tooltip_class .= ' tooltip-calendar-event year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
+          $tooltip_class .= ' tooltip-location-' . $item['location'] . ' tooltip-building-' . $item['building'] . ' tooltip-room-' . $item['room'];
+          $tooltip_class .= ' tooltip-type-' . $item['type'];
+
+          $javascript_item_common .= $space . 'className: [ ' . implode(', ', $class_names) . ' ]' . "\n";
+        }
+
+        $tooltip_text .= '<div class="tooltip-item tooltip-item-date">';
+        $tooltip_text .= date(MFCS_DATE_FORMAT_DATE, $item['date']);
+        $tooltip_text .= '</div>';
+
+        if (empty($item['times'])) {
+          if (!is_null($javascript_items)) {
+            $javascript_items .= ',' . "\n";
+          }
+
+          $javascript_items .= '    {' . "\n";
+          $javascript_items .= $space . 'id: ' . (int) $item_id . ',' . "\n";
+          $javascript_items .= $space . 'start: \'' . date('Y-m-d', $item['date']) . '\',' . "\n";
+          $javascript_items .= $space . 'end: \'' . date('Y-m-d', strtotime('tomorrow', $item['date'])) . '\',' . "\n";
+          $javascript_items .= $space . 'allDayDefault: true,' . "\n";
+          $javascript_items .= $space . 'tooltipTitle: \'<strong>' . $item['title'] . '</strong>\',' . "\n";
+          $javascript_items .= $space . 'tooltipText: \'' . $tooltip_text . '\',' . "\n";
+          $javascript_items .= $space . 'tooltipClass: \'' . $tooltip_class . '\',' . "\n";
+          $javascript_items .= $javascript_item_common;
+          $javascript_items .= '    }';
+        }
+        else {
+          foreach ($item['times'] as $delta => $times) {
+            if (!is_null($javascript_items)) {
+              $javascript_items .= ',' . "\n";
+            }
+
+            $tooltip_text .= '<div class="tooltip-item tooltip-item-times tooltip-item-time-' . $delta . '">';
+            $tooltip_text .= date(MFCS_DATE_FORMAT_TIME, $times['start']) . ' to ' . date(MFCS_DATE_FORMAT_TIME, $times['stop']);
+            $tooltip_text .= '</div>';
+
+            $javascript_items .= '    {' . "\n";
+            $javascript_items .= $space . 'id: ' . (int) $item_id . ',' . "\n";
+            $javascript_items .= $space . 'start: \'' . date('c', $times['start']) . '\',' . "\n";
+            $javascript_items .= $space . 'end: \'' . date('c', $times['stop']) . '\',' . "\n";
+            $javascript_items .= $space . 'allDayDefault: false,' . "\n";
+            $javascript_items .= $space . 'tooltipTitle: \'<strong>' . $item['title'] . '</strong>\',' . "\n";
+            $javascript_items .= $space . 'tooltipText: \'' . $tooltip_text . $tooltip_text_suffix . '\',' . "\n";
+            $javascript_items .= $space . 'tooltipClass: \'' . $tooltip_class . '\',' . "\n";
+            $javascript_items .= $javascript_item_common;
+            $javascript_items .= '    }';
+          }
+        }
+
+        unset($javascript_item_common);
+      }
+    }
+
+    $current_date = strtotime('midnight tomorrow', $current_date);
+  }
+
+  if (!is_null($javascript_items)) {
+    $javascript .= '  events: [' . "\n" . $javascript_items . "\n" . '  ]' . "\n";
+  }
+
+  $javascript .= '});' . "\n";
+  $javascript .= '    }' . "\n";
+  $javascript .= '  }' . "\n";
+  $javascript .= '})(jQuery);' . "\n";
+
+
+  drupal_add_js($javascript, array('type' => 'inline', 'group' => JS_DEFAULT, 'preprocess' => FALSE, 'cache' => FALSE));
+
+
+  // full calendar markup.
+  $markup = '<div id="' . $id_string . '-wrapper" class="calendar-month-fullcalendar-wrapper"><div id="' . $id_string . '" class="calendar-month-fullcalendar"></div></div>';
 
   return $markup;
 }

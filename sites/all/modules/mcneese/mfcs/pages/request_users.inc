@@ -2102,7 +2102,7 @@ function mfcs_request_users_0_customize_form($form, &$form_state, $user_id) {
     '#title' => 'Select a calendar theme to use.',
     '#default_value' => MFCS_USER_CALENDAR_NONE,
     '#options' => $calendar_options,
-    '#description' => 'Changes how the calendar is used. The original calendar is very printer-friendly but has limited space. The Full-IO calendar is more fluid and can show more events than the original. ',
+    '#description' => 'Changes how the calendars are presented. The original calendar is a simple and very stable calendar but it is rather limited in functionality. The full calendar is more experimental but has a lot more functionality and is in many ways easier to use. ',
   );
 
 

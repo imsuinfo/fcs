@@ -1412,7 +1412,7 @@ function mfcs_get_user_calendar_list_options($option = NULL, $hidden = FALSE, $d
   }
 
   $options_all[MFCS_USER_CALENDAR_ORIGINAL] = 'Original Calendar';
-  $options_all[MFCS_USER_CALENDAR_FULL_IO] = 'Full I/O Calendar';
+  $options_all[MFCS_USER_CALENDAR_FULL] = 'Full Calendar';
 
   foreach ($options_all as $option_id => $option_name) {
     $options[$option_id] = $option_name;

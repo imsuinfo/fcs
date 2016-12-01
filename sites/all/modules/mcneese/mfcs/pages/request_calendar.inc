@@ -225,6 +225,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
       'is' => 'holiday',
       'id' => $holiday->id,
       'title' => check_plain($holiday->title),
+      'title-raw' => $holiday->title,
       'tooltip' => str_replace('"', '&quot;', check_plain($holiday->description)),
       'year' => $year,
       'month' => $month,
@@ -232,6 +233,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
       'date' => $holiday->date,
     );
   }
+  unset($holiday);
   unset($holidays);
 
   while ($current_date < $absolute_stop) {
@@ -274,7 +276,8 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
           }
 
           if (isset($rows[$month_day][$item->id])) {
-            $rows[$month_day][$item->id]['time_start'][] = array('start' => $item->time_start, 'stop' => $item->time_stop);
+            $rows[$month_day][$item->id]['times'][$delta]['start'] = $item->time_start[$delta];
+            $rows[$month_day][$item->id]['times'][$delta]['stop'] = $item->time_stop[$delta];
           }
           else {
             $room_number = '';
@@ -300,12 +303,16 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
                 'is' => 'more',
                 'href' => $base_path . 'requests/calendar-0/day/' . $year . '/' . $month_name_lower . '/' . $day . $url_arguments,
                 'title' => '. . .',
+                'title-raw' => '. . .',
                 'tooltip' => 'View more requests on ' . $month_name . ' ' . $day . ', ' . $year,
                 'date' => $date,
                 'month' => $month,
                 'day' => $day,
-                'times' => NULL,
+                'times' => array(),
               );
+
+              $rows[$month_day][$item->id]['times'][$delta]['start'] = $item->time_start[$delta];
+              $rows[$month_day][$item->id]['times'][$delta]['stop'] = $item->time_stop[$delta];
 
               unset($year);
               unset($month_name);
@@ -323,11 +330,13 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
                 'is' => 'event',
                 'href' => $base_path . 'requests/view-0/' . $item->id . $url_arguments,
                 'title' => $item_title,
+                'title-raw' => $item->title,
                 'tooltip' => '[' . $item->id . '] ' . $building_code . ' ' . $room_number . ': ' . $item_title,
                 'date' => $date,
                 'year' => $year,
                 'month' => $month,
                 'day' => date('j', $date),
+                'times' => array(),
                 'location' => $location,
                 'building' => $building,
                 'room' => $room,
@@ -339,6 +348,9 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
               );
               unset($item_title);
             }
+
+            $rows[$month_day][$item->id]['times'][$delta]['start'] = $item->time_start[$delta];
+            $rows[$month_day][$item->id]['times'][$delta]['stop'] = $item->time_stop[$delta];
           }
         }
       }
