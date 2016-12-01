@@ -705,8 +705,25 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
   drupal_add_js($javascript, array('type' => 'inline', 'group' => JS_DEFAULT, 'preprocess' => FALSE, 'cache' => FALSE));
 
 
+  // full calendar markup wrapper.
+  $markup = '<div id="' . $id_string . '-wrapper" class="calendar-month-fullcalendar-wrapper">';
+
   // full calendar markup.
-  $markup = '<div id="' . $id_string . '-wrapper" class="calendar-month-fullcalendar-wrapper"><div id="' . $id_string . '" class="calendar-month-fullcalendar"></div></div>';
+  $markup .= '<div id="' . $id_string . '" class="calendar-month-fullcalendar"></div>';
+
+  // calendar links
+  $markup .= '<div id="mfcs-links_and_filters" class="links_and_filters-wrapper no-print">';
+
+  $markup .= '<div class="links_and_filters-group group-1">';
+  $markup .= mfcs_build_calendar_ical_links_markup($month_start, TRUE, TRUE, FALSE);
+  $markup .= mfcs_build_calendar_openpgp_links_markup();
+  $markup .= '</div>'; // filter-group-1
+
+  $markup .= mfcs_build_determined_filters_markup();
+  $markup .= '</div>'; // #mfcs-links_and_filters
+
+  // end full calendar markup wrapper.
+  $markup .= '</div>';
 
   return $markup;
 }
