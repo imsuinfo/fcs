@@ -414,6 +414,7 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
     return FALSE;
   }
 
+  // fullcalendar requires an id string to function.
   $id_string = 'mfcs-calendar-0-month';
   if (!empty($id)) {
     if (!is_string($id)) {

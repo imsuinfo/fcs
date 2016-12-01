@@ -436,7 +436,7 @@ function mfcs_dashboard_page() {
     mfcs_include(MFCS_INCLUDE_OUTPUT);
 
     $title = '<h3><a href="' . $base_path . 'requests/calendar-0/month' . $url_arguments . '">Requests for ' . date('F, Y', $month_start) . '</a></h3>';
-    $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, NULL, 3);
+    $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, 'mfcs-calendar-0-month', 3);
     if ($result !== FALSE) {
       $markup .= $result;
     }
