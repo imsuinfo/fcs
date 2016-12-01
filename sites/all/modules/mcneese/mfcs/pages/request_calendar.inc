@@ -623,7 +623,6 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     $day_stop = strtotime('midnight tomorrow', $day_start);
   }
 
-
   $month = strtolower(date('F', $day_start));
   $year = date('Y', $day_start);
   $day = date('d', $day_start);
@@ -863,12 +862,12 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
               $rows['range'][$time_count][$time_slot][$item->id]['slot_stop'] = TRUE;
             }
 
-            $time_count += $range_interval;
-          }
+            $slots_max = count($rows['range'][$time_count]);
+            if ($rows['slots_max'] < $slots_max) {
+              $rows['slots_max'] = $slots_max;
+            }
 
-          $slots_max = count($rows['range'][$time_floor]);
-          if ($rows['slots_max'] < $slots_max) {
-            $rows['slots_max'] = $slots_max;
+            $time_count += $range_interval;
           }
         }
       }
@@ -1001,12 +1000,12 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
           $rows['range'][$time_count][$time_slot]['unavailable-' . $unavailability->id]['slot_stop'] = TRUE;
         }
 
-        $time_count += $range_interval;
-      }
+        $slots_max = count($rows['range'][$time_count]);
+        if ($rows['slots_max'] < $slots_max) {
+          $rows['slots_max'] = $slots_max;
+        }
 
-      $slots_max = count($rows['range'][$time_floor]);
-      if ($rows['slots_max'] < $slots_max) {
-        $rows['slots_max'] = $slots_max;
+        $time_count += $range_interval;
       }
 
       unset($time_start);

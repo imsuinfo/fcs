@@ -835,8 +835,8 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   $range_height_non_location_small = $range_height_link_small_max + $range_height_time_small_max + $range_height_type_small_max;
 
   $slots_per_page = 4;
-  $slots_min = $slots_per_page * $page_number;
-  $slots_max = $slots_min + $slots_per_page;
+  $slots_minimum = $page_number * $slots_per_page;
+  $slots_page_max = $slots_minimum + $slots_per_page;
 
   // prepare the inline CSS markup
   $css_screen = '';
@@ -1036,9 +1036,8 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
   $slots_page = 0;
   $slots_count = 0;
-  $slots_minimum = $page_number * $slots_per_page;
   do {
-    $page_url = $url_base_day . '/' . date('Y', $last_day) . '/' . strtolower(date('F', $last_day)) . '/' . date('d', $day_start) . '/' . $slots_page . $url_arguments;
+    $page_url = $url_base_day . '/' . date('Y', $day_start) . '/' . strtolower(date('F', $day_start)) . '/' . date('d', $day_start) . '/' . $slots_page . $url_arguments;
 
     $class_active_page = '';
     if ($slots_page == $page_number) {
@@ -1053,7 +1052,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
   } while ($slots_count < $items['slots_max']);
 
   // setup page_url to be used in the prev/next links later on.
-  $page_url = $url_base_day . '/' . date('Y', $last_day) . '/' . strtolower(date('F', $last_day)) . '/' . date('d', $day_start) . '/';
+  $page_url = $url_base_day . '/' . date('Y', $day_start) . '/' . strtolower(date('F', $day_start)) . '/' . date('d', $day_start) . '/';
 
   // end page links (Range)
   $markup .= '</ul></nav>';
@@ -1130,10 +1129,10 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
 
     foreach ($slots as $slot => $range) {
       // only process slots used by the current page.
-      if ($slot < $slots_min) {
+      if ($slot < $slots_minimum) {
         continue;
       }
-      elseif ($slot >= $slots_max) {
+      elseif ($slot >= $slots_page_max) {
         break;
       }
 
@@ -1209,7 +1208,7 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
         $margin_left_landscape = 0;
         $margin_left_small = 0;
         $slot_count = $slot - 1;
-        while ($slot_count >= $slots_min) {
+        while ($slot_count >= $slots_minimum) {
           if (empty($slots[$slot_count])) {
             // the +6 is for the margins.
             $margin_left_screen += $range_width_screen + 6;
