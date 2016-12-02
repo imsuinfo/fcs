@@ -176,15 +176,22 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     $room_ids = array_keys($rooms);
   }
 
+  $search_room_ids = NULL;
+  if (!empty($mfcs_determined['filters']['field_top-building-0']['search'])) {
+    $search_room_ids = $mfcs_determined['filters']['field_top-building-0']['search'];
+  }
+
   $holidays = mfcs_get_holidays($year, $absolute_start, $absolute_stop);
   if (!is_array($holidays)) {
     $holidays = array();
   }
 
-  $search_room_ids = NULL;
-  if (!empty($mfcs_determined['filters']['field_top-building-0']['search'])) {
-    $search_room_ids = $mfcs_determined['filters']['field_top-building-0']['search'];
+  $unavailabilities = mfcs_get_unavailabilities($year, $search_room_ids, $absolute_start, $absolute_stop, TRUE, FALSE, TRUE);
+  if (!is_array($unavailabilities)) {
+    $unavailabilities = array();
   }
+
+  $unavailability_type_options = mfcs_get_unavailability_type_list_options(NULL, TRUE);
 
   // Holidays and Unavailabilities are setup on a per-year basis.
   // If absolute_start is a previous or next year, additional function calls are required.
@@ -200,6 +207,15 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     unset($holiday_key);
     unset($holiday_value);
     unset($holidays_previous);
+
+    $unavailabilities = mfcs_get_unavailabilities($year - 1, $search_room_ids, $absolute_start, $year_start, TRUE, FALSE, TRUE);
+    if (is_array($unavailabilities_previous)) {
+      foreach ($unavailabilities_previous as $unavailabilities_key => $unavailabilities_value) {
+        $holidays[$unavailabilities_key] = $unavailabilities_value;
+      }
+    }
+    unset($unavailabilities_key);
+    unset($unavailabilities_value);
   }
   if ($absolute_stop > $year_stop) {
     $holidays_next = mfcs_get_holidays($year + 1, $year_stop, $absolute_stop);
@@ -211,6 +227,15 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     unset($holiday_key);
     unset($holiday_value);
     unset($holidays_next);
+
+    $unavailabilities = mfcs_get_unavailabilities($year + 1, $search_room_ids, $year_stop, $absolute_stop, TRUE, FALSE, TRUE);
+    if (is_array($unavailabilities_next)) {
+      foreach ($unavailabilities_next as $unavailabilities_key => $unavailabilities_value) {
+        $holidays[$unavailabilities_key] = $unavailabilities_value;
+      }
+    }
+    unset($unavailabilities_key);
+    unset($unavailabilities_value);
   }
 
   foreach ($holidays as $holiday) {
@@ -235,6 +260,94 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   }
   unset($holiday);
   unset($holidays);
+
+  foreach ($unavailabilities as $unavailability) {
+    $building_code = check_plain($unavailability->building_code);
+    $building_name = check_plain($unavailability->building_name);
+    $room_number = check_plain($unavailability->room_number);
+    $room_name = check_plain($unavailability->room_name);
+    $description = check_plain($unavailability->description);
+    $tooltip = $building_code . ' ' . $room_number . ': ' . $description;
+
+    if ($unavailability->type == MFCS_UNAVAILABILITY_TYPE_CLASS) {
+      $tooltip = $building_code . ' ' . $room_number . ': unavailable due to class ' . check_plain($unavailability->title) . '.';
+    }
+
+    if ($unavailability->date_start == $unavailability->date_stop) {
+      $day = date('j', $unavailability->date_start);
+      $month = date('n', $unavailability->date_start);
+      $month_day = $month . '-' . $day;
+      if (!isset($rows[$month_day])) {
+        $rows[$month_day] = array();
+      }
+
+      $rows[$month_day]['unavailability-' . $unavailability->id] = array(
+        'is' => 'unavailable',
+        'id' => 'unavailability-' . ((int) $unavailability->id),
+        'href' => $base_path . 'requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
+        'title' => check_plain($unavailability->title),
+        'title-raw' => $unavailability->title,
+        'tooltip' => str_replace('"', '&quot;', $tooltip),
+        'description' => str_replace("\n", '<br>', $description),
+        'year' => $year,
+        'month' => $month,
+        'day' => $day,
+        'date' => $unavailability->date_start,
+        'building' => $unavailability->building_id,
+        'room' => $unavailability->room_id,
+        'building_code' => $building_code,
+        'building_name' => $building_name,
+        'room_number' => $room_number,
+        'room_name' => $room_name,
+        'type' => $unavailability->type,
+        'type_name' => isset($unavailability_type_options[$unavailability->type]) ? $unavailability_type_options[$unavailability->type] : 'Unknown',
+      );
+    }
+    else {
+      $date_current = $unavailability->date_start;
+      while ($date_current < $unavailability->date_stop) {
+        $day = date('j', $date_current);
+        $month = date('n', $date_current);
+        $month_day = $month . '-' . $day;
+        if (!isset($rows[$month_day])) {
+          $rows[$month_day] = array();
+        }
+
+        $rows[$month_day]['unavailability-' . $unavailability->id] = array(
+          'is' => 'unavailable',
+          'id' => 'unavailability-' . ((int) $unavailability->id),
+          'href' => $base_path . 'requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
+          'title' => check_plain($unavailability->title),
+          'title-raw' => $unavailability->title,
+          'tooltip' => str_replace('"', '&quot;', $tooltip),
+          'description' => str_replace("\n", '<br>', $description),
+          'year' => $year,
+          'month' => $month,
+          'day' => $day,
+          'date' => $date_current,
+          'date_range_start' => $unavailability->date_start,
+          'date_range_stop' => $unavailability->date_stop,
+          'building' => $unavailability->building_id,
+          'room' => $unavailability->room_id,
+          'building_code' => $building_code,
+          'building_name' => $building_name,
+          'room_number' => $room_number,
+          'room_name' => $room_name,
+          'type' => $unavailability->type,
+          'type_name' => isset($unavailability_type_options[$unavailability->type]) ? $unavailability_type_options[$unavailability->type] : 'Unknown',
+        );
+
+        $date_current = strtotime('midnight tomorrow', $date_current);
+      }
+    }
+    unset($date_current);
+    unset($building_code);
+    unset($building_name);
+    unset($room_number);
+    unset($room_name);
+    unset($description);
+    unset($tooltip);
+  }
 
   while ($current_date < $absolute_stop) {
     $next_date = strtotime('+1 days', $current_date);
@@ -882,6 +995,8 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     $unavailabilities = array();
   }
 
+  $unavailability_type_options = mfcs_get_unavailability_type_list_options(NULL, TRUE);
+
   foreach ($unavailabilities as $unavailability) {
     $building_code = check_plain($unavailability->building_code);
     $building_name = check_plain($unavailability->building_name);
@@ -919,7 +1034,8 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
         'building_name' => $building_name,
         'room_number' => $room_number,
         'room_name' => $room_name,
-        'type' => 'unavailable',
+        'type' => $unavailability->type,
+        'type_name' => isset($unavailability_type_options[$unavailability->type]) ? $unavailability_type_options[$unavailability->type] : 'Unknown',
       );
     }
     else {
@@ -994,7 +1110,8 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
           'offset_start' => $time_offset_start,
           'offset_stop' => $time_offset_stop,
           'z-index' => $time_zindex,
-          'type' => 'unavailable',
+          'type' => $unavailability->type,
+          'type_name' => isset($unavailability_type_options[$unavailability->type]) ? $unavailability_type_options[$unavailability->type] : 'Unknown',
         );
 
         if ($time_count == $time_floor) {

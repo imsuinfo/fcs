@@ -205,6 +205,8 @@ function mfcs_dashboard_page() {
 
     $instance = mfcs_instance();
 
+    $year = date('Y', $instance);
+
     $month_start = strtotime('midnight first day of', $instance);
     $month_end = strtotime('midnight last day of', $instance);
     $month_stop = strtotime('midnight tomorrow', $month_end);
@@ -260,15 +262,66 @@ function mfcs_dashboard_page() {
       $buildings = array();
     }
 
-    // Holidays and Unavailabilities are setup on a per-year basis.
-    // If absolute_start is a previous or next year, additional function calls are required.
-    $year = date('Y', $month_start);
-    $year_start = strtotime('midnight january 1 ' . $year);
-    $year_stop = strtotime('next year', $year_start);
+    $search_room_ids = NULL;
+    if (!empty($mfcs_determined['filters']['field_top-building-0']['search'])) {
+      $search_room_ids = $mfcs_determined['filters']['field_top-building-0']['search'];
+    }
 
     $holidays = mfcs_get_holidays($year, $absolute_start, $absolute_stop);
     if (!is_array($holidays)) {
       $holidays = array();
+    }
+
+    $unavailabilities = mfcs_get_unavailabilities($year, $search_room_ids, $absolute_start, $absolute_stop, TRUE, FALSE, TRUE);
+    if (!is_array($unavailabilities)) {
+      $unavailabilities = array();
+    }
+
+    $unavailability_type_options = mfcs_get_unavailability_type_list_options(NULL, TRUE);
+
+    // Holidays and Unavailabilities are setup on a per-year basis.
+    // If absolute_start is a previous or next year, additional function calls are required.
+    $year_start = strtotime('midnight january 1 ' . $year);
+    $year_stop = strtotime('next year', $year_start);
+    if ($absolute_start < $year_start) {
+      $holidays_previous = mfcs_get_holidays($year - 1, $absolute_start, $year_start);
+      if (is_array($holidays_previous)) {
+        foreach ($holidays_previous as $holiday_key => $holiday_value) {
+          $holidays[$holiday_key] = $holiday_value;
+        }
+      }
+      unset($holiday_key);
+      unset($holiday_value);
+      unset($holidays_previous);
+
+      $unavailabilities = mfcs_get_unavailabilities($year - 1, $search_room_ids, $absolute_start, $year_start, TRUE, FALSE, TRUE);
+      if (is_array($unavailabilities_previous)) {
+        foreach ($unavailabilities_previous as $unavailabilities_key => $unavailabilities_value) {
+          $holidays[$unavailabilities_key] = $unavailabilities_value;
+        }
+      }
+      unset($unavailabilities_key);
+      unset($unavailabilities_value);
+    }
+    if ($absolute_stop > $year_stop) {
+      $holidays_next = mfcs_get_holidays($year + 1, $year_stop, $absolute_stop);
+      if (is_array($holidays_next)) {
+        foreach ($holidays_next as $holiday_key => $holiday_value) {
+          $holidays[$holiday_key] = $holiday_value;
+        }
+      }
+      unset($holiday_key);
+      unset($holiday_value);
+      unset($holidays_next);
+
+      $unavailabilities = mfcs_get_unavailabilities($year + 1, $search_room_ids, $year_stop, $absolute_stop, TRUE, FALSE, TRUE);
+      if (is_array($unavailabilities_next)) {
+        foreach ($unavailabilities_next as $unavailabilities_key => $unavailabilities_value) {
+          $holidays[$unavailabilities_key] = $unavailabilities_value;
+        }
+      }
+      unset($unavailabilities_key);
+      unset($unavailabilities_value);
     }
 
     $rows = array();
@@ -317,6 +370,58 @@ function mfcs_dashboard_page() {
     }
     unset($holiday);
     unset($holidays);
+
+    foreach ($unavailabilities as $unavailability) {
+      if ($unavailability->date_start == $unavailability->date_stop) {
+        $day = date('j', $unavailability->date_start);
+        $month = date('n', $unavailability->date_start);
+        $month_day = $month . '-' . $day;
+        if (!isset($rows[$month_day])) {
+          $rows[$month_day] = array();
+        }
+
+        $rows[$month_day]['unavailability-all'] = array(
+          'is' => 'unavailable',
+          'id' => 'unavailability-all',
+          'title' => 'Some rooms are unavailable.',
+          'title-raw' => 'Some rooms are unavailable.',
+          'tooltip' => 'View the current day to see all room unavailabilities',
+          'year' => $year,
+          'month' => $month,
+          'day' => $day,
+          'date' => $unavailability->date_start,
+          'type' => NULL,
+        );
+      }
+      else {
+        $date_current = $unavailability->date_start;
+        while ($date_current < $unavailability->date_stop) {
+          $day = date('j', $date_current);
+          $month = date('n', $date_current);
+          $month_day = $month . '-' . $day;
+          if (!isset($rows[$month_day])) {
+            $rows[$month_day] = array();
+          }
+
+          $rows[$month_day]['unavailability-all'] = array(
+            'is' => 'unavailable',
+            'id' => 'unavailability-all',
+            'title' => 'Some rooms are unavailable.',
+            'title-raw' => 'Some rooms are unavailable.',
+            'tooltip' => 'View the current day to see all room unavailabilities',
+            'year' => $year,
+            'month' => $month,
+            'day' => $day,
+            'date' => $unavailability->date_start,
+            'type' => NULL,
+          );
+
+          $date_current = strtotime('midnight tomorrow', $date_current);
+        }
+      }
+      unset($date_current);
+  }
+
 
     $current_date = $absolute_start;
     while ($current_date < $absolute_stop) {
