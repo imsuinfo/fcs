@@ -12806,10 +12806,6 @@ function mfcs_get_unavailabilities($year, $room_id = NULL, $timestamp_start = NU
       else {
         $or = db_or();
 
-        // [B] [DS] [E] [DF] ~ B <= DS && E > DS | DS < E && DF >= E
-        // [B] [DS] [DF] [E] ~ B <= DS && E > DF | DS >= B && DF < E
-        // [DS] [B] [DF] [E] ~ B >= DS && B < DF | DS <= B && DF > B
-
         $and = db_and();
         $and->condition('mu.date_start', $timestamp_stop, '<');
         $and->condition('mu.date_stop', $timestamp_stop, '>=');
@@ -12826,10 +12822,6 @@ function mfcs_get_unavailabilities($year, $room_id = NULL, $timestamp_start = NU
         $or->condition($and);
 
         $query->condition($or);
-
-    #( (mu.date_start >= 1469077200) AND (mu.date_start < 1469163600) )
-    #OR                  1468389600
-    #( (mu.date_stop > 1469077200) AND (mu.date_stop <= 1469163600) )
       }
     }
 
