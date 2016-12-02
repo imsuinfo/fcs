@@ -371,33 +371,17 @@ function mfcs_dashboard_page() {
     unset($holiday);
     unset($holidays);
 
-    foreach ($unavailabilities as $unavailability) {
-      if ($unavailability->date_start == $unavailability->date_stop) {
-        $day = date('j', $unavailability->date_start);
-        $month = date('n', $unavailability->date_start);
-        $month_day = $month . '-' . $day;
-        if (!isset($rows[$month_day])) {
-          $rows[$month_day] = array();
-        }
+    // dashboard assigns a separate theme for the original theme, however the full calander can and should display all unavailabilities.
+    $calendar = MFCS_USER_CALENDAR_ORIGINAL;
+    if (isset($user->mfcs['calendar']) && is_numeric($user->mfcs['calendar'])) {
+      $calendar = (int) $user->mfcs['calendar'];
+    }
 
-        $rows[$month_day]['unavailability-all'] = array(
-          'is' => 'unavailable',
-          'id' => 'unavailability-all',
-          'title' => 'Some rooms are unavailable.',
-          'title-raw' => 'Some rooms are unavailable.',
-          'tooltip' => 'View the current day to see all room unavailabilities',
-          'year' => $year,
-          'month' => $month,
-          'day' => $day,
-          'date' => $unavailability->date_start,
-          'type' => NULL,
-        );
-      }
-      else {
-        $date_current = $unavailability->date_start;
-        while ($date_current < $unavailability->date_stop) {
-          $day = date('j', $date_current);
-          $month = date('n', $date_current);
+    if ($calendar == MFCS_USER_CALENDAR_ORIGINAL) {
+      foreach ($unavailabilities as $unavailability) {
+        if ($unavailability->date_start == $unavailability->date_stop) {
+          $day = date('j', $unavailability->date_start);
+          $month = date('n', $unavailability->date_start);
           $month_day = $month . '-' . $day;
           if (!isset($rows[$month_day])) {
             $rows[$month_day] = array();
@@ -415,13 +399,125 @@ function mfcs_dashboard_page() {
             'date' => $unavailability->date_start,
             'type' => NULL,
           );
-
-          $date_current = strtotime('midnight tomorrow', $date_current);
         }
-      }
-      unset($date_current);
-  }
+        else {
+          $date_current = $unavailability->date_start;
+          while ($date_current < $unavailability->date_stop) {
+            $day = date('j', $date_current);
+            $month = date('n', $date_current);
+            $month_day = $month . '-' . $day;
+            if (!isset($rows[$month_day])) {
+              $rows[$month_day] = array();
+            }
 
+            $rows[$month_day]['unavailability-all'] = array(
+              'is' => 'unavailable',
+              'id' => 'unavailability-all',
+              'title' => 'Some rooms are unavailable.',
+              'title-raw' => 'Some rooms are unavailable.',
+              'tooltip' => 'View the current day to see all room unavailabilities',
+              'year' => $year,
+              'month' => $month,
+              'day' => $day,
+              'date' => $unavailability->date_start,
+              'type' => NULL,
+            );
+
+            $date_current = strtotime('midnight tomorrow', $date_current);
+          }
+        }
+        unset($date_current);
+      }
+    }
+    else {
+      foreach ($unavailabilities as $unavailability) {
+        $building_code = check_plain($unavailability->building_code);
+        $building_name = check_plain($unavailability->building_name);
+        $room_number = check_plain($unavailability->room_number);
+        $room_name = check_plain($unavailability->room_name);
+        $description = check_plain($unavailability->description);
+        $tooltip = $building_code . ' ' . $room_number . ': ' . $description;
+
+        if ($unavailability->type == MFCS_UNAVAILABILITY_TYPE_CLASS) {
+          $tooltip = $building_code . ' ' . $room_number . ': unavailable due to class ' . check_plain($unavailability->title) . '.';
+        }
+
+        if ($unavailability->date_start == $unavailability->date_stop) {
+          $day = date('j', $unavailability->date_start);
+          $month = date('n', $unavailability->date_start);
+          $month_day = $month . '-' . $day;
+          if (!isset($rows[$month_day])) {
+            $rows[$month_day] = array();
+          }
+
+          $rows[$month_day]['unavailability-' . $unavailability->id] = array(
+            'is' => 'unavailable',
+            'id' => 'unavailability-' . ((int) $unavailability->id),
+            'href' => $base_path . 'requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
+            'title' => check_plain($unavailability->title),
+            'title-raw' => $unavailability->title,
+            'tooltip' => str_replace('"', '&quot;', $tooltip),
+            'description' => str_replace("\n", '<br>', $description),
+            'year' => $year,
+            'month' => $month,
+            'day' => $day,
+            'date' => $unavailability->date_start,
+            'building' => $unavailability->building_id,
+            'room' => $unavailability->room_id,
+            'building_code' => $building_code,
+            'building_name' => $building_name,
+            'room_number' => $room_number,
+            'room_name' => $room_name,
+            'type' => $unavailability->type,
+            'type_name' => isset($unavailability_type_options[$unavailability->type]) ? $unavailability_type_options[$unavailability->type] : 'Unknown',
+          );
+        }
+        else {
+          $date_current = $unavailability->date_start;
+          while ($date_current < $unavailability->date_stop) {
+            $day = date('j', $date_current);
+            $month = date('n', $date_current);
+            $month_day = $month . '-' . $day;
+            if (!isset($rows[$month_day])) {
+              $rows[$month_day] = array();
+            }
+
+            $rows[$month_day]['unavailability-' . $unavailability->id] = array(
+              'is' => 'unavailable',
+              'id' => 'unavailability-' . ((int) $unavailability->id),
+              'href' => $base_path . 'requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
+              'title' => check_plain($unavailability->title),
+              'title-raw' => $unavailability->title,
+              'tooltip' => str_replace('"', '&quot;', $tooltip),
+              'description' => str_replace("\n", '<br>', $description),
+              'year' => $year,
+              'month' => $month,
+              'day' => $day,
+              'date' => $date_current,
+              'date_range_start' => $unavailability->date_start,
+              'date_range_stop' => $unavailability->date_stop,
+              'building' => $unavailability->building_id,
+              'room' => $unavailability->room_id,
+              'building_code' => $building_code,
+              'building_name' => $building_name,
+              'room_number' => $room_number,
+              'room_name' => $room_name,
+              'type' => $unavailability->type,
+              'type_name' => isset($unavailability_type_options[$unavailability->type]) ? $unavailability_type_options[$unavailability->type] : 'Unknown',
+            );
+
+            $date_current = strtotime('midnight tomorrow', $date_current);
+          }
+        }
+        unset($date_current);
+        unset($building_code);
+        unset($building_name);
+        unset($room_number);
+        unset($room_name);
+        unset($description);
+        unset($tooltip);
+      }
+    }
 
     $current_date = $absolute_start;
     while ($current_date < $absolute_stop) {

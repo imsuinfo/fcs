@@ -641,6 +641,10 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
 
           $javascript_item_common .= $space . 'className: [ ' . implode(', ', $class_names) . ' ]' . "\n";
         }
+        elseif ($item['is'] == 'more') {
+          // this is not used for full calendar, only for original calendar.
+          continue;
+        }
         else {
           $javascript_item_common .= $space . 'title: \'' . $processed_title_for_fullcalendar . '\',' . "\n";
           $javascript_item_common .= $space . 'url: \'' . $item['href'] . '\',' . "\n";
