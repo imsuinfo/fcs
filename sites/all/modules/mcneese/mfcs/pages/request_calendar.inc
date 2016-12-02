@@ -223,7 +223,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
 
     $rows[$month_day]['holiday-' . $holiday->id] = array(
       'is' => 'holiday',
-      'id' => $holiday->id,
+      'id' => 'holiday-' . $holiday->id,
       'title' => check_plain($holiday->title),
       'title-raw' => $holiday->title,
       'tooltip' => str_replace('"', '&quot;', check_plain($holiday->description)),
@@ -705,7 +705,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     $description = check_plain($holiday->description);
     $rows['all_day'][$date]['holiday-' . $holiday->id] = array(
       'is' => 'holiday',
-      'id' => $holiday->id,
+      'id' => 'holiday-' . $holiday->id,
       'title' => check_plain($holiday->title),
       'title-raw' => $holiday->title,
       'tooltip' => str_replace('"', '&quot;', $description),

@@ -524,6 +524,12 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
   $javascript .= '    });' . "\n";
   $javascript .= '  },' . "\n";
 
+  // redesign the day click action.
+  $javascript .= '  navLinkDayClick: function(date, jsEvent) {' . "\n";
+  $javascript .= '    jsEvent.preventDefault();' . "\n";
+  $javascript .= '    location.assign(\'' . $url_base_day . '/\' + date.format(\'Y/MM/D\'));' . "\n";
+  $javascript .= '  },' . "\n";
+
   // add each event.
   $current_date = $absolute_start;
 
@@ -588,6 +594,8 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
           $class_names = array(
             '\'calendar-item\'',
             '\'calendar-unavailable\'',
+            '\'building-' . $item['building'] . '\'',
+            '\'room-' . $item['room'] . '\'',
             '\'year-' . $item['year'] . '\'',
             '\'month-' . $item['month'] . '\'',
             '\'day-' . $item['day'] . '\'',
@@ -628,6 +636,7 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
             '\'calendar-item\'',
             '\'calendar-event\'',
             '\'location-' . $item['location'] . '\'',
+            '\'building-' . $item['building'] . '\'',
             '\'room-' . $item['room'] . '\'',
             '\'type-' . $item['type'] . '\'',
             '\'year-' . $item['year'] . '\'',
@@ -1800,6 +1809,8 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
           $class_names = array(
             '\'calendar-item\'',
             '\'calendar-unavailable\'',
+            '\'building-' . $item['building'] . '\'',
+            '\'room-' . $item['room'] . '\'',
             '\'year-' . $item['year'] . '\'',
             '\'month-' . $item['month'] . '\'',
             '\'day-' . $item['day'] . '\'',
@@ -1840,6 +1851,7 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
             '\'calendar-item\'',
             '\'calendar-event\'',
             '\'location-' . $item['location'] . '\'',
+            '\'building-' . $item['building'] . '\'',
             '\'room-' . $item['room'] . '\'',
             '\'type-' . $item['type'] . '\'',
             '\'year-' . $item['year'] . '\'',
@@ -1889,7 +1901,6 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
   unset($date_items);
 
   // add each range event.
-  $javascript_items = NULL;
   $processed_items = array();
   $space = '      ';
   if (!empty($items['range'])) {
@@ -1964,6 +1975,8 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
             $class_names = array(
               '\'calendar-item\'',
               '\'calendar-unavailable\'',
+              '\'building-' . $item['building'] . '\'',
+              '\'room-' . $item['room'] . '\'',
               '\'year-' . $item['year'] . '\'',
               '\'month-' . $item['month'] . '\'',
               '\'day-' . $item['day'] . '\'',
@@ -2004,6 +2017,7 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
               '\'calendar-item\'',
               '\'calendar-event\'',
               '\'location-' . $item['location'] . '\'',
+              '\'building-' . $item['building'] . '\'',
               '\'room-' . $item['room'] . '\'',
               '\'type-' . $item['type'] . '\'',
               '\'year-' . $item['year'] . '\'',
