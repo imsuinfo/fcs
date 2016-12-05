@@ -736,6 +736,62 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
 }
 
 /**
+ * Redirects the current page to the appropriate unavailability page.
+ *
+ * If the unavailability does not exist or the user lacks access redirect is not perfomed and a page not found is renderred.
+ *
+ * @param string $operation
+ *   The operation for determining the page to load, either: 'view', 'edit', or 'delete'.
+ * @param int $unavailability_id
+ *   The unavailability id to redirect to.
+ *
+ * @return
+ *   This function does not return, it exits.
+ */
+function mfcs_request_unavailability_redirect_page($operation, $unavailability_id) {
+  if (!is_string($operation)) {
+    cf_error::invalid_string('operation');
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if (!cf_is_integer($unavailability_id)) {
+    cf_error::invalid_integer('unavailability_id');
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  $unavailable = mfcs_get_unavailability($unavailability_id, NULL);
+  if (!is_object($unavailable)) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  // check to see if the user has access and if not, do not redirect.
+  $access = mfcs_unavailability_request_access($operation, $unavailable->year, $unavailable->room_id, $unavailability_id);
+  if ($access === FALSE) {
+    drupal_not_found();
+    drupal_exit();
+  }
+
+  if ($operation == 'view') {
+    drupal_goto('requests/unavailable-0/view/' . $unavailable->year . '/' . $unavailable->room_id . '/' . $unavailability_id);
+    drupal_exit();
+  }
+  elseif ($operation == 'edit') {
+    drupal_goto('requests/unavailable-0/edit/' . $unavailable->year . '/' . $unavailable->room_id . '/' . $unavailability_id);
+    drupal_exit();
+  }
+  elseif ($operation == 'delete') {
+    drupal_goto('requests/unavailable-0/delete/' . $unavailable->year . '/' . $unavailable->room_id . '/' . $unavailability_id);
+    drupal_exit();
+  }
+
+  drupal_not_found();
+  drupal_exit();
+}
+
+/**
  * Renders a single unavailability entry.
  *
  * @param int $year
