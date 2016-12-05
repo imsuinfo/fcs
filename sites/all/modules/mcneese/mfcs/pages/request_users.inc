@@ -503,7 +503,7 @@ function mfcs_request_users_0_view_page($user_id) {
   // load custom list options.
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
   $calendar_options = mfcs_get_user_calendar_list_options(NULL, TRUE);
-  $calendar_options[0] = 'Default'; // display 'default' instead of 'none'.
+  $calendar_options[MFCS_USER_CALENDAR_NONE] = 'Default'; // display 'default' instead of 'none'.
 
 
   $name = $account->name;
@@ -1956,7 +1956,7 @@ function mfcs_request_users_0_customize_form($form, &$form_state, $user_id) {
 
   // display 'default' instead of 'none', and make it the first option.
   unset($calendar_options[0]);
-  $calendar_options_temp = array(0 => 'Default');
+  $calendar_options_temp = array(MFCS_USER_CALENDAR_NONE => 'Default');
   foreach ($calendar_options as $calendar_options_key => $calendar_options_value) {
     $calendar_options_temp[$calendar_options_key] = $calendar_options_value;
   }
@@ -2328,11 +2328,11 @@ function mfcs_request_users_0_customize_form_submit($form, &$form_state) {
 
     if ($success !== FALSE) {
       $calendar_settings_changes = array();
-      if (!empty($form_state['values']['form']['settings_calendar']['calendar_theme'])) {
+      if (isset($form_state['values']['form']['settings_calendar']['calendar_theme']) && is_numeric($form_state['values']['form']['settings_calendar']['calendar_theme'])) {
         $calendar_settings_changes['calendar'] = (int) $form_state['values']['form']['settings_calendar']['calendar_theme'];
       }
 
-      if (!empty($form_state['values']['form']['settings_calendar']['calendar_holidays'])) {
+      if (isset($form_state['values']['form']['settings_calendar']['calendar_holidays'])) {
         if ($form_state['values']['form']['settings_calendar']['calendar_holidays'] == 'visible') {
           $calendar_settings_changes['calendar_holidays'] = TRUE;
         }
@@ -2341,7 +2341,7 @@ function mfcs_request_users_0_customize_form_submit($form, &$form_state) {
         }
       }
 
-      if (!empty($form_state['values']['form']['settings_calendar']['calendar_unavailabilities'])) {
+      if (isset($form_state['values']['form']['settings_calendar']['calendar_unavailabilities'])) {
         if ($form_state['values']['form']['settings_calendar']['calendar_unavailabilities'] == 'visible') {
           $calendar_settings_changes['calendar_unavailabilities'] = TRUE;
         }
