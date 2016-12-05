@@ -802,10 +802,27 @@ function mfcs_request_users_0_view_page($user_id) {
     $updated = $account->mfcs['updated'];
   }
 
+
+  // customization markup.
   $calendar_text = 'Unknown';
   if (array_key_exists($account->mfcs['calendar'], $calendar_options)) {
     $calendar_text = $calendar_options[$account->mfcs['calendar']];
   }
+
+  $calendar_holidays = 'Visible';
+  if (array_key_exists('calendar_holidays', $account->mfcs) && $account->mfcs['calendar_holidays'] === FALSE) {
+    $calendar_holidays = 'Hidden';
+  }
+
+  $calendar_unavailabilities = 'Visible';
+  if (array_key_exists('calendar_unavailabilities', $account->mfcs) && $account->mfcs['calendar_unavailabilities'] === FALSE) {
+    $calendar_unavailabilities = 'Hidden';
+  }
+
+  $customization = '';
+  $customization .= '<div class="view_user-item view_user-item-calendar"><span class="item-label item-label-calendar strong">Calendar:</span> <span class="item-value item-value-calendar">' . $calendar_text . '</span></div>';
+  $customization .= '<div class="view_user-item view_user-item-calendar_holidays"><span class="item-label item-label-calendar_holidays strong">Holidays:</span> <span class="item-value item-value-calendar_holidays">' . $calendar_holidays . '</span></div>';
+  $customization .= '<div class="view_user-item view_user-item-calendar_unavailabilities"><span class="item-label item-label-calendar_unavailabilities strong">Unavailabilities:</span> <span class="item-value item-value-calendar_unavailabilities">' . $calendar_unavailabilities . '</span></div>';
 
 
   // build presentation.
@@ -819,7 +836,6 @@ function mfcs_request_users_0_view_page($user_id) {
   $markup .= '<div class="view_user-item view_user-item-email"><span class="item-label item-label-email strong">E-mail:</span> <span class="item-value item-value-email">' . $email . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-banner_id"><span class="item-label item-label-banner_id strong">Banner ID:</span> <span class="item-value item-value-banner_id">' . $account->mfcs['banner_id'] . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-phone"><span class="item-label item-label-phone strong">Phone:</span> <span class="item-value item-value-phone">' . $phone . '</span></div>';
-  $markup .= '<div class="view_user-item view_user-item-calendar"><span class="item-label item-label-calendar strong">Calendar:</span> <span class="item-value item-value-calendar">' . $calendar_text . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-updated_on"><span class="item-label item-label-updated_on strong">Updated On:</span> <span class="item-value item-value-updated_on">' . date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $updated) . '</span></div>';
   $markup .= '</div>';
 
@@ -862,6 +878,7 @@ function mfcs_request_users_0_view_page($user_id) {
   $markup .= $venue;
   $markup .= '</div>';
 
+  $buttons = '';
   if ($is_manager || $is_administer) {
     $markup .= '<div class="view_user-group view_user-group-roles-special">';
     $markup .= '<h3 class="view_user-group-header view_user-group-header-roles-special">Special/Exceptional Roles</h3>';
@@ -899,18 +916,24 @@ function mfcs_request_users_0_view_page($user_id) {
     }
     unset($problems_detected);
 
-    $markup .= '<div class="view_user-buttons">';
-    $markup .= '<a href="' . $base_path . 'users-0/edit/' . $user_id . $url_arguments . '" class="view_user-button view_user-edit">Edit</a>' ;
-    $markup .= '<a href="' . $base_path . 'users-0/customize/' . $user_id . $url_arguments . '" class="view_user-button view_user-customize">Customize</a>' ;
-    $markup .= '<a href="' . $base_path . 'users-0/check/' . $user_id . $url_arguments . '" class="view_user-button view_user-check">Check for Problems</a>' ;
-    $markup .= '</div>';
+    $buttons .= '<div class="view_user-buttons">';
+    $buttons .= '<a href="' . $base_path . 'users-0/edit/' . $user_id . $url_arguments . '" class="view_user-button view_user-edit">Edit</a>' ;
+    $buttons .= '<a href="' . $base_path . 'users-0/customize/' . $user_id . $url_arguments . '" class="view_user-button view_user-customize">Customize</a>' ;
+    $buttons .= '<a href="' . $base_path . 'users-0/check/' . $user_id . $url_arguments . '" class="view_user-button view_user-check">Check for Problems</a>' ;
+    $buttons .= '</div>';
   }
   elseif ($user->uid == $user_id && ($is_requester || $is_reviewer)) {
-    $markup .= '<div class="view_user-buttons">';
-    $markup .= '<a href="' . $base_path . 'users-0/customize/' . $user_id . $url_arguments . '" class="view_user-button view_user-customize">Customize</a>' ;
-    $markup .= '</div>';
+    $buttons .= '<div class="view_user-buttons">';
+    $buttons .= '<a href="' . $base_path . 'users-0/customize/' . $user_id . $url_arguments . '" class="view_user-button view_user-customize">Customize</a>' ;
+    $buttons .= '</div>';
   }
 
+  $markup .= '<div class="view_user-group view_user-group-customization">';
+  $markup .= '<h3 class="view_user-group-header view_user-group-header-customization">Customization Information</h3>';
+  $markup .= $customization;
+  $markup .= '</div>';
+
+  $markup .= $buttons;
   $markup .= '</div>';
 
   return $markup;
@@ -2105,6 +2128,22 @@ function mfcs_request_users_0_customize_form($form, &$form_state, $user_id) {
     '#description' => 'Changes how the calendars are presented. The original calendar is a simple and very stable calendar but it is rather limited in functionality. The full calendar is more experimental but has a lot more functionality and is in many ways easier to use. ',
   );
 
+  $form['form']['settings_calendar']['calendar_holidays'] = array(
+    '#type' => 'select',
+    '#title' => 'Calendar Holidays',
+    '#default_value' => 'visible',
+    '#options' => array('visible' => 'Visible', 'hidden' => 'Hidden'),
+    '#description' => 'When visible, holidays are shown on both the monthly and daily calendars. This does not affect the display of holidays for requests due to conflicts and related warnings. ',
+  );
+
+  $form['form']['settings_calendar']['calendar_unavailabilities'] = array(
+    '#type' => 'select',
+    '#title' => 'Calendar Unavailabilities',
+    '#default_value' => 'visible',
+    '#options' => array('visible' => 'Visible', 'hidden' => 'Hidden'),
+    '#description' => 'When visible, room unavailabilities are shown on both the monthly and daily calendars. This does not affect the display of unavailabilities for requests due to conflicts and related warnings. ',
+  );
+
 
   // load and assign existing settings.
   if (isset($account->data['mcneese_settings'])) {
@@ -2148,6 +2187,14 @@ function mfcs_request_users_0_customize_form($form, &$form_state, $user_id) {
     // calendar settings
     if (isset($account->mfcs['calendar']) && is_numeric($account->mfcs['calendar'])) {
       $form['form']['settings_calendar']['calendar_theme']['#default_value'] = (int) $account->mfcs['calendar'];
+    }
+
+    if (isset($account->mfcs['calendar_holidays']) && is_bool($account->mfcs['calendar_holidays'])) {
+      $form['form']['settings_calendar']['calendar_holidays']['#default_value'] = $account->mfcs['calendar_holidays'] ? 'visible' : 'hidden';
+    }
+
+    if (isset($account->mfcs['calendar_unavailabilities']) && is_bool($account->mfcs['calendar_unavailabilities'])) {
+      $form['form']['settings_calendar']['calendar_unavailabilities']['#default_value'] = $account->mfcs['calendar_unavailabilities'] ? 'visible' : 'hidden';
     }
   }
 
@@ -2275,10 +2322,32 @@ function mfcs_request_users_0_customize_form_submit($form, &$form_state) {
     }
 
     if ($success !== FALSE) {
+      $calendar_settings_changes = array();
       if (!empty($form_state['values']['form']['settings_calendar']['calendar_theme'])) {
-        $data = array('calendar' => (int) $form_state['values']['form']['settings_calendar']['calendar_theme']);
-        $saved = mfcs_save_user($customized_account->uid, $data);
-        unset($data);
+        $calendar_settings_changes['calendar'] = (int) $form_state['values']['form']['settings_calendar']['calendar_theme'];
+      }
+
+      if (!empty($form_state['values']['form']['settings_calendar']['calendar_holidays'])) {
+        if ($form_state['values']['form']['settings_calendar']['calendar_holidays'] == 'visible') {
+          $calendar_settings_changes['calendar_holidays'] = TRUE;
+        }
+        elseif ($form_state['values']['form']['settings_calendar']['calendar_holidays'] == 'hidden') {
+          $calendar_settings_changes['calendar_holidays'] = FALSE;
+        }
+      }
+
+      if (!empty($form_state['values']['form']['settings_calendar']['calendar_unavailabilities'])) {
+        if ($form_state['values']['form']['settings_calendar']['calendar_unavailabilities'] == 'visible') {
+          $calendar_settings_changes['calendar_unavailabilities'] = TRUE;
+        }
+        elseif ($form_state['values']['form']['settings_calendar']['calendar_unavailabilities'] == 'hidden') {
+          $calendar_settings_changes['calendar_unavailabilities'] = FALSE;
+        }
+      }
+
+      if (!empty($calendar_settings_changes)) {
+        $saved = mfcs_save_user($customized_account->uid, $calendar_settings_changes);
+        unset($calendar_settings_changes);
 
         if ($saved === FALSE) {
           $success = FALSE;

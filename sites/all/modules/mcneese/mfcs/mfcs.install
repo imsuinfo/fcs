@@ -2192,6 +2192,8 @@ function mfcs_install() {
     ldap_duplicate bool default false,
     primary_account bool default true,
     calendar smallint not null default 0,
+    calendar_holidays bool default true not null,
+    calendar_unavailabilities bool default true not null,
     problems bigint not null default 0,
     updated bigint not null,
     updated_problems bigint not null,

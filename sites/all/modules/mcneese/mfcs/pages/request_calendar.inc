@@ -94,6 +94,19 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
 
   $user = cf_current_user();
 
+
+  // load customization options.
+  $show_holidays = TRUE;
+  if (isset($user->mfcs) && is_array($user->mfcs) && array_key_exists('calendar_holidays', $user->mfcs) && $user->mfcs['calendar_holidays'] === FALSE) {
+    $show_holidays = FALSE;
+  }
+
+  $show_unavailabilities = TRUE;
+  if (isset($user->mfcs) && is_array($user->mfcs) && array_key_exists('calendar_unavailabilities', $user->mfcs) && $user->mfcs['calendar_unavailabilities'] === FALSE) {
+    $show_unavailabilities = FALSE;
+  }
+
+
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
 
@@ -181,15 +194,38 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     $search_room_ids = $mfcs_determined['filters']['field_top-building-0']['search'];
   }
 
-  $holidays = mfcs_get_holidays($year, $absolute_start, $absolute_stop);
+
+  // conditionally load holidays.
+  $holidays = NULL;
+  $show_holidays = TRUE;
+  if (isset($user->mfcs['calendar_holidays']) && $user->mfcs['calendar_holidays'] === FALSE) {
+    $show_holidays = FALSE;
+  }
+
+  if ($show_holidays) {
+    $holidays = mfcs_get_holidays($year, $absolute_start, $absolute_stop);
+  }
+
   if (!is_array($holidays)) {
     $holidays = array();
   }
 
-  $unavailabilities = mfcs_get_unavailabilities($year, $search_room_ids, $absolute_start, $absolute_stop, TRUE, FALSE, TRUE);
+
+  // conditionally load unavailabilities.
+  $unavailabilities = NULL;
+  $show_unavailabilities = TRUE;
+  if (isset($user->mfcs['calendar_unavailabilities']) && $user->mfcs['calendar_unavailabilities'] === FALSE) {
+    $show_unavailabilities = FALSE;
+  }
+
+  if ($show_unavailabilities) {
+    $unavailabilities = mfcs_get_unavailabilities($year, $search_room_ids, $absolute_start, $absolute_stop, TRUE, FALSE, TRUE);
+  }
+
   if (!is_array($unavailabilities)) {
     $unavailabilities = array();
   }
+
 
   $unavailability_type_options = mfcs_get_unavailability_type_list_options('combined', TRUE);
 
@@ -198,44 +234,53 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   $year_start = strtotime('midnight january 1 ' . $year);
   $year_stop = strtotime('next year', $year_start);
   if ($absolute_start < $year_start) {
-    $holidays_previous = mfcs_get_holidays($year - 1, $absolute_start, $year_start);
-    if (is_array($holidays_previous)) {
-      foreach ($holidays_previous as $holiday_key => $holiday_value) {
-        $holidays[$holiday_key] = $holiday_value;
+    if ($show_holidays) {
+      $holidays_previous = mfcs_get_holidays($year - 1, $absolute_start, $year_start);
+      if (is_array($holidays_previous)) {
+        foreach ($holidays_previous as $holiday_key => $holiday_value) {
+          $holidays[$holiday_key] = $holiday_value;
+        }
       }
+      unset($holiday_key);
+      unset($holiday_value);
+      unset($holidays_previous);
     }
-    unset($holiday_key);
-    unset($holiday_value);
-    unset($holidays_previous);
 
-    $unavailabilities = mfcs_get_unavailabilities($year - 1, $search_room_ids, $absolute_start, $year_start, TRUE, FALSE, TRUE);
-    if (is_array($unavailabilities_previous)) {
-      foreach ($unavailabilities_previous as $unavailabilities_key => $unavailabilities_value) {
-        $holidays[$unavailabilities_key] = $unavailabilities_value;
+    if ($show_unavailabilities) {
+      $unavailabilities = mfcs_get_unavailabilities($year - 1, $search_room_ids, $absolute_start, $year_start, TRUE, FALSE, TRUE);
+      if (is_array($unavailabilities_previous)) {
+        foreach ($unavailabilities_previous as $unavailabilities_key => $unavailabilities_value) {
+          $holidays[$unavailabilities_key] = $unavailabilities_value;
+        }
       }
+      unset($unavailabilities_key);
+      unset($unavailabilities_value);
     }
-    unset($unavailabilities_key);
-    unset($unavailabilities_value);
   }
-  if ($absolute_stop > $year_stop) {
-    $holidays_next = mfcs_get_holidays($year + 1, $year_stop, $absolute_stop);
-    if (is_array($holidays_next)) {
-      foreach ($holidays_next as $holiday_key => $holiday_value) {
-        $holidays[$holiday_key] = $holiday_value;
-      }
-    }
-    unset($holiday_key);
-    unset($holiday_value);
-    unset($holidays_next);
 
-    $unavailabilities = mfcs_get_unavailabilities($year + 1, $search_room_ids, $year_stop, $absolute_stop, TRUE, FALSE, TRUE);
-    if (is_array($unavailabilities_next)) {
-      foreach ($unavailabilities_next as $unavailabilities_key => $unavailabilities_value) {
-        $holidays[$unavailabilities_key] = $unavailabilities_value;
+  if ($absolute_stop > $year_stop) {
+    if ($show_holidays) {
+      $holidays_next = mfcs_get_holidays($year + 1, $year_stop, $absolute_stop);
+      if (is_array($holidays_next)) {
+        foreach ($holidays_next as $holiday_key => $holiday_value) {
+          $holidays[$holiday_key] = $holiday_value;
+        }
       }
+      unset($holiday_key);
+      unset($holiday_value);
+      unset($holidays_next);
     }
-    unset($unavailabilities_key);
-    unset($unavailabilities_value);
+
+    if ($show_unavailabilities) {
+      $unavailabilities = mfcs_get_unavailabilities($year + 1, $search_room_ids, $year_stop, $absolute_stop, TRUE, FALSE, TRUE);
+      if (is_array($unavailabilities_next)) {
+        foreach ($unavailabilities_next as $unavailabilities_key => $unavailabilities_value) {
+          $holidays[$unavailabilities_key] = $unavailabilities_value;
+        }
+      }
+      unset($unavailabilities_key);
+      unset($unavailabilities_value);
+    }
   }
 
   foreach ($holidays as $holiday) {
@@ -722,6 +767,19 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
 
   $user = cf_current_user();
 
+
+  // load customization options.
+  $show_holidays = TRUE;
+  if (isset($user->mfcs) && is_array($user->mfcs) && array_key_exists('calendar_holidays', $user->mfcs) && $user->mfcs['calendar_holidays'] === FALSE) {
+    $show_holidays = FALSE;
+  }
+
+  $show_unavailabilities = TRUE;
+  if (isset($user->mfcs) && is_array($user->mfcs) && array_key_exists('calendar_unavailabilities', $user->mfcs) && $user->mfcs['calendar_unavailabilities'] === FALSE) {
+    $show_unavailabilities = FALSE;
+  }
+
+
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
 
@@ -803,7 +861,18 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   }
   unset($current_time);
 
-  $holidays = mfcs_get_holidays($year, $day_start, $day_stop);
+
+  // conditionally load holidays.
+  $holidays = NULL;
+  $show_holidays = TRUE;
+  if (isset($user->mfcs['calendar_holidays']) && $user->mfcs['calendar_holidays'] === FALSE) {
+    $show_holidays = FALSE;
+  }
+
+  if ($show_holidays) {
+    $holidays = mfcs_get_holidays($year, $day_start, $day_stop);
+  }
+
   if (!is_array($holidays)) {
     $holidays = array();
   }
@@ -990,7 +1059,18 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     }
   }
 
-  $unavailabilities = mfcs_get_unavailabilities($year, $search_room_ids, $day_start, $day_stop, TRUE, FALSE, TRUE);
+
+  // conditionally load unavailabilities.
+  $unavailabilities = NULL;
+  $show_unavailabilities = TRUE;
+  if (isset($user->mfcs['calendar_unavailabilities']) && $user->mfcs['calendar_unavailabilities'] === FALSE) {
+    $show_unavailabilities = FALSE;
+  }
+
+  if ($show_unavailabilities) {
+    $unavailabilities = mfcs_get_unavailabilities($year, $search_room_ids, $day_start, $day_stop, TRUE, FALSE, TRUE);
+  }
+
   if (!is_array($unavailabilities)) {
     $unavailabilities = array();
   }

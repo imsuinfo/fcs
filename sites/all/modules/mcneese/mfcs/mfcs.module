@@ -3368,6 +3368,8 @@ function mfcs_load_users($user_ids, $join = FALSE, $deleted = FALSE) {
     $query->addField('mu', 'ldap_duplicate', 'ldap_duplicate');
     $query->addField('mu', 'primary_account', 'primary_account');
     $query->addField('mu', 'calendar', 'calendar');
+    $query->addField('mu', 'calendar_holidays', 'calendar_holidays');
+    $query->addField('mu', 'calendar_unavailabilities', 'calendar_unavailabilities');
     $query->addField('mu', 'problems', 'problems');
     $query->addField('mu', 'updated', 'updated');
     $query->addField('mu', 'updated_problems', 'updated_problems');
@@ -3470,6 +3472,24 @@ function mfcs_save_user($user_id, $data) {
   if (array_key_exists('calendar', $data)) {
     if (!cf_is_integer($data['calendar'])) {
       unset($data['calendar']);
+    }
+  }
+
+  if (array_key_exists('calendar_holidays', $data)) {
+    if ($data['calendar_holidays'] === TRUE) {
+      $data['calendar_holidays'] = 'TRUE';
+    }
+    elseif ($data['calendar_holidays'] === FALSE) {
+      $data['calendar_holidays'] = 'FALSE';
+    }
+  }
+
+  if (array_key_exists('calendar_unavailabilities', $data)) {
+    if ($data['calendar_unavailabilities'] === TRUE) {
+      $data['calendar_unavailabilities'] = 'TRUE';
+    }
+    elseif ($data['calendar_unavailabilities'] === FALSE) {
+      $data['calendar_unavailabilities'] = 'FALSE';
     }
   }
 
@@ -3659,6 +3679,8 @@ function mfcs_search_users($search, $wildcard = TRUE, $sensitive = FALSE, $delet
  * - 'ldap_duplicate': user's ldap duplicate setting (custom field).
  * - 'primary_account': user's primary account setting (custom field).
  * - 'calendar': user's calendar setting (custom field).
+ * - 'calendar_holidays': user's calendar setting for showing/hiding holidays (custom field).
+ * - 'calendar_unavailabilities': user's calendar setting for showing/hiding unavailabilities (custom field).
  * - 'problems': user's calendar setting (custom field).
  * - 'updated': timestamp of when the user information was last updated (custom field).
  * - 'updated_problems': timestamp of when the user problems flag was last updated (custom field).
@@ -3702,6 +3724,8 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
     $query->addField('mu', 'ldap_duplicate', 'ldap_duplicate');
     $query->addField('mu', 'primary_account', 'primary_account');
     $query->addField('mu', 'calendar', 'calendar');
+    $query->addField('mu', 'calendar_holidays', 'calendar_holidays');
+    $query->addField('mu', 'calendar_unavailabilities', 'calendar_unavailabilities');
     $query->addField('mu', 'problems', 'problems');
     $query->addField('mu', 'updated', 'updated');
     $query->addField('mu', 'updated_problems', 'updated_problems');
@@ -3725,6 +3749,8 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
         'ldap_duplicate' => FALSE,
         'primary_account' => TRUE,
         'calendar' => MFCS_USER_CALENDAR_NONE,
+        'calendar_holidays' => TRUE,
+        'calendar_unavailabilities' => TRUE,
         'problems' => MFCS_USER_PROBLEM_NONE,
         'updated' => NULL,
         'updated_problems' => NULL,
@@ -3769,6 +3795,14 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
 
         if (property_exists($row, 'calendar') && !is_null($row->calendar)) {
           $user[$user_id]['calendar'] = (int) $row->calendar;
+        }
+
+        if (property_exists($row, 'calendar_holidays') && !is_null($row->calendar_holidays)) {
+          $user[$user_id]['calendar_holidays'] = (int) $row->calendar_holidays;
+        }
+
+        if (property_exists($row, 'calendar_unavailabilities') && !is_null($row->calendar_unavailabilities)) {
+          $user[$user_id]['calendar_unavailabilities'] = (int) $row->calendar_unavailabilities;
         }
 
         if (property_exists($row, 'problems') && !is_null($row->problems)) {
