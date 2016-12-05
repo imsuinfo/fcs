@@ -386,7 +386,7 @@ function mfcs_dashboard_page() {
       $calendar = (int) $user->mfcs['calendar'];
     }
 
-    if ($calendar == MFCS_USER_CALENDAR_ORIGINAL) {
+    if ($calendar == MFCS_USER_CALENDAR_ORIGINAL || $calendar == MFCS_USER_CALENDAR_NONE) {
       foreach ($unavailabilities as $unavailability) {
         if ($unavailability->date_start == $unavailability->date_stop) {
           $day = date('j', $unavailability->date_start);
