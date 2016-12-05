@@ -289,18 +289,18 @@ function mfcs_build_calendar_month_markup_original($items, $month_start, $month_
       if (is_null($max_items)) {
         foreach ($items[$current_month_day] as $item_id => $item) {
           if ($item['is'] == 'holiday') {
-            $markup .= '<div class="strong calendar-item calendar-holiday year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</div>';
+            $markup .= '<div class="strong calendar-item is-holiday year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</div>';
           }
           elseif ($item['is'] == 'unavailable') {
             if (is_null($item['type'])) {
-              $markup .= '<div class="calendar-item calendar-unavailable type-unavailable unavailable-notice year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</div>';
+              $markup .= '<div class="calendar-item is-unavailable unavailable-notice year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</div>';
             }
             else {
-              $markup .= '<div class="calendar-item calendar-unavailable building-' . $item['building'] . ' room-' . $item['room'] . ' type-unavailable year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '" title="' . $item['tooltip'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+              $markup .= '<div class="calendar-item is-unavailable building-' . $item['building'] . ' room-' . $item['room'] . ' is-unavailable year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '" title="' . $item['tooltip'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
             }
           }
           else {
-            $markup .= '<div class="calendar-item calendar-event location-' . $item['location'] . ' building-' . $item['building'] . ' room-' . $item['room'] . ' type-' . $item['type'] . ' year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+            $markup .= '<div class="calendar-item is-event location-' . $item['location'] . ' building-' . $item['building'] . ' room-' . $item['room'] . ' type-' . $item['type'] . ' year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
           }
         }
       }
@@ -308,18 +308,18 @@ function mfcs_build_calendar_month_markup_original($items, $month_start, $month_
         $items_count = 0;
         foreach ($items[$current_month_day] as $item_id => $item) {
           if ($item['is'] == 'holiday') {
-            $markup .= '<div class="strong calendar-item calendar-holiday year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</div>';
+            $markup .= '<div class="strong calendar-item is-holiday year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</div>';
           }
           elseif ($item['is'] == 'unavailable') {
             if (is_null($item['type'])) {
-              $markup .= '<div class="calendar-item calendar-unavailable type-unavailable unavailable-notice year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</div>';
+              $markup .= '<div class="calendar-item is-unavailable unavailable-notice year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</div>';
             }
             else {
-              $markup .= '<div class="calendar-item calendar-unavailable building-' . $item['building'] . ' room-' . $item['room'] . ' type-unavailable year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '" title="' . $item['tooltip'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+              $markup .= '<div class="calendar-item is-unavailable building-' . $item['building'] . ' room-' . $item['room'] . ' is-unavailable year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '" title="' . $item['tooltip'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
             }
           }
           else {
-            $markup .= '<div class="calendar-item calendar-event location-' . $item['location'] . ' building-' . $item['building'] . ' room-' . $item['room'] . ' type-' . $item['type'] . ' year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
+            $markup .= '<div class="calendar-item is-event location-' . $item['location'] . ' building-' . $item['building'] . ' room-' . $item['room'] . ' type-' . $item['type'] . ' year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'] . '"><a class="calendar-item-link" href="' . $item['href'] . '" title="' . $item['tooltip'] . '">' . $item['title'] . '</a></div>';
 
             $items_count++;
             if ($items_count == $max_items) {
@@ -581,13 +581,17 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
 
           $class_names = array(
             '\'calendar-item\'',
-            '\'calendar-holiday\'',
+            '\'is-holiday\'',
             '\'year-' . $item['year'] . '\'',
             '\'month-' . $item['month'] . '\'',
             '\'day-' . $item['day'] . '\'',
           );
 
-          $tooltip_class .= ' tooltip-calendar-holiday year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
+          if (array_key_exists('type', $item)) {
+            $class_names[] = '\'type-' . $item['type'] . '\'';
+          }
+
+          $tooltip_class .= ' tooltip-is-holiday year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
 
           if (!empty($item['tooltip'])) {
             $tooltip_text .= '<div class="tooltip-item tooltip-item-holiday_text">';
@@ -610,7 +614,7 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
 
           $class_names = array(
             '\'calendar-item\'',
-            '\'calendar-unavailable\'',
+            '\'is-unavailable\'',
             '\'building-' . $item['building'] . '\'',
             '\'room-' . $item['room'] . '\'',
             '\'year-' . $item['year'] . '\'',
@@ -618,11 +622,15 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
             '\'day-' . $item['day'] . '\'',
           );
 
+          if (array_key_exists('type', $item)) {
+            $class_names[] = '\'type-' . $item['type'] . '\'';
+          }
+
           if (array_key_exists('date_range_start', $item)) {
             $date_range_items[$item['id']] = TRUE;
           }
 
-          $tooltip_class .= ' tooltip-calendar-unavailable year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
+          $tooltip_class .= ' tooltip-is-unavailable year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
 
           if (!empty($item['description'])) {
             if (!empty($tooltip_text)) {
@@ -674,7 +682,7 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
 
           $class_names = array(
             '\'calendar-item\'',
-            '\'calendar-event\'',
+            '\'is-event\'',
             '\'location-' . $item['location'] . '\'',
             '\'building-' . $item['building'] . '\'',
             '\'room-' . $item['room'] . '\'',
@@ -684,7 +692,7 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
             '\'day-' . $item['day'] . '\'',
           );
 
-          $tooltip_class .= ' tooltip-calendar-event year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
+          $tooltip_class .= ' tooltip-is-event year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
           $tooltip_class .= ' tooltip-location-' . $item['location'] . ' tooltip-building-' . $item['building'] . ' tooltip-room-' . $item['room'];
           $tooltip_class .= ' tooltip-type-' . $item['type'];
 
@@ -1134,17 +1142,21 @@ function mfcs_build_calendar_day_markup_original($items, $day_start, $day_stop, 
         }
 
         if ($item['is'] == 'holiday') {
-          $item_class .= 'type-holiday ';
+          $item_class .= 'is-holiday ';
         }
         elseif ($item['is'] == 'unavailable') {
+          $item_class .= 'is-unavailable ';
           $item_class .= 'building-' . $item['building'] . ' ';
           $item_class .= 'room-' . $item['room'] . ' ';
-          $item_class .= 'type-unavailable ';
         }
         else {
+          $item_class .= 'is-event ';
           $item_class .= 'location-' . $item['location'] . ' ';
           $item_class .= 'building-' . $item['building'] . ' ';
           $item_class .= 'room-' . $item['room'] . ' ';
+        }
+
+        if (array_key_exists('type', $item)) {
           $item_class .= 'type-' . $item['type'] . ' ';
         }
 
@@ -1368,12 +1380,17 @@ function mfcs_build_calendar_day_markup_original($items, $day_start, $day_stop, 
         }
 
         if ($item['is'] == 'unavailable') {
-          $item_class[] = 'type-unavailable';
+          $item_class[] = 'is-unavailable';
+        }
+        elseif ($item['is'] == 'holiday') {
+          $item_class[] = 'is-holiday';
         }
         else {
-          if (array_key_exists('type', $item)) {
-            $item_class[] = 'type-' . $item['type'];
-          }
+          $item_class[] = 'is-event';
+        }
+
+        if (array_key_exists('type', $item)) {
+          $item_class[] = 'type-' . $item['type'];
         }
 
         $item_class[] = 'slot-' . $slot;
@@ -1901,13 +1918,17 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
 
           $class_names = array(
             '\'calendar-item\'',
-            '\'calendar-holiday\'',
+            '\'is-holiday\'',
             '\'year-' . $item['year'] . '\'',
             '\'month-' . $item['month'] . '\'',
             '\'day-' . $item['day'] . '\'',
           );
 
-          $tooltip_class .= ' tooltip-calendar-holiday year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
+          if (array_key_exists('type', $item)) {
+            $class_names[] = '\'type-' . $item['type'] . '\'';
+          }
+
+          $tooltip_class .= ' tooltip-is-holiday year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
 
           if (!empty($item['tooltip'])) {
             $tooltip_text .= '<div class="tooltip-item tooltip-item-holiday_text">';
@@ -1924,7 +1945,7 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
 
           $class_names = array(
             '\'calendar-item\'',
-            '\'calendar-unavailable\'',
+            '\'is-unavailable\'',
             '\'building-' . $item['building'] . '\'',
             '\'room-' . $item['room'] . '\'',
             '\'year-' . $item['year'] . '\'',
@@ -1932,7 +1953,11 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
             '\'day-' . $item['day'] . '\'',
           );
 
-          $tooltip_class .= ' tooltip-calendar-unavailable year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
+          if (array_key_exists('type', $item)) {
+            $class_names[] = '\'type-' . $item['type'] . '\'';
+          }
+
+          $tooltip_class .= ' tooltip-is-unavailable year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
 
           if (array_key_exists($item['building'], $building_options)) {
             $tooltip_text .= '<div class="tooltip-item tooltip-item-building">';
@@ -1998,7 +2023,7 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
 
           $class_names = array(
             '\'calendar-item\'',
-            '\'calendar-event\'',
+            '\'is-event\'',
             '\'location-' . $item['location'] . '\'',
             '\'building-' . $item['building'] . '\'',
             '\'room-' . $item['room'] . '\'',
@@ -2008,7 +2033,7 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
             '\'day-' . $item['day'] . '\'',
           );
 
-          $tooltip_class .= ' tooltip-calendar-event year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
+          $tooltip_class .= ' tooltip-is-event year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
           $tooltip_class .= ' tooltip-location-' . $item['location'] . ' tooltip-building-' . $item['building'] . ' tooltip-room-' . $item['room'];
           $tooltip_class .= ' tooltip-type-' . $item['type'];
 
@@ -2078,13 +2103,17 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
 
             $class_names = array(
               '\'calendar-item\'',
-              '\'calendar-holiday\'',
+              '\'is-holiday\'',
               '\'year-' . $item['year'] . '\'',
               '\'month-' . $item['month'] . '\'',
               '\'day-' . $item['day'] . '\'',
             );
 
-            $tooltip_class .= ' tooltip-calendar-holiday year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
+            if (array_key_exists('type', $item)) {
+              $class_names[] = '\'type-' . $item['type'] . '\'';
+            }
+
+            $tooltip_class .= ' tooltip-is-holiday year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
 
             if (!empty($item['tooltip'])) {
               $tooltip_text .= '<div class="tooltip-item tooltip-item-holiday_text">';
@@ -2134,7 +2163,7 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
 
             $class_names = array(
               '\'calendar-item\'',
-              '\'calendar-unavailable\'',
+              '\'is-unavailable\'',
               '\'building-' . $item['building'] . '\'',
               '\'room-' . $item['room'] . '\'',
               '\'year-' . $item['year'] . '\'',
@@ -2142,7 +2171,11 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
               '\'day-' . $item['day'] . '\'',
             );
 
-            $tooltip_class .= ' tooltip-calendar-unavailable year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
+            if (array_key_exists('type', $item)) {
+              $class_names[] = '\'type-' . $item['type'] . '\'';
+            }
+
+            $tooltip_class .= ' tooltip-is-unavailable year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
 
             $javascript_item_common .= $space . 'className: [ ' . implode(', ', $class_names) . ' ]' . "\n";
           }
@@ -2175,7 +2208,7 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
 
             $class_names = array(
               '\'calendar-item\'',
-              '\'calendar-event\'',
+              '\'is-event\'',
               '\'location-' . $item['location'] . '\'',
               '\'building-' . $item['building'] . '\'',
               '\'room-' . $item['room'] . '\'',
@@ -2185,7 +2218,7 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
               '\'day-' . $item['day'] . '\'',
             );
 
-            $tooltip_class .= ' tooltip-calendar-event year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
+            $tooltip_class .= ' tooltip-is-event year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
             $tooltip_class .= ' tooltip-location-' . $item['location'] . ' tooltip-building-' . $item['building'] . ' tooltip-room-' . $item['room'];
             $tooltip_class .= ' tooltip-type-' . $item['type'];
 
