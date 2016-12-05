@@ -2158,7 +2158,7 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
 
             $tooltip_text_suffix .= '<div class="tooltip-item tooltip-item-footer">';
             $tooltip_text_suffix .= '<span class="tooltip-item-unavailability_text">Room Unavailable</span> ';
-            $tooltip_text_suffix .= '<span class="tooltip-item-unavailability_type">' . $type_options[$item['type']] . '</span>';
+            $tooltip_text_suffix .= '<span class="tooltip-item-unavailability_type">' . $item['type_name'] . '</span>';
             $tooltip_text_suffix .= '</div>';
 
             $class_names = array(

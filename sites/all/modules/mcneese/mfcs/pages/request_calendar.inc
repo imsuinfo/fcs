@@ -191,7 +191,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     $unavailabilities = array();
   }
 
-  $unavailability_type_options = mfcs_get_unavailability_type_list_options(NULL, TRUE);
+  $unavailability_type_options = mfcs_get_unavailability_type_list_options('combined', TRUE);
 
   // Holidays and Unavailabilities are setup on a per-year basis.
   // If absolute_start is a previous or next year, additional function calls are required.
@@ -995,7 +995,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
     $unavailabilities = array();
   }
 
-  $unavailability_type_options = mfcs_get_unavailability_type_list_options(NULL, TRUE);
+  $unavailability_type_options = mfcs_get_unavailability_type_list_options('combined', TRUE);
 
   foreach ($unavailabilities as $unavailability) {
     $building_code = check_plain($unavailability->building_code);
