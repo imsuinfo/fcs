@@ -921,6 +921,11 @@ function mfcs_request_users_0_view_page($user_id) {
     $buttons .= '<a href="' . $base_path . 'users-0/customize/' . $user_id . $url_arguments . '" class="view_user-button view_user-customize">Customize</a>' ;
     $buttons .= '<a href="' . $base_path . 'users-0/check/' . $user_id . $url_arguments . '" class="view_user-button view_user-check">Check for Problems</a>' ;
     $buttons .= '</div>';
+
+    // add a break so that the customization options are on another line.
+    // this is done here because managers/administers have additional role management options which should take up the second line.
+    // all other users don't need this and can consider the second line to be just additional options (to save screen space).
+    $markup .= '<br>';
   }
   elseif ($user->uid == $user_id && ($is_requester || $is_reviewer)) {
     $buttons .= '<div class="view_user-buttons">';
