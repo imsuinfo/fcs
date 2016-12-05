@@ -2217,6 +2217,9 @@ function mfcs_hook_user_load($users) {
     $users[$result->user_id]->mfcs['calendar'] = (int) $result->calendar;
     $users[$result->user_id]->mfcs['calendar_holidays'] = ($result->calendar_holidays == TRUE) ? TRUE : FALSE;
     $users[$result->user_id]->mfcs['calendar_unavailabilities'] = ($result->calendar_unavailabilities == TRUE) ? TRUE : FALSE;
+    $users[$result->user_id]->mfcs['filter_by_classification'] = array(); // @todo
+    $users[$result->user_id]->mfcs['filter_by_type'] = array(); // @todo
+    $users[$result->user_id]->mfcs['filter_by_building'] = array(); // @todo
     $users[$result->user_id]->mfcs['problems'] = (int) $result->problems;
     $users[$result->user_id]->mfcs['updated'] = (int) $result->updated;
     $users[$result->user_id]->mfcs['updated_problems'] = (int) $result->updated_problems;
@@ -2236,6 +2239,9 @@ function mfcs_hook_user_load($users) {
     $user->mfcs['calendar'] = MFCS_USER_CALENDAR_NONE;
     $user->mfcs['calendar_holidays'] = TRUE;
     $user->mfcs['calendar_unavailabilities'] = TRUE;
+    $user->mfcs['filter_by_classification'] = array();
+    $user->mfcs['filter_by_type'] = array();
+    $user->mfcs['filter_by_building'] = array();
     $user->mfcs['problems'] = MFCS_USER_PROBLEM_NONE;
     $user->mfcs['updated'] = isset($users[$user_id]->created) ? (int) $users[$user_id]->created : mfcs_instance();
     $user->mfcs['updated_problems'] = $user->mfcs['updated'];
