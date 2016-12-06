@@ -1258,7 +1258,7 @@ function mfcs_request_unavailability_0_copy_form_validate($form, &$form_state) {
   }
 
   // check to see if there are any years to copy.
-  $unavailabilities = mfcs_get_unavailabilities($year, $form['form']['room_id']['#value'], NULL, NULL, $enabled);
+  $unavailabilities = mfcs_get_unavailabilities($year, $form['form']['room_id']['#value'], NULL, NULL, NULL, $enabled);
   if ($unavailabilities === FALSE) {
     form_set_error('', 'Internal Error. An unknown error has been detected while trying to process this request. Please contact the appropriate support staff.');
 
@@ -1324,7 +1324,7 @@ function mfcs_request_unavailability_0_copy_form_submit($form, &$form_state) {
     $as_disabled = FALSE;
   }
 
-  $unavailabilities = mfcs_get_unavailabilities($year_previous, $room_id, NULL, NULL, $enabled);
+  $unavailabilities = mfcs_get_unavailabilities($year_previous, $room_id, NULL, NULL, NULL, $enabled);
 
   $transaction = db_transaction();
   $success = TRUE;

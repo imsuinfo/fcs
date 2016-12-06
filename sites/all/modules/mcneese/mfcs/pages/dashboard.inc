@@ -262,9 +262,9 @@ function mfcs_dashboard_page() {
       $buildings = array();
     }
 
-    $search_room_ids = NULL;
+    $search_building_ids = NULL;
     if (!empty($mfcs_determined['filters']['field_top-building-0']['search'])) {
-      $search_room_ids = $mfcs_determined['filters']['field_top-building-0']['search'];
+      $search_building_ids = $mfcs_determined['filters']['field_top-building-0']['search'];
     }
 
 
@@ -292,7 +292,7 @@ function mfcs_dashboard_page() {
     }
 
     if ($show_unavailabilities) {
-      $unavailabilities = mfcs_get_unavailabilities($year, $search_room_ids, $absolute_start, $absolute_stop, TRUE, FALSE, TRUE);
+      $unavailabilities = mfcs_get_unavailabilities($year, NULL, $search_building_ids, $absolute_start, $absolute_stop, TRUE, FALSE, TRUE);
     }
 
     if (!is_array($unavailabilities)) {
@@ -320,7 +320,7 @@ function mfcs_dashboard_page() {
       }
 
       if ($show_unavailabilities) {
-        $unavailabilities = mfcs_get_unavailabilities($year - 1, $search_room_ids, $absolute_start, $year_start, TRUE, FALSE, TRUE);
+        $unavailabilities = mfcs_get_unavailabilities($year - 1, $search_building_ids, NULL, $absolute_start, $year_start, TRUE, FALSE, TRUE);
         if (is_array($unavailabilities_previous)) {
           foreach ($unavailabilities_previous as $unavailabilities_key => $unavailabilities_value) {
             $holidays[$unavailabilities_key] = $unavailabilities_value;
@@ -345,7 +345,7 @@ function mfcs_dashboard_page() {
       }
 
       if ($show_unavailabilities) {
-        $unavailabilities = mfcs_get_unavailabilities($year + 1, $search_room_ids, $year_stop, $absolute_stop, TRUE, FALSE, TRUE);
+        $unavailabilities = mfcs_get_unavailabilities($year + 1, NULL, $search_building_ids, $year_stop, $absolute_stop, TRUE, FALSE, TRUE);
         if (is_array($unavailabilities_next)) {
           foreach ($unavailabilities_next as $unavailabilities_key => $unavailabilities_value) {
             $holidays[$unavailabilities_key] = $unavailabilities_value;

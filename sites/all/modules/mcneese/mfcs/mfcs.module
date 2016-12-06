@@ -8072,7 +8072,7 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
       continue;
     }
 
-    $unavailabilities = mfcs_get_unavailabilities($year, $room, $start_time, $stop_time);
+    $unavailabilities = mfcs_get_unavailabilities($year, $room, NULL, $start_time, $stop_time);
     if (is_array($unavailabilities)) {
       foreach ($unavailabilities as $unavailability) {
         $matched_requests['unavailable'][$unavailability->id] = $unavailability;
@@ -12914,6 +12914,10 @@ function mfcs_get_holiday($id, $enabled = TRUE, $deleted = FALSE) {
  *   (optional) The ID of the room to load.
  *   May be an array of room IDS to load by multiple rooms.
  *   If NULL, then all rooms for the given year are loaded.
+ * @param array|int|null $building_id
+ *   (optional) The ID of the building to load.
+ *   May be an array of building IDS to load by multiple building.
+ *   If NULL, then all buildings for the given year are loaded.
  * @param int|null $timestamp_start
  *   (optional) The timestamp start range.
  * @param int|null $timestamp_stop
@@ -12935,7 +12939,7 @@ function mfcs_get_holiday($id, $enabled = TRUE, $deleted = FALSE) {
  *   An array of unavailabilities.
  *   FALSE is returned on error.
  */
-function mfcs_get_unavailabilities($year, $room_id = NULL, $timestamp_start = NULL, $timestamp_stop = NULL, $enabled = TRUE, $deleted = FALSE, $inner_joins = FALSE) {
+function mfcs_get_unavailabilities($year, $room_id = NULL, $building_id = NULL, $timestamp_start = NULL, $timestamp_stop = NULL, $enabled = TRUE, $deleted = FALSE, $inner_joins = FALSE) {
   if (!cf_is_integer($year)) {
     cf_error::invalid_integer('year');
     return FALSE;
@@ -12943,6 +12947,11 @@ function mfcs_get_unavailabilities($year, $room_id = NULL, $timestamp_start = NU
 
   if (!is_null($room_id) && !cf_is_integer($room_id) && !is_array($room_id)) {
     cf_error::invalid_integer('room_id');
+    return FALSE;
+  }
+
+  if (!is_null($building_id) && !cf_is_integer($building_id) && !is_array($building_id)) {
+    cf_error::invalid_integer('building_id');
     return FALSE;
   }
 
@@ -13016,6 +13025,15 @@ function mfcs_get_unavailabilities($year, $room_id = NULL, $timestamp_start = NU
       }
       else {
         $query->condition('mu.room_id', $room_id);
+      }
+    }
+
+    if (!is_null($building_id)) {
+      if (is_array($building_id)) {
+        $query->condition('mu.building_id', $building_id, 'IN');
+      }
+      else {
+        $query->condition('mu.building_id', $building_id);
       }
     }
 
