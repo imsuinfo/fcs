@@ -632,6 +632,20 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
 
           $tooltip_class .= ' tooltip-is-unavailable year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
 
+          if (array_key_exists($item['building'], $building_options)) {
+            $tooltip_text .= '<div class="tooltip-item tooltip-item-building">';
+            $tooltip_text .= '<span class="tooltip-item-name">Building:</span> ';
+            $tooltip_text .= '<span class="tooltip-item-value">' . $building_options[$item['building']] . '</span>';
+            $tooltip_text .= '</div>';
+          }
+
+          if (array_key_exists($item['room'], $room_options)) {
+            $tooltip_text .= '<div class="tooltip-item tooltip-item-room">';
+            $tooltip_text .= '<span class="tooltip-item-name">Room:</span> ';
+            $tooltip_text .= '<span class="tooltip-item-value">' . $room_options[$item['room']] . '</span>';
+            $tooltip_text .= '</div>';
+          }
+
           if (!empty($item['description'])) {
             if (!empty($tooltip_text)) {
               $tooltip_text .= '<br>';
@@ -640,6 +654,10 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
             $tooltip_text .= '<div class="tooltip-item tooltip-item-description">';
             $tooltip_text .= '<span class="tooltip-item-value">' . $item['description'] . '</span>';
             $tooltip_text .= '</div>';
+          }
+
+          if (!empty($tooltip_text)) {
+            $tooltip_text .= '<br>';
           }
 
           $tooltip_text_suffix .= '<div class="tooltip-item tooltip-item-footer">';
