@@ -2202,7 +2202,7 @@ function mfcs_hook_cronapi() {
  * Internal function for hook_user_load().
  */
 function mfcs_hook_user_load($users) {
-  $results = db_query('SELECT user_id, banner_id, first_name, last_name, phone_number, ldap_duplicate, primary_account, calendar, calendar_holidays, calendar_unavailabilities, problems, updated, updated_problems FROM {mfcs_users} WHERE user_id IN (:uids)', array(':uids' => array_keys($users)));
+  $results = db_query('SELECT user_id, banner_id, first_name, last_name, phone_number, ldap_duplicate, primary_account, calendar, calendar_holidays, calendar_unavailabilities, filter_by_classification, filter_by_type, filter_by_building, problems, updated, updated_problems FROM {mfcs_users} WHERE user_id IN (:uids)', array(':uids' => array_keys($users)));
 
   $found = array();
   foreach ($results as $result) {
@@ -2217,12 +2217,64 @@ function mfcs_hook_user_load($users) {
     $users[$result->user_id]->mfcs['calendar'] = (int) $result->calendar;
     $users[$result->user_id]->mfcs['calendar_holidays'] = ($result->calendar_holidays == TRUE) ? TRUE : FALSE;
     $users[$result->user_id]->mfcs['calendar_unavailabilities'] = ($result->calendar_unavailabilities == TRUE) ? TRUE : FALSE;
-    $users[$result->user_id]->mfcs['filter_by_classification'] = array(); // @todo
-    $users[$result->user_id]->mfcs['filter_by_type'] = array(); // @todo
-    $users[$result->user_id]->mfcs['filter_by_building'] = array(); // @todo
+    $users[$result->user_id]->mfcs['filter_by_classification'] = array();
+    $users[$result->user_id]->mfcs['filter_by_type'] = array();
+    $users[$result->user_id]->mfcs['filter_by_building'] = array();
     $users[$result->user_id]->mfcs['problems'] = (int) $result->problems;
     $users[$result->user_id]->mfcs['updated'] = (int) $result->updated;
     $users[$result->user_id]->mfcs['updated_problems'] = (int) $result->updated_problems;
+
+    if (!empty($result->filter_by_classification)) {
+      $users[$result->user_id]->mfcs['filter_by_classification'] = array();
+
+      $filters = preg_replace('/(^{|}$)/i', '', $result->filter_by_classification);
+      $filters = explode(',', $filters);
+
+
+      if (is_array($filters) && !empty($filters)) {
+        foreach ($filters as $filter) {
+          if (is_numeric($filter)) {
+            $users[$result->user_id]->mfcs['filter_by_classification'][(int) $filter] = (int) $filter;
+          }
+        }
+        unset($filter);
+      }
+      unset($filters);
+    }
+
+    if (!empty($result->filter_by_type)) {
+      $users[$result->user_id]->mfcs['filter_by_type'] = array();
+
+      $filters = preg_replace('/(^{|}$)/i', '', $result->filter_by_type);
+      $filters = explode(',', $filters);
+
+      if (is_array($filters) && !empty($filters)) {
+        foreach ($filters as $filter) {
+          if (is_numeric($filter)) {
+            $users[$result->user_id]->mfcs['filter_by_type'][(int) $filter] = (int) $filter;
+          }
+        }
+        unset($filter);
+      }
+      unset($filters);
+    }
+
+    if (!empty($result->filter_by_building)) {
+      $users[$result->user_id]->mfcs['filter_by_building'] = array();
+
+      $filters = preg_replace('/(^{|}$)/i', '', $result->filter_by_building);
+      $filters = explode(',', $filters);
+
+      if (is_array($filters) && !empty($filters)) {
+        foreach ($filters as $filter) {
+          if (is_numeric($filter)) {
+            $users[$result->user_id]->mfcs['filter_by_building'][(int) $filter] = (int) $filter;
+          }
+        }
+        unset($filter);
+      }
+      unset($filters);
+    }
   }
 
   foreach (array_keys($users) as $user_id) {

@@ -3497,18 +3497,93 @@ function mfcs_save_user($user_id, $data) {
   }
 
   if (array_key_exists('filter_by_classification', $data)) {
-    $data['filter_by_classification'] = array();
-    // @todo: implement this
+    // the filter array has to be converted to a postgresql array string (given that drupal api does not know how to process postgresql arrays).
+    $filters = array();
+    if (is_array($data['filter_by_classification'])) {
+      $filters = $data['filter_by_classification'];
+    }
+
+    $data['filter_by_classification'] = NULL;
+    if (!empty($filters)) {
+      $data['filter_by_classification'] = NULL;
+      foreach ($filters as $filter) {
+        if (!is_numeric($filter)) {
+          continue;
+        }
+
+        if (is_null($data['filter_by_classification'])) {
+          $data['filter_by_classification'] = '{';
+        }
+        else {
+          $data['filter_by_classification'] .= ',';
+        }
+
+        $data['filter_by_classification'] .= (int) $filter;
+      }
+      unset($filter);
+      $data['filter_by_classification'] .= '}';
+    }
+    unset($filters);
   }
 
   if (array_key_exists('filter_by_type', $data)) {
-    $data['filter_by_type'] = array();
-    // @todo: implement this
+    // the filter array has to be converted to a postgresql array string (given that drupal api does not know how to process postgresql arrays).
+    $filters = array();
+    if (is_array($data['filter_by_type'])) {
+      $filters = $data['filter_by_type'];
+    }
+
+    $data['filter_by_type'] = NULL;
+    if (!empty($filters)) {
+      $data['filter_by_type'] = NULL;
+      foreach ($filters as $filter) {
+        if (!is_numeric($filter)) {
+          continue;
+        }
+
+        if (is_null($data['filter_by_type'])) {
+          $data['filter_by_type'] = '{';
+        }
+        else {
+          $data['filter_by_type'] .= ',';
+        }
+
+        $data['filter_by_type'] .= (int) $filter;
+      }
+      unset($filter);
+      $data['filter_by_type'] .= '}';
+    }
+    unset($filters);
   }
 
   if (array_key_exists('filter_by_building', $data)) {
-    $data['filter_by_building'] = array();
-    // @todo: implement this
+    // the filter array has to be converted to a postgresql array string (given that drupal api does not know how to process postgresql arrays).
+    $filters = array();
+    if (is_array($data['filter_by_building'])) {
+      $filters = $data['filter_by_building'];
+    }
+
+    $data['filter_by_building'] = NULL;
+    if (!empty($filters)) {
+      $data['filter_by_building'] = NULL;
+      foreach ($filters as $filter) {
+        if (!is_numeric($filter)) {
+          continue;
+        }
+
+        if (is_null($data['filter_by_building'])) {
+          $data['filter_by_building'] = '{';
+        }
+        else {
+          $data['filter_by_building'] .= ',';
+        }
+
+        $data['filter_by_building'] .= (int) $filter;
+      }
+      unset($filter);
+      $data['filter_by_building'] .= '}';
+    }
+    unset($filters);
   }
 
   $instance = mfcs_instance();
@@ -3775,9 +3850,9 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
         'calendar' => MFCS_USER_CALENDAR_NONE,
         'calendar_holidays' => TRUE,
         'calendar_unavailabilities' => TRUE,
-        'filter_by_classification' => array(), // @todo
-        'filter_by_type' => array(), // @todo
-        'filter_by_building' => array(), // @todo
+        'filter_by_classification' => array(),
+        'filter_by_type' => array(),
+        'filter_by_building' => array(),
         'problems' => MFCS_USER_PROBLEM_NONE,
         'updated' => NULL,
         'updated_problems' => NULL,
@@ -3832,16 +3907,55 @@ function mfcs_load_basic_user_settings_by_user_id($user_id) {
           $user[$user_id]['calendar_unavailabilities'] = (int) $row->calendar_unavailabilities;
         }
 
-        if (property_exists($row, 'filter_by_classification') && !is_null($row->filter_by_classification)) {
-          // @todo:
+        if (property_exists($row, 'filter_by_classification')) {
+          $user[$user_id]['filter_by_classification'] = array();
+
+          $filters = preg_replace('/(^{|}$)/i', '', $row->filter_by_building);
+          $filters = explode(',', $filters);
+
+          if (is_array($filters) && !empty($filters)) {
+            foreach ($filters as $filter) {
+              if (is_numeric($filter)) {
+                $user[$user_id]['filter_by_classification']->mfcs['filter_by_classification'][(int) $filter] = (int) $filter;
+              }
+            }
+            unset($filter);
+          }
+          unset($filters);
         }
 
-        if (property_exists($row, 'filter_by_type') && !is_null($row->filter_by_type)) {
-          // @todo:
+        if (property_exists($row, 'filter_by_type')) {
+          $user[$user_id]['filter_by_type'] = array();
+
+          $filters = preg_replace('/(^{|}$)/i', '', $row->filter_by_type);
+          $filters = explode(',', $filters);
+
+          if (is_array($filters) && !empty($filters)) {
+            foreach ($filters as $filter) {
+              if (is_numeric($filter)) {
+                $user[$user_id]['filter_by_type']->mfcs['filter_by_type'][(int) $filter] = (int) $filter;
+              }
+            }
+            unset($filter);
+          }
+          unset($filters);
         }
 
-        if (property_exists($row, 'filter_by_building') && !is_null($row->filter_by_building)) {
-          // @todo:
+        if (property_exists($row, 'filter_by_building')) {
+          $user[$user_id]['filter_by_building'] = array();
+
+          $filters = preg_replace('/(^{|}$)/i', '', $row->filter_by_building);
+          $filters = explode(',', $filters);
+
+          if (is_array($filters) && !empty($filters)) {
+            foreach ($filters as $filter) {
+              if (is_numeric($filter)) {
+                $user[$user_id]['filter_by_building']->mfcs['filter_by_building'][(int) $filter] = (int) $filter;
+              }
+            }
+            unset($filter);
+          }
+          unset($filters);
         }
 
         if (property_exists($row, 'problems') && !is_null($row->problems)) {
@@ -11519,8 +11633,9 @@ function mfcs_instance($reset = FALSE) {
  * The arguments are processed and stored in the global $mfcs_determined.
  */
 function mfcs_determine_url_arguments() {
-  global $user;
   global $mfcs_determined;
+
+  $user = cf_current_user();
 
   $mfcs_determined = array(
     'get' => array(),
@@ -11534,6 +11649,43 @@ function mfcs_determine_url_arguments() {
   // deny access to this functionality to the anonymous user.
   if ($user->uid == 0) {
     return;
+  }
+
+  // pre-load user customization of filters.
+  if (isset($user->mfcs['filter_by_classification']) && is_array($user->mfcs['filter_by_classification']) && !empty($user->mfcs['filter_by_classification'])) {
+    $target_field_name = 'field_request_coordinator-classification-0';
+    $mfcs_determined['filters'][$target_field_name]['group_name'] = 'request_coordinator';
+    $mfcs_determined['filters'][$target_field_name]['field_name'] = 'classification';
+    $mfcs_determined['filters'][$target_field_name]['column'] = 'value';
+    $mfcs_determined['filters'][$target_field_name]['search'] = $user->mfcs['filter_by_classification'];
+    $mfcs_determined['filters'][$target_field_name]['classification'] = 'number';
+    $mfcs_determined['filters'][$target_field_name]['multiple'] = FALSE;
+    $mfcs_determined['filters'][$target_field_name]['operator'] = MFCS_OPERATOR_IS_IN;
+    unset($target_field_name);
+  }
+
+  if (isset($user->mfcs['filter_by_type']) && is_array($user->mfcs['filter_by_type']) && !empty($user->mfcs['filter_by_type'])) {
+    $target_field_name = 'field_information-type-0';
+    $mfcs_determined['filters'][$target_field_name]['group_name'] = 'information';
+    $mfcs_determined['filters'][$target_field_name]['field_name'] = 'type';
+    $mfcs_determined['filters'][$target_field_name]['column'] = 'value';
+    $mfcs_determined['filters'][$target_field_name]['search'] = $user->mfcs['filter_by_type'];
+    $mfcs_determined['filters'][$target_field_name]['type'] = 'number';
+    $mfcs_determined['filters'][$target_field_name]['multiple'] = FALSE;
+    $mfcs_determined['filters'][$target_field_name]['operator'] = MFCS_OPERATOR_IS_IN;
+    unset($target_field_name);
+  }
+
+  if (isset($user->mfcs['filter_by_building']) && is_array($user->mfcs['filter_by_building']) && !empty($user->mfcs['filter_by_building'])) {
+    $target_field_name = 'field_top-building-0';
+    $mfcs_determined['filters'][$target_field_name]['group_name'] = 'mer';
+    $mfcs_determined['filters'][$target_field_name]['field_name'] = 'building';
+    $mfcs_determined['filters'][$target_field_name]['column'] = 'value';
+    $mfcs_determined['filters'][$target_field_name]['search'] = $user->mfcs['filter_by_building'];
+    $mfcs_determined['filters'][$target_field_name]['building'] = 'number';
+    $mfcs_determined['filters'][$target_field_name]['multiple'] = FALSE;
+    $mfcs_determined['filters'][$target_field_name]['operator'] = MFCS_OPERATOR_IS_IN;
+    unset($target_field_name);
   }
 
   if (!empty($_GET)) {
@@ -11556,6 +11708,10 @@ function mfcs_determine_url_arguments() {
         $mfcs_determined['combined'] .= $lower_name . '=' . $lower_value;
 
         $types = array();
+        if (isset($user->mfcs['filter_by_type']) && is_array($user->mfcs['filter_by_type']) && !empty($user->mfcs['filter_by_type'])) {
+          $types = $user->mfcs['filter_by_type'];
+        }
+
         foreach ($types_array as $type) {
           if (cf_is_integer($type)) {
             $types[$type] = $type;
@@ -11588,6 +11744,9 @@ function mfcs_determine_url_arguments() {
         $mfcs_determined['combined'] .= $lower_name . '=' . $lower_value;
 
         $classifications = array();
+        if (isset($user->mfcs['filter_by_classification']) && is_array($user->mfcs['filter_by_classification']) && !empty($user->mfcs['filter_by_classification'])) {
+          $classifications = $user->mfcs['filter_by_classification'];
+        }
         foreach ($classifications_array as $classification) {
           if (cf_is_integer($classification)) {
             $classifications[$classification] = $classification;
@@ -11620,6 +11779,9 @@ function mfcs_determine_url_arguments() {
         $mfcs_determined['combined'] .= $lower_name . '=' . $lower_value;
 
         $buildings = array();
+        if (isset($user->mfcs['filter_by_building']) && is_array($user->mfcs['filter_by_building']) && !empty($user->mfcs['filter_by_building'])) {
+          $buildings = $user->mfcs['filter_by_building'];
+        }
         foreach ($buildings_array as $building) {
           if (cf_is_integer($building)) {
             $buildings[$building] = $building;

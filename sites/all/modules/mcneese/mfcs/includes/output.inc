@@ -655,6 +655,9 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
             $tooltip_text .= '<span class="tooltip-item-value">' . $item['description'] . '</span>';
             $tooltip_text .= '</div>';
           }
+            if (!empty($tooltip_text)) {
+              $tooltip_text .= '<br>';
+            }
 
           if (!empty($tooltip_text)) {
             $tooltip_text .= '<br>';
@@ -2475,6 +2478,9 @@ function mfcs_build_determined_filters_markup($id = NULL) {
   $request_classification_options = mfcs_get_request_classification_list_options();
   $building_list_options = mfcs_get_request_building_list_options();
 
+  $user = cf_current_user();
+
+
   $type_id = NULL;
   $classifications_id = NULL;
   if (!empty($id)) {
@@ -2516,7 +2522,16 @@ function mfcs_build_determined_filters_markup($id = NULL) {
 
     $link_cg = $base_path . $_GET['q'];
 
-    if (isset($mfcs_determined['get']['classifications'][$classification_id])) {
+    $filtered_via_customization = FALSE;
+    $filtered_via_url = FALSE;
+    if (isset($user->mfcs['filter_by_classification']) && array_key_exists($classification_id, $user->mfcs['filter_by_classification'])) {
+      $filtered_via_customization = TRUE;
+      unset($current_get[$classification_id]);
+      $link_action_css = 'link-remove';
+      $link_action_text = 'Unfilter: ';
+    }
+    elseif (isset($mfcs_determined['get']['classifications'][$classification_id])) {
+      $filtered_via_url = TRUE;
       unset($current_get[$classification_id]);
       $link_action_css = 'link-remove';
       $link_action_text = 'Unfilter: ';
@@ -2527,6 +2542,8 @@ function mfcs_build_determined_filters_markup($id = NULL) {
       $link_action_text = 'Filter: ';
     }
 
+
+    // rebuild the url parameter for the link (in the case of unfiltering, the current valid id will be removed).
     $first = TRUE;
     $add_qmark = TRUE;
 
@@ -2592,6 +2609,8 @@ function mfcs_build_determined_filters_markup($id = NULL) {
       $link_cg .= $url_arguments_remaining;
     }
 
+
+    // build the output
     $markup .= '<li' . $id . ' class="links_and_filters-list-item item-' . $classification_id . ' filter_classifications">';
     $markup .= '<a href="' . $link_cg . '" class="links_and_filters-list-item-link item-' . $classification_id . ' item-link ' . $link_action_css . ' filter_classifications" title="' . $link_action_text . $classification . '">' . $link_action_text . $classification . '</a>';
     $markup .= '</li>';
@@ -2614,7 +2633,16 @@ function mfcs_build_determined_filters_markup($id = NULL) {
 
     $link_cg = $base_path . $_GET['q'];
 
-    if (isset($mfcs_determined['get']['types'][$type_id])) {
+    $filtered_via_customization = FALSE;
+    $filtered_via_url = FALSE;
+    if (isset($user->mfcs['filter_by_type']) && array_key_exists($type_id, $user->mfcs['filter_by_type'])) {
+      $filtered_via_customization = TRUE;
+      unset($current_get[$type_id]);
+      $link_action_css = 'link-remove';
+      $link_action_text = 'Unfilter: ';
+    }
+    elseif (isset($mfcs_determined['get']['types'][$type_id])) {
+      $filtered_via_url = TRUE;
       unset($current_get[$type_id]);
       $link_action_css = 'link-remove';
       $link_action_text = 'Unfilter: ';
@@ -2625,6 +2653,8 @@ function mfcs_build_determined_filters_markup($id = NULL) {
       $link_action_text = 'Filter: ';
     }
 
+
+    // rebuild the url parameter for the link (in the case of unfiltering, the current valid id will be removed).
     $first = TRUE;
     $add_qmark = TRUE;
 
@@ -2690,6 +2720,8 @@ function mfcs_build_determined_filters_markup($id = NULL) {
       $link_cg .= $url_arguments_remaining;
     }
 
+
+    // build the output.
     $markup .= '<li' . $id . ' class="links_and_filters-list-item item-' . $type_id . ' filter_types">';
     $markup .= '<a href="' . $link_cg . '" class="links_and_filters-list-item-link item-' . $type_id . ' item-link ' . $link_action_css . ' filter_types" title="' . $link_action_text . $type . '">' . $link_action_text . $type . '</a>';
     $markup .= '</li>';
@@ -2715,7 +2747,16 @@ function mfcs_build_determined_filters_markup($id = NULL) {
 
     $link_cg = $base_path . $_GET['q'];
 
-    if (isset($mfcs_determined['get']['buildings'][$building_id])) {
+    $filtered_via_customization = FALSE;
+    $filtered_via_url = FALSE;
+    if (isset($user->mfcs['filter_by_building']) && array_key_exists($building_id, $user->mfcs['filter_by_building'])) {
+      $filtered_via_customization = TRUE;
+      unset($current_get[$building_id]);
+      $link_action_css = 'link-remove';
+      $link_action_text = 'Unfilter: ';
+    }
+    elseif (isset($mfcs_determined['get']['buildings'][$building_id])) {
+      $filtered_via_url = TRUE;
       unset($current_get[$building_id]);
       $link_action_css = 'link-remove';
       $link_action_text = 'Unfilter: ';
@@ -2726,6 +2767,8 @@ function mfcs_build_determined_filters_markup($id = NULL) {
       $link_action_text = 'Filter: ';
     }
 
+
+    // rebuild the url parameter for the link (in the case of unfiltering, the current valid id will be removed).
     $first = TRUE;
     $add_qmark = TRUE;
 
@@ -2791,6 +2834,8 @@ function mfcs_build_determined_filters_markup($id = NULL) {
       $link_cg .= $url_arguments_remaining;
     }
 
+
+    // build the output.
     $markup .= '<li' . $id . ' class="links_and_filters-list-item item-' . $type_id . ' filter_types">';
     $markup .= '<a href="' . $link_cg . '" class="links_and_filters-list-item-link item-' . $type_id . ' item-link ' . $link_action_css . ' filter_types" title="' . $link_action_text . $building . '">' . $link_action_text . $building . '</a>';
     $markup .= '</li>';

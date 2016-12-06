@@ -1076,7 +1076,6 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   }
 
   $unavailability_type_options = mfcs_get_unavailability_type_list_options('combined', TRUE);
-
   foreach ($unavailabilities as $unavailability) {
     $building_code = check_plain($unavailability->building_code);
     $building_name = check_plain($unavailability->building_name);

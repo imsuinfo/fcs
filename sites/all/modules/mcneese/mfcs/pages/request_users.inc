@@ -819,10 +819,35 @@ function mfcs_request_users_0_view_page($user_id) {
     $calendar_unavailabilities = 'Hidden';
   }
 
+  $filters_active = NULL;
+  if (array_key_exists('filter_by_classification', $account->mfcs) && is_array($account->mfcs['filter_by_classification']) && !empty($account->mfcs['filter_by_classification'])) {
+    if (!is_null($filters_active)) {
+      $filters_active .= ', ';
+    }
+    $filters_active .= 'Request Classifications';
+  }
+  if (array_key_exists('filter_by_type', $account->mfcs) && is_array($account->mfcs['filter_by_type']) && !empty($account->mfcs['filter_by_type'])) {
+    if (!is_null($filters_active)) {
+      $filters_active .= ', ';
+    }
+    $filters_active .= 'Request Types';
+  }
+  if (array_key_exists('filter_by_building', $account->mfcs) && is_array($account->mfcs['filter_by_building']) && !empty($account->mfcs['filter_by_building'])) {
+    if (!is_null($filters_active)) {
+      $filters_active .= ', ';
+    }
+    $filters_active .= 'Buildings';
+  }
+
+  if (is_null($filters_active)) {
+    $filters_active = 'No Active Filters';
+  }
+
   $customization = '';
   $customization .= '<div class="view_user-item view_user-item-calendar"><span class="item-label item-label-calendar strong">Calendar:</span> <span class="item-value item-value-calendar">' . $calendar_text . '</span></div>';
   $customization .= '<div class="view_user-item view_user-item-calendar_holidays"><span class="item-label item-label-calendar_holidays strong">Holidays:</span> <span class="item-value item-value-calendar_holidays">' . $calendar_holidays . '</span></div>';
   $customization .= '<div class="view_user-item view_user-item-calendar_unavailabilities"><span class="item-label item-label-calendar_unavailabilities strong">Unavailabilities:</span> <span class="item-value item-value-calendar_unavailabilities">' . $calendar_unavailabilities . '</span></div>';
+  $customization .= '<div class="view_user-item view_user-item-filters_active"><span class="item-label item-label-filters_active strong">Active Filters:</span> <span class="item-value item-value-filters_active">' . $filters_active . '</span></div>';
 
 
   // build presentation.
@@ -1953,6 +1978,9 @@ function mfcs_request_users_0_customize_form($form, &$form_state, $user_id) {
   // load custom list options.
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
   $calendar_options = mfcs_get_user_calendar_list_options(NULL, TRUE);
+  $request_type_options = mfcs_get_request_type_list_options();
+  $request_classification_options = mfcs_get_request_classification_list_options();
+  $building_list_options = mfcs_get_request_building_list_options();
 
   // display 'default' instead of 'none', and make it the first option.
   unset($calendar_options[0]);
@@ -2149,6 +2177,75 @@ function mfcs_request_users_0_customize_form($form, &$form_state, $user_id) {
     '#description' => 'When visible, room unavailabilities are shown on both the monthly and daily calendars. This does not affect the display of unavailabilities for requests due to conflicts and related warnings. ',
   );
 
+  $form['form']['settings_calendar']['filter_by_classification_wrapper'] = array(
+    '#id' => 'manage-users_0-customize-filter_by_classification_wrapper',
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#title' => 'Filter by Request Classification',
+    '#attributes' => array(
+      'class' => array(
+        'manage-users_0-customize-filter_by_classification_wrapper',
+        'fieldset_print_as_div',
+      ),
+    ),
+    '#tree' => TRUE,
+  );
+
+  $form['form']['settings_calendar']['filter_by_classification_wrapper']['filter_by_classification'] = array(
+    '#type' => 'checkboxes',
+    '#title' => 'Request Classifications to Filter By',
+    '#default_value' => array(),
+    '#options' => $request_classification_options,
+    '#description' => 'Select all classification to filter by. When no classifications are selected, then no filtering is applied otherwise only the selected classifications are loaded on calendars. ',
+  );
+
+  $form['form']['settings_calendar']['filter_by_type_wrapper'] = array(
+    '#id' => 'manage-users_0-customize-filter_by_type_wrapper',
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#title' => 'Filter by Request Type',
+    '#attributes' => array(
+      'class' => array(
+        'manage-users_0-customize-filter_by_type_wrapper',
+        'fieldset_print_as_div',
+      ),
+    ),
+    '#tree' => TRUE,
+  );
+
+  $form['form']['settings_calendar']['filter_by_type_wrapper']['filter_by_type'] = array(
+    '#type' => 'checkboxes',
+    '#title' => 'Request Types to Filter By',
+    '#default_value' => array(),
+    '#options' => $request_type_options,
+    '#description' => 'Select all type to filter by. When no types are selected, then no filtering is applied otherwise only the selected types are loaded on calendars. ',
+  );
+
+  $form['form']['settings_calendar']['filter_by_building_wrapper'] = array(
+    '#id' => 'manage-users_0-customize-filter_by_building_wrapper',
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#title' => 'Filter by Building',
+    '#attributes' => array(
+      'class' => array(
+        'manage-users_0-customize-filter_by_building_wrapper',
+        'fieldset_print_as_div',
+      ),
+    ),
+    '#tree' => TRUE,
+  );
+
+  $form['form']['settings_calendar']['filter_by_building_wrapper']['filter_by_building'] = array(
+    '#type' => 'checkboxes',
+    '#title' => 'Buildings to Filter By',
+    '#default_value' => array(),
+    '#options' => $building_list_options,
+    '#description' => 'Select all building to filter by. When no buildings are selected, then no filtering is applied otherwise only the selected buildings are loaded on calendars. ',
+  );
+
 
   // load and assign existing settings.
   if (isset($account->data['mcneese_settings'])) {
@@ -2200,6 +2297,27 @@ function mfcs_request_users_0_customize_form($form, &$form_state, $user_id) {
 
     if (isset($account->mfcs['calendar_unavailabilities']) && is_bool($account->mfcs['calendar_unavailabilities'])) {
       $form['form']['settings_calendar']['calendar_unavailabilities']['#default_value'] = $account->mfcs['calendar_unavailabilities'] ? 'visible' : 'hidden';
+    }
+
+    if (isset($account->mfcs['filter_by_classification']) && is_array($account->mfcs['filter_by_classification'])) {
+      foreach ($account->mfcs['filter_by_classification'] as $filter) {
+        $form['form']['settings_calendar']['filter_by_classification_wrapper']['filter_by_classification']['#default_value'][$filter] = $filter;
+      }
+      unset($filter);
+    }
+
+    if (isset($account->mfcs['filter_by_type']) && is_array($account->mfcs['filter_by_type'])) {
+      foreach ($account->mfcs['filter_by_type'] as $filter) {
+        $form['form']['settings_calendar']['filter_by_type_wrapper']['filter_by_type']['#default_value'][$filter] = $filter;
+      }
+      unset($filter);
+    }
+
+    if (isset($account->mfcs['filter_by_building']) && is_array($account->mfcs['filter_by_building'])) {
+      foreach ($account->mfcs['filter_by_building'] as $filter) {
+        $form['form']['settings_calendar']['filter_by_building_wrapper']['filter_by_building']['#default_value'][$filter] = $filter;
+      }
+      unset($filter);
     }
   }
 
@@ -2348,6 +2466,75 @@ function mfcs_request_users_0_customize_form_submit($form, &$form_state) {
         elseif ($form_state['values']['form']['settings_calendar']['calendar_unavailabilities'] == 'hidden') {
           $calendar_settings_changes['calendar_unavailabilities'] = FALSE;
         }
+      }
+
+      if (isset($form_state['values']['form']['settings_calendar']['filter_by_classification_wrapper']['filter_by_classification']) && is_array($form_state['values']['form']['settings_calendar']['filter_by_classification_wrapper']['filter_by_classification'])) {
+        // drupal stores checkbox decisions as 0 (for false) or as value.
+        // this is unwanted (especially if 0 is a valid value), so convert it to an array of only the selected choices to pass to mfcs_save_user().
+        $filters = array();
+        foreach ($form_state['values']['form']['settings_calendar']['filter_by_classification_wrapper']['filter_by_classification'] as $filter_key => $filter_value) {
+          if ($filter_value == 0) {
+            continue;
+          }
+
+          $filters[] = $filter_key;
+        }
+        unset($filter_key);
+        unset($filter_value);
+
+        if (empty($filters)) {
+          $calendar_settings_changes['filter_by_classification'] = NULL;
+        }
+        else {
+          $calendar_settings_changes['filter_by_classification'] = $filters;
+        }
+        unset($filters);
+      }
+
+      if (isset($form_state['values']['form']['settings_calendar']['filter_by_type_wrapper']['filter_by_type']) && is_array($form_state['values']['form']['settings_calendar']['filter_by_type_wrapper']['filter_by_type'])) {
+        // drupal stores checkbox decisions as 0 (for false) or as value.
+        // this is unwanted (especially if 0 is a valid value), so convert it to an array of only the selected choices to pass to mfcs_save_user().
+        $filters = array();
+        foreach ($form_state['values']['form']['settings_calendar']['filter_by_type_wrapper']['filter_by_type'] as $filter_key => $filter_value) {
+          if ($filter_value == 0) {
+            continue;
+          }
+
+          $filters[] = $filter_key;
+        }
+        unset($filter_key);
+        unset($filter_value);
+
+        if (empty($filters)) {
+          $calendar_settings_changes['filter_by_type'] = NULL;
+        }
+        else {
+          $calendar_settings_changes['filter_by_type'] = $filters;
+        }
+        unset($filters);
+      }
+
+      if (isset($form_state['values']['form']['settings_calendar']['filter_by_building_wrapper']['filter_by_building']) && is_array($form_state['values']['form']['settings_calendar']['filter_by_building_wrapper']['filter_by_building'])) {
+        // drupal stores checkbox decisions as 0 (for false) or as value.
+        // this is unwanted (especially if 0 is a valid value), so convert it to an array of only the selected choices to pass to mfcs_save_user().
+        $filters = array();
+        foreach ($form_state['values']['form']['settings_calendar']['filter_by_building_wrapper']['filter_by_building'] as $filter_key => $filter_value) {
+          if ($filter_value == 0) {
+            continue;
+          }
+
+          $filters[] = $filter_key;
+        }
+        unset($filter_key);
+        unset($filter_value);
+
+        if (empty($filters)) {
+          $calendar_settings_changes['filter_by_building'] = NULL;
+        }
+        else {
+          $calendar_settings_changes['filter_by_building'] = $filters;
+        }
+        unset($filters);
       }
 
       if (!empty($calendar_settings_changes)) {
