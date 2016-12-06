@@ -655,9 +655,6 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
             $tooltip_text .= '<span class="tooltip-item-value">' . $item['description'] . '</span>';
             $tooltip_text .= '</div>';
           }
-            if (!empty($tooltip_text)) {
-              $tooltip_text .= '<br>';
-            }
 
           if (!empty($tooltip_text)) {
             $tooltip_text .= '<br>';
