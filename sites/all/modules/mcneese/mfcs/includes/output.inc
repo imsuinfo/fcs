@@ -2511,21 +2511,38 @@ function mfcs_build_determined_filters_markup($id = NULL) {
   $markup .= '<h3 class="links_and_filters-title filter_classifications">Filter by Classification</h3>';
   $markup .= '  <ul class="links_and_filters-list filter_classifications">';
 
-  foreach ($request_classification_options as $classification_id => $classification) {
-    $current_get = array();
-    if (!empty($mfcs_determined['get']['classifications'])) {
-      $current_get = $mfcs_determined['get']['classifications'];
+  // pre-process the classifications to ensure that classifications removed by the user customization settings do not get appended as a url argument.
+  $pre_processed_classifications = array();
+  if (!empty($mfcs_determined['get']['classifications'])) {
+    $pre_processed_classifications = $mfcs_determined['get']['classifications'];
+  }
+  if (!empty($user->mfcs['filter_by_classification'])) {
+    foreach ($user->mfcs['filter_by_classification'] as $classification_id) {
+      unset($pre_processed_classifications[$classification_id]);
     }
+    unset($classification_id);
+  }
 
+  // build the url arguments.
+  foreach ($request_classification_options as $classification_id => $classification) {
+    $current_get = $pre_processed_classifications;
     $link_cg = $base_path . $_GET['q'];
 
     $filtered_via_customization = FALSE;
     $filtered_via_url = FALSE;
     if (isset($user->mfcs['filter_by_classification']) && array_key_exists($classification_id, $user->mfcs['filter_by_classification'])) {
-      $filtered_via_customization = TRUE;
-      unset($current_get[$classification_id]);
-      $link_action_css = 'link-remove';
-      $link_action_text = 'Unfilter: ';
+      if (isset($mfcs_determined['get']['classifications'][-$classification_id])) {
+        unset($current_get[-$classification_id]);
+        $link_action_css = 'link-add';
+        $link_action_text = 'Filter: ';
+      }
+      else {
+        $filtered_via_customization = TRUE;
+        unset($current_get[$classification_id]);
+        $current_get[- $classification_id] = -$classification_id;
+        $link_action_css = 'link-remove';
+        $link_action_text = 'Unfilter: ';
+      }
     }
     elseif (isset($mfcs_determined['get']['classifications'][$classification_id])) {
       $filtered_via_url = TRUE;
@@ -2622,21 +2639,38 @@ function mfcs_build_determined_filters_markup($id = NULL) {
   $markup .= '<h3 class="links_and_filters-title filter_types">Filter by Type</h3>';
   $markup .= '  <ul class="links_and_filters-list filter_types">';
 
-  foreach ($request_type_options as $type_id => $type) {
-    $current_get = array();
-    if (!empty($mfcs_determined['get']['types'])) {
-      $current_get = $mfcs_determined['get']['types'];
+  // pre-process the types to ensure that types removed by the user customization settings do not get appended as a url argument.
+  $pre_processed_types = array();
+  if (!empty($mfcs_determined['get']['types'])) {
+    $pre_processed_types = $mfcs_determined['get']['types'];
+  }
+  if (!empty($user->mfcs['filter_by_type'])) {
+    foreach ($user->mfcs['filter_by_type'] as $type_id) {
+      unset($pre_processed_types[$type_id]);
     }
+    unset($type_id);
+  }
 
+  // build the url arguments.
+  foreach ($request_type_options as $type_id => $type) {
+    $current_get = $pre_processed_types;
     $link_cg = $base_path . $_GET['q'];
 
     $filtered_via_customization = FALSE;
     $filtered_via_url = FALSE;
     if (isset($user->mfcs['filter_by_type']) && array_key_exists($type_id, $user->mfcs['filter_by_type'])) {
-      $filtered_via_customization = TRUE;
-      unset($current_get[$type_id]);
-      $link_action_css = 'link-remove';
-      $link_action_text = 'Unfilter: ';
+      if (isset($mfcs_determined['get']['types'][-$type_id])) {
+        unset($current_get[-$type_id]);
+        $link_action_css = 'link-add';
+        $link_action_text = 'Filter: ';
+      }
+      else {
+        $filtered_via_customization = TRUE;
+        unset($current_get[$type_id]);
+        $current_get[- $type_id] = -$type_id;
+        $link_action_css = 'link-remove';
+        $link_action_text = 'Unfilter: ';
+      }
     }
     elseif (isset($mfcs_determined['get']['types'][$type_id])) {
       $filtered_via_url = TRUE;
@@ -2736,21 +2770,38 @@ function mfcs_build_determined_filters_markup($id = NULL) {
   $markup .= '<h3 class="links_and_filters-title filter_buildings">Filter by Building</h3>';
   $markup .= '  <ul class="links_and_filters-list filter_buildings">';
 
-  foreach ($building_list_options as $building_id => $building) {
-    $current_get = array();
-    if (!empty($mfcs_determined['get']['buildings'])) {
-      $current_get = $mfcs_determined['get']['buildings'];
+  // pre-process the buildings to ensure that buildings removed by the user customization settings do not get appended as a url argument.
+  $pre_processed_buildings = array();
+  if (!empty($mfcs_determined['get']['buildings'])) {
+    $pre_processed_buildings = $mfcs_determined['get']['buildings'];
+  }
+  if (!empty($user->mfcs['filter_by_building'])) {
+    foreach ($user->mfcs['filter_by_building'] as $building_id) {
+      unset($pre_processed_buildings[$building_id]);
     }
+    unset($building_id);
+  }
 
+  // build the url arguments.
+  foreach ($building_list_options as $building_id => $building) {
+    $current_get = $pre_processed_buildings;
     $link_cg = $base_path . $_GET['q'];
 
     $filtered_via_customization = FALSE;
     $filtered_via_url = FALSE;
     if (isset($user->mfcs['filter_by_building']) && array_key_exists($building_id, $user->mfcs['filter_by_building'])) {
-      $filtered_via_customization = TRUE;
-      unset($current_get[$building_id]);
-      $link_action_css = 'link-remove';
-      $link_action_text = 'Unfilter: ';
+      if (isset($mfcs_determined['get']['buildings'][-$building_id])) {
+        unset($current_get[-$building_id]);
+        $link_action_css = 'link-add';
+        $link_action_text = 'Filter: ';
+      }
+      else {
+        $filtered_via_customization = TRUE;
+        unset($current_get[$building_id]);
+        $current_get[- $building_id] = -$building_id;
+        $link_action_css = 'link-remove';
+        $link_action_text = 'Unfilter: ';
+      }
     }
     elseif (isset($mfcs_determined['get']['buildings'][$building_id])) {
       $filtered_via_url = TRUE;
