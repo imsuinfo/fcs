@@ -291,8 +291,6 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
   $markup = '<h2 class="code-title">#' . MFCS_TROUBLESHOOT_BANNER_INFORMATION . ': Banner Information</h2>';
   $markup .= '<div class="code-description">';
   $markup .= 'The following links provide locally stored information regarding banner data.' . '<br>';
-  $markup .= '<br>';
-  $markup .= 'Using this troubleshoot will force a re-synchronization of <strong>only</strong> the banner role cache data, if the system can connect to the banner database.' . '<br>';
   $markup .= '</div>';
   $markup .= '<div class="code-links">';
   $markup .= '  <ul class="code-links-list">';
