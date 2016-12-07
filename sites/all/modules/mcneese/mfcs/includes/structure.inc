@@ -1018,6 +1018,8 @@ function mfcs_get_request_field_room($form, &$form_state, &$fields, &$request_st
 
 
   if ($form['form']['step']['#value'] == 'rooms' && array_key_exists('information', $form['form']['sections']['#value'])) {
+    mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
     $fields['room'] = array(
       '#id' => 'field-request-room',
       '#type' => 'container',
