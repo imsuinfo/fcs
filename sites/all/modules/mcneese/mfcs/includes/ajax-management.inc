@@ -535,7 +535,7 @@ function mfcs_ajax_proxy_0_list() {
  * @param array $override_options
  *   (optional) An array containing the operations to override.
  */
-function mfcs_ajax_listing_0($custom_conditions = array(), $override_options = array()) {
+function mfcs_ajax_management_listing_0($custom_conditions = array(), $override_options = array()) {
   global $base_path;
   global $mfcs_determined;
 
@@ -1683,7 +1683,7 @@ function mfcs_ajax_problems_0_disabled_in_use($user_id) {
     ),
   );
 
-  mfcs_ajax_listing_0($conditions, $options);
+  mfcs_ajax_management_listing_0($conditions, $options);
 }
 
 /**
