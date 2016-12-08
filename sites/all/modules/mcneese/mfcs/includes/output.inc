@@ -75,18 +75,6 @@ function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $ab
     }
     unset($library);
 
-    // load the qtip library.
-    $library = libraries_load('qtip');
-    if (isset($library['error'])) {
-      $success = FALSE;
-      watchdog(MFCS_WATCHDOG_ID, 'Unable to load qtip library, reason: @reason.', array('@reason' => $library['error']), WATCHDOG_ERROR);
-    }
-    elseif (empty($library['loaded'])) {
-      $success = FALSE;
-      watchdog(MFCS_WATCHDOG_ID, 'Unable to load qtip library, reason: unknown.', array(), WATCHDOG_ERROR);
-    }
-    unset($library);
-
     if ($success) {
       return mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id, $max_items);
     }
@@ -528,7 +516,7 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
   $javascript .= '      content: { title: event.tooltipTitle, text: event.tooltipText },' . "\n";
   $javascript .= '      style: event.tooltipClass,' . "\n";
   $javascript .= '      position: {' . "\n";
-  $javascript .= '        my: \'top left\',' . "\n";
+  $javascript .= '        my: \'top center\',' . "\n";
   $javascript .= '        at: \'bottom center\'' . "\n";
   $javascript .= '      }' . "\n";
   $javascript .= '    });' . "\n";
@@ -927,18 +915,6 @@ function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $
     elseif (empty($library['loaded'])) {
       $success = FALSE;
       watchdog(MFCS_WATCHDOG_ID, 'Unable to load fullcalendar library, reason: unknown.', array(), WATCHDOG_ERROR);
-    }
-    unset($library);
-
-    // load the qtip library.
-    $library = libraries_load('qtip');
-    if (isset($library['error'])) {
-      $success = FALSE;
-      watchdog(MFCS_WATCHDOG_ID, 'Unable to load qtip library, reason: @reason.', array('@reason' => $library['error']), WATCHDOG_ERROR);
-    }
-    elseif (empty($library['loaded'])) {
-      $success = FALSE;
-      watchdog(MFCS_WATCHDOG_ID, 'Unable to load qtip library, reason: unknown.', array(), WATCHDOG_ERROR);
     }
     unset($library);
 
@@ -1909,7 +1885,7 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
   $javascript .= '      content: { title: event.tooltipTitle, text: event.tooltipText },' . "\n";
   $javascript .= '      style: event.tooltipClass,' . "\n";
   $javascript .= '      position: {' . "\n";
-  $javascript .= '        my: \'top left\',' . "\n";
+  $javascript .= '        my: \'top center\',' . "\n";
   $javascript .= '        at: \'bottom center\'' . "\n";
   $javascript .= '      }' . "\n";
   $javascript .= '    });' . "\n";

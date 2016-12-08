@@ -1021,6 +1021,7 @@ function mfcs_table_presentation($option = NULL) {
         'show' => TRUE,
         'hide' => FALSE,
       ),
+      'tooltip' => TRUE,
     ),
     'additional' => array(
       'label' => 'Additional Information or Questions to Campus Officials',

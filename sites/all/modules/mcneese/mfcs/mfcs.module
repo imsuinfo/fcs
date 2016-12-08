@@ -399,6 +399,19 @@ function mfcs_init() {
   drupal_add_js($module_path . '/js/printing-fieldsets.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
   #drupal_add_js($module_path . '/js/small_width-detection.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
 
+  // load the qtip library.
+  $qtip_library_loaded = libraries_load('qtip');
+  if (isset($qtip_library_loaded['error'])) {
+    watchdog(MFCS_WATCHDOG_ID, 'Unable to load qtip library, reason: @reason.', array('@reason' => $qtip_library_loaded['error']), WATCHDOG_ERROR);
+  }
+  elseif (empty($qtip_library_loaded['loaded'])) {
+    watchdog(MFCS_WATCHDOG_ID, 'Unable to load qtip library, reason: unknown.', array(), WATCHDOG_ERROR);
+  }
+  else {
+    drupal_add_js($module_path . '/js/qtip_tooltip.js', array('type' => 'file', 'group' => JS_THEME, 'preprocess' => TRUE));
+  }
+  unset($qtip_library_loaded);
+
   mfcs_determine_url_arguments();
 }
 
@@ -9734,6 +9747,9 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
     return $table;
   }
 
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  $room_options_special = mfcs_get_request_room_list_options(NULL, 'special', TRUE, TRUE);
+
   $table_sort = TRUE;
   if (array_key_exists('table_sort', $extra) && !$extra['table_sort']) {
     $table_sort = FALSE;
@@ -10296,6 +10312,27 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
     $table['datatable_settings']['rowId'] = $rowId;
   }
 
+  // enable qtip support
+  $table['datatable_settings']['fnRowCallback'] = 'function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '  $(\'.mfcs-qtip-datatable_tooltip\', nRow).each(function(context) {' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '    var qtip_element = $(this);' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '    $(qtip_element).qtip({' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '      id: $(qtip_element).attr(\'qtip_tooltip-id\'),' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '      content: {' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '        title: $(qtip_element).attr(\'qtip_tooltip-title\'),' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '        text: $(qtip_element).attr(\'qtip_tooltip-text\')' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '      },' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '      style: {' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '        classes: $(qtip_element).attr(\'qtip_tooltip-class\')' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '      },' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '      position: {' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '        my: \'top center\',' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '        at: \'bottom center\'' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '      }' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '    });' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '  });' . "\n";
+  $table['datatable_settings']['fnRowCallback'] .= '}' . "\n";
+
   foreach ($columns as $column_id => $column) {
     $table['datatable_settings']['columns'][$column_id] = $column;
 
@@ -10567,13 +10604,15 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
     $can_delete_requests = array();
   }
 
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
   $type_options = mfcs_get_request_type_list_options();
   $status_options = mfcs_get_request_status_list_options();
   $step_options = mfcs_get_review_steps_list_options();
   $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
   $room_options = mfcs_get_request_room_list_options(NULL, NULL, FALSE, TRUE);
+  $room_options_special = mfcs_get_request_room_list_options(NULL, 'special', TRUE, TRUE);
   $building_options = array();
-
 
   $rows = array();
   foreach ($items as $item) {
@@ -10649,7 +10688,24 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
         elseif ($column['column'] == 'room') {
           if (!empty($item->room)) {
             if (isset($room_options[$item->room])) {
-              $data = '<div class="column-item item-room item-room-0">' . check_plain($room_options[$item->room]) . '</div>';
+              $tooltip = '';
+              $extra_class = '';
+
+              if (isset($room_options_special[$item->room])) {
+                $tooltip_attributes = array(
+                  'qtip_tooltip-title' => 'Room',
+                  'qtip_tooltip-text' => $room_options_special[$item->room],
+                  'qtip_tooltip-class' => 'item-tooltip request_item-tooltip-room',
+                );
+
+                $extra_class = ' mfcs-qtip-datatable_tooltip';
+                $tooltip = ' ' . drupal_attributes($tooltip_attributes);
+                unset($tooltip_attributes);
+              }
+
+              $data = '<div class="column-item item-room item-room-0' . $extra_class . '"' . $tooltip . '>' . check_plain($room_options[$item->room]) . '</div>';
+              unset($extra_class);
+              unset($tooltip);
             }
           }
         }
