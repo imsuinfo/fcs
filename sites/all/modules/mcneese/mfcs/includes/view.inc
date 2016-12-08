@@ -323,10 +323,10 @@ function mfcs_view_build_request_item_structure($request_id, $field_group, $fiel
       if (isset($generated['tooltip']['#value']) && is_array($generated['tooltip']['#value'])) {
         $tooltip_classes = $output[$delta]['#attributes']['class'];
         $tooltip_classes[] = 'item-tooltip';
-        $tooltip_classes[] = 'request_item-tooltip-room';
+        $tooltip_classes[] = 'request_item-tooltip-' . $generated['tooltip']['#value']['class'];
 
         $output[$delta]['#attributes']['qtip_tooltip-id'] = $id . '-tooltip';
-        $output[$delta]['#attributes']['qtip_tooltip-title'] = 'Room';
+        $output[$delta]['#attributes']['qtip_tooltip-title'] = $generated['tooltip']['#value']['title'];
         $output[$delta]['#attributes']['qtip_tooltip-text'] = $generated['tooltip']['#value']['text'];
         $output[$delta]['#attributes']['qtip_tooltip-class'] = implode(' ', $tooltip_classes);
 
@@ -969,6 +969,17 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
         if (!isset($building_options)) {
           $building_options = mfcs_get_request_building_list_options(NULL, NULL, TRUE, TRUE);
         }
+        if (!isset($building_options_special)) {
+          $building_options_special = mfcs_get_request_building_list_options(NULL, 'special', TRUE, TRUE);
+        }
+
+        if (isset($building_options_special[$value->{$value_name}])) {
+          $tooltip = array(
+            'title' => 'Building',
+            'class' => 'building',
+            'text' => $building_options_special[$value->{$value_name}],
+          );
+        }
 
         if (isset($building_options[$value->{$value_name}])) {
           $markup .= $building_options[$value->{$value_name}];
@@ -987,7 +998,8 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
 
         if (isset($room_options_special[$value->{$value_name}])) {
           $tooltip = array(
-            'title' => NULL,
+            'title' => 'Room',
+            'class' => 'room',
             'text' => $room_options_special[$value->{$value_name}],
           );
         }

@@ -3076,7 +3076,9 @@ function mfcs_load_buildings($location = NULL, $building = NULL, $disabled = FAL
       $query->innerJoin('mfcs_banner_building_to_location', 'mbbl', 'mbb.id = mbbl.building');
       $query->innerJoin('mfcs_banner_locations', 'mbl', 'mbbl.location = mbl.id');
 
-      $query->condition('mbl.id', $location);
+      if ($location !== TRUE) {
+        $query->condition('mbl.id', $location);
+      }
 
       $query->addField('mbl', 'id', 'location_id');
       $query->addField('mbl', 'machine_name', 'location_code');
@@ -9747,9 +9749,6 @@ function mfcs_build_request_table($items, $max_rows, $columns = NULL, $user = NU
     return $table;
   }
 
-  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
-  $room_options_special = mfcs_get_request_room_list_options(NULL, 'special', TRUE, TRUE);
-
   $table_sort = TRUE;
   if (array_key_exists('table_sort', $extra) && !$extra['table_sort']) {
     $table_sort = FALSE;
@@ -10610,17 +10609,14 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
   $status_options = mfcs_get_request_status_list_options();
   $step_options = mfcs_get_review_steps_list_options();
   $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
+  $building_options = mfcs_get_request_building_list_options(NULL, NULL, FALSE, TRUE);
+  $building_options_special = mfcs_get_request_building_list_options(NULL, 'special', TRUE, TRUE);
   $room_options = mfcs_get_request_room_list_options(NULL, NULL, FALSE, TRUE);
   $room_options_special = mfcs_get_request_room_list_options(NULL, 'special', TRUE, TRUE);
-  $building_options = array();
 
   $rows = array();
   foreach ($items as $item) {
     $row = array();
-
-    if (!array_key_exists($item->location, $building_options)) {
-      $building_options[$item->location] = mfcs_get_request_building_list_options($item->location, NULL, FALSE, TRUE);
-    }
 
     foreach ($columns as $column_id => $column) {
       if (is_null($column['column'])) {
@@ -10680,8 +10676,25 @@ function mfcs_build_request_ajax_table_process_rows($items, $columns, $user = NU
         }
         elseif ($column['column'] == 'building') {
           if (!empty($item->building)) {
-            if (isset($building_options[$item->location][$item->building])) {
-              $data = '<div class="column-item item-building item-building-0">' . check_plain($building_options[$item->location][$item->building]) . '</div>';
+            if (isset($building_options[$item->building])) {
+              $tooltip = '';
+              $extra_class = '';
+
+              if (isset($building_options_special[$item->building])) {
+                $tooltip_attributes = array(
+                  'qtip_tooltip-title' => 'Building',
+                  'qtip_tooltip-text' => $building_options_special[$item->building],
+                  'qtip_tooltip-class' => 'item-tooltip request_item-tooltip-building',
+                );
+
+                $extra_class = ' mfcs-qtip-datatable_tooltip';
+                $tooltip = ' ' . drupal_attributes($tooltip_attributes);
+                unset($tooltip_attributes);
+              }
+
+              $data = '<div class="column-item item-building item-building-0' . $extra_class . '"' . $tooltip . '>' . check_plain($building_options[$item->building]) . '</div>';
+              unset($extra_class);
+              unset($tooltip);
             }
           }
         }

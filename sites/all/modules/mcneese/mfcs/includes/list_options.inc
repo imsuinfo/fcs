@@ -376,8 +376,48 @@ function mfcs_get_request_building_list_options($location = NULL, $option = NULL
 
   $buildings = mfcs_load_buildings($location, NULL, $disabled);
 
-  foreach ($buildings as &$building) {
-    $options[$building->building_id] = $building->building_name;
+  if ($option == 'special') {
+    global $base_path;
+    $module_path = drupal_get_path('module', 'mfcs');
+
+    foreach ($buildings as &$building) {
+      // to simplify the design and to avoid having to alter the code later on, use the building and building ids as the name of the file.
+      $image_file_path = NULL;
+
+      // look for generic building-specific images.
+      if (file_exists(DRUPAL_ROOT . '/sites/all/modules/mcneese/mfcs/images/buildings/' . $building->building_id . '.png')) {
+        $image_file_path = $base_path . $module_path . '/images/buildings/' . $building->building_id . '.png';
+      }
+      elseif (file_exists(DRUPAL_ROOT . '/sites/all/modules/mcneese/mfcs/images/buildings/' . $building->building_id . '.jpg')) {
+        $image_file_path = $base_path . $module_path . '/images/buildings/' . $building->building_id . '.jpg';
+      }
+      elseif (file_exists(DRUPAL_ROOT . '/sites/all/modules/mcneese/mfcs/images/buildings/0.png')) {
+        $image_file_path = $base_path . $module_path . '/images/buildings/0.png';
+      }
+
+      $building_name = NULL;
+      if (!empty($building->building_name)) {
+        $building_name = check_plain($building->building_name);
+      }
+      $building_name = trim($building_name);
+
+      $text = '';
+      if (!is_null($image_file_path)) {
+        $text = '<img src="' . $image_file_path . '" alt="' . $building_name . '" width="65" class="building_image">';
+      }
+
+      $text .= '<div class="building_name">' . $building_name . '</div>';
+
+      $options[$building->building_id] = $text;
+    }
+
+    // return now to avoid custom sorting.
+    return $options;
+  }
+  else {
+    foreach ($buildings as &$building) {
+      $options[$building->building_id] = $building->building_name;
+    }
   }
 
   asort($options);
@@ -420,22 +460,22 @@ function mfcs_get_request_room_list_options($location = NULL, $option = NULL, $h
 
     foreach ($rooms as $room) {
       // to simplify the design and to avoid having to alter the code later on, use the building and room ids as the name of the file.
-      $image_file_name = $room->building_id . '-';
+      $image_file_name = $room->building_id;
       $image_file_path = NULL;
       $image_alt_text = NULL;
 
       // first look for generic building-specific images.
-      if (file_exists(DRUPAL_ROOT . '/sites/all/modules/mcneese/mfcs/images/rooms/' . $image_file_name . '.png')) {
-        $image_file_path = $base_path . $module_path . '/images/rooms/' . $image_file_name . '.png';
+      if (file_exists(DRUPAL_ROOT . '/sites/all/modules/mcneese/mfcs/images/buildings/' . $image_file_name . '.png')) {
+        $image_file_path = $base_path . $module_path . '/images/buildings/' . $image_file_name . '.png';
         $image_alt_text = FALSE;
       }
-      elseif (file_exists(DRUPAL_ROOT . '/sites/all/modules/mcneese/mfcs/images/rooms/' . $image_file_name . '.jpg')) {
-        $image_file_path = $base_path . $module_path . '/images/rooms/' . $image_file_name . '.jpg';
+      elseif (file_exists(DRUPAL_ROOT . '/sites/all/modules/mcneese/mfcs/images/buildings/' . $image_file_name . '.jpg')) {
+        $image_file_path = $base_path . $module_path . '/images/buildings/' . $image_file_name . '.jpg';
         $image_alt_text = FALSE;
       }
 
       // then look for room-specific images.
-      $image_file_name .= $room->room_id;
+      $image_file_name .= '-' . $room->room_id;
       if (file_exists(DRUPAL_ROOT . '/sites/all/modules/mcneese/mfcs/images/rooms/' . $image_file_name . '.png')) {
         $image_file_path = $base_path . $module_path . '/images/rooms/' . $image_file_name . '.png';
         $image_alt_text = TRUE;
@@ -462,7 +502,7 @@ function mfcs_get_request_room_list_options($location = NULL, $option = NULL, $h
         $room_number = check_plain($room_number);
       }
 
-      $title = '';
+      $text = '';
 
       if (!is_null($image_file_path)) {
         if ($image_alt_text) {
@@ -472,27 +512,27 @@ function mfcs_get_request_room_list_options($location = NULL, $option = NULL, $h
           $image_alt_text = trim($building_name);
         }
 
-        $title .= '<img src="' . $image_file_path . '" alt="' . $image_alt_text . '" width="65" class="room_image">';
+        $text .= '<img src="' . $image_file_path . '" alt="' . $image_alt_text . '" width="65" class="room_image">';
       }
       unset($image_alt_text);
 
-      $title .= '<div class="room_notes">';
-      $title .= '<div class="room_number"><span class="room_number-label">Room:</span> <span class="room_number-data">' . $room_number . '</span></div>';
+      $text .= '<div class="room_notes">';
+      $text .= '<div class="room_number"><span class="room_number-label">Room:</span> <span class="room_number-data">' . $room_number . '</span></div>';
 
       if (!empty($room->capacity_normal)) {
-        $title .= '<div class="room_capacity"><span class="capacity-label">Capacity:</span> <span class="capacity-data">' . check_plain($room->capacity_normal) . '</span></div>';
+        $text .= '<div class="room_capacity"><span class="capacity-label">Capacity:</span> <span class="capacity-data">' . check_plain($room->capacity_normal) . '</span></div>';
       }
-      $title .= '</div>';
+      $text .= '</div>';
 
-      $title .= '<div class="building_desc">' . $building_name . '</div>';
+      $text .= '<div class="building_name">' . $building_name . '</div>';
 
       if (is_null($room_name)) {
         $room_name = 'No information available.';
       }
 
-      $title .= '<div class="room_description"><span class="room_description-label"></span> <span class="room_description-data">' . $room_name . '</span></div>';
+      $text .= '<div class="room_description"><span class="room_description-label"></span> <span class="room_description-data">' . $room_name . '</span></div>';
 
-      $options[$room->room_id] = $title;
+      $options[$room->room_id] = $text;
     }
 
     // return now to avoid custom sorting.
@@ -500,18 +540,18 @@ function mfcs_get_request_room_list_options($location = NULL, $option = NULL, $h
   }
   elseif ($option == 'room_with_building') {
     foreach ($rooms as $room) {
-      $title = '(' . $room->building_code . ') ';
+      $text = '(' . $room->building_code . ') ';
       if (empty($room->room_name) || is_numeric($room->room_number)) {
         $room_number = mcneese_fcs_text_capitalization($room->room_number);
 
-        $title .= $room_number;
+        $text .= $room_number;
         unset($room_number);
       }
       else {
-        $title .= mcneese_fcs_text_capitalization($room->room_name);
+        $text .= mcneese_fcs_text_capitalization($room->room_name);
       }
 
-      $options[$room->room_id] = $title;
+      $options[$room->room_id] = $text;
     }
   }
   else {
