@@ -237,6 +237,23 @@ function mcneese_libraries_theme_table($variables, $datatable_settings = array()
         'visible',
         'targets',
         'createdRow',
+        'fnCookieCallback',
+        'fnCreatedRow',
+        'fnDrawCallback',
+        'fnFooterCallback',
+        'fnFormatNumber',
+        'fnHeaderCallback',
+        'fnInfoCallback',
+        'fnInitComplete',
+        'fnPreDrawCallback',
+        'fnRowCallback',
+        'fnServerData',
+        'fnServerParams',
+        'fnStateLoad',
+        'fnStateLoadParams',
+        'fnStateLoaded',
+        'fnStateSave',
+        'fnStateSaveParams',
       );
 
       $integer_settings = array(
