@@ -729,7 +729,7 @@ function mfcs_request_holiday_0_copy_form_submit($form, &$form_state) {
   // search for and report any holiday conflicts
   global $base_path;
   foreach ($holidays_to_check as $holiday_id => $holiday_title) {
-    $conflicts = mfcs_request_holiday_0_check_for_conlficts($holiday_id);
+    $conflicts = mfcs_request_holiday_0_check_for_conflicts($holiday_id);
     if (!empty($conflicts)) {
       $warning = 'The holiday, <strong>' . check_plain($holiday_title) . '</strong>, is in conflict with the following requests:<br><ul class="holiday_conflict-warning-list">';
       foreach ($conflicts as $conflict) {
@@ -1236,7 +1236,7 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
   }
 
   // search for and report any holiday conflicts
-  $conflicts = mfcs_request_holiday_0_check_for_conlficts($holiday_id);
+  $conflicts = mfcs_request_holiday_0_check_for_conflicts($holiday_id);
   if (!empty($conflicts)) {
     global $base_path;
 
@@ -1529,7 +1529,7 @@ function mfcs_request_holiday_0_delete_form_submit($form, &$form_state) {
  *   An array of requests whose dates conflict with the specified holiday.
  *   FALSE is returned on error.
  */
-function mfcs_request_holiday_0_check_for_conlficts($holiday_id) {
+function mfcs_request_holiday_0_check_for_conflicts($holiday_id) {
   if (!cf_is_integer($holiday_id)) {
     cf_error::invalid_integer('holiday_id');
     return FALSE;
