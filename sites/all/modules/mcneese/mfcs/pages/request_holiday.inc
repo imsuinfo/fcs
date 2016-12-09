@@ -86,6 +86,7 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
   $class_id = 'column-id ';
   $class_date = 'column-date ';
   $class_title = 'column-title ';
+  $class_type = 'column-type ';
   $class_enabled = 'column-enabled ';
   $class_operations = 'column-operations no-print ';
 
@@ -111,6 +112,11 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
       $order_column = array(2 => strtolower($sorting[$order]));
       $class_title .= 'sorting_1 ';
     }
+    elseif ($order == 'type') {
+      $sorting['type'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = array(2 => strtolower($sorting[$order]));
+      $class_type .= 'sorting_1 ';
+    }
     elseif ($order == 'enabled') {
       if ($can_edit) {
         $sorting['enabled'] = is_null($sort) ? 'DESC' : $sort;
@@ -126,10 +132,10 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
   }
 
   if ($can_edit) {
-    $items = mfcs_get_holidays($year, NULL, NULL, NULL);
+    $items = mfcs_get_holidays($year, NULL, NULL, NULL, FALSE, TRUE);
   }
   else {
-    $items = mfcs_get_holidays($year);
+    $items = mfcs_get_holidays($year, NULL, NULL, TRUE, FALSE, TRUE);
   }
 
   // do not provide pages when the page number would bring the user beyond the available items.
@@ -154,6 +160,11 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
 
     $row['title'] = array(
       'data' => '<div class="column-item item-title item-title-0">' . check_plain($item->title) . '</div>',
+      'class' => $class_title,
+    );
+
+    $row['type'] = array(
+      'data' => '<div class="column-item item-type item-type-0">' . check_plain($item->type_human_name) . '</div>',
       'class' => $class_title,
     );
 
@@ -187,6 +198,7 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
     'id' => array('field' => 'id', 'data' => 'ID', 'align' => 'center'),
     'date' => array('field' => 'date', 'data' => 'Date', 'align' => 'center'),
     'title' => array('field' => 'title', 'data' => 'Title', 'align' => 'center'),
+    'type' => array('field' => 'type', 'data' => 'Type', 'align' => 'center'),
   );
 
   if ($can_edit) {
@@ -230,6 +242,7 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
       array('id' => 0, 'column' => 'id', 'name' => 'ID', 'className' => 'column-id', 'sanitize' => FALSE),
       array('id' => 1, 'column' => 'date', 'name' => 'Date', 'className' => 'column-date'),
       array('id' => 2, 'column' => 'title', 'name' => 'Title', 'className' => 'column-title'),
+      array('id' => 3, 'column' => 'type', 'name' => 'Type', 'className' => 'column-type'),
     ),
     'displayStart' => 0,
     'pageLength' => 40,
@@ -251,11 +264,11 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
   );
 
   if ($can_edit) {
-    $datatable_settings['columns'][] = array('id' => 3, 'column' => 'enabled', 'name' => 'Enabled', 'className' => 'column-enabled');
-    $datatable_settings['columns'][] = array('id' => 4, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE);
+    $datatable_settings['columns'][] = array('id' => 4, 'column' => 'enabled', 'name' => 'Enabled', 'className' => 'column-enabled');
+    $datatable_settings['columns'][] = array('id' => 5, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE);
   }
   else {
-    $datatable_settings['columns'][] = array('id' => 3, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE);
+    $datatable_settings['columns'][] = array('id' => 4, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE);
   }
 
   $form = array();
@@ -318,10 +331,10 @@ function mfcs_request_holiday_0_page($year, $holiday_id) {
   }
 
   if ($is_manager || $is_administer) {
-    $holiday = mfcs_get_holiday($holiday_id, NULL);
+    $holiday = mfcs_get_holiday($holiday_id, NULL, FALSE, TRUE);
   }
   else {
-    $holiday = mfcs_get_holiday($holiday_id);
+    $holiday = mfcs_get_holiday($holiday_id, TRUE, FALSE, TRUE);
   }
 
   if (!is_object($holiday)) {
@@ -346,6 +359,7 @@ function mfcs_request_holiday_0_page($year, $holiday_id) {
   $formatted_date = date(MFCS_DATE_FORMAT_DATE, $holiday->date);
 
   $title = check_plain($holiday->title);
+  $type = check_plain($holiday->type_human_name);
   $description = check_plain($holiday->description);
 
   mfcs_add_canonical_headers('requests/holiday-0/view/' . $year . '/' . $holiday_id);
@@ -355,9 +369,10 @@ function mfcs_request_holiday_0_page($year, $holiday_id) {
   $markup .= '<div class="mfcs-holiday_page-title"><strong>' . $title . '</strong> is a holiday, break, or office closure for McNeese State University on: <strong>' . $formatted_date . '</strong>.</div>';
   $markup .= '<br>';
   $markup .= '<div class="mfcs-holiday_page-description">' . $description . '</div>';
+  $markup .= '<br>';
+  $markup .= '<div class="mfcs-holiday_page-type"><strong>Type</strong>: ' . $type . '</div>';
 
   if ($is_manager || $is_administer) {
-    $markup .= '<br>';
     $markup .= '<div class="mfcs-holiday_page-status"><strong>Status:</strong> ' . ($holiday->enabled ? 'Enabled' : 'Disabled') . '<br>';
 
     $instance = mfcs_instance();
@@ -661,6 +676,7 @@ function mfcs_request_holiday_0_copy_form_submit($form, &$form_state) {
         $fields['year'] = $year_current;
         $fields['date'] = strtotime($current_date);
         $fields['title'] = $holiday->title;
+        $fields['type'] = $holiday->type;
         $fields['description'] = $holiday->description;
         $fields['created'] = $instance;
         $fields['updated'] = $instance;
@@ -864,6 +880,10 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
 
   drupal_set_title($page_title);
 
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+  $holiday_types = mfcs_get_holiday_type_list_options('select');
+  $holiday_types_all = mfcs_get_holiday_type_list_options('select', TRUE);
+
   // a year offset is necessary to create the date field for a specific year.
   // the date field needs to be limited to a certain year and it works based off the offset to the current year.
   $instance = mfcs_instance();
@@ -918,6 +938,14 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
     '#required' => TRUE,
   );
 
+  $form['holiday']['type'] = array(
+    '#id' => 'field-holiday-type',
+    '#type' => 'select',
+    '#title' => 'Type',
+    '#options' => $holiday_types,
+    '#required' => TRUE,
+  );
+
   $form['holiday']['description'] = array(
     '#id' => 'field-holiday-description',
     '#type' => 'textarea',
@@ -949,11 +977,21 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
 
   if (is_object($holiday)) {
     $form['holiday']['title']['#default_value'] = $holiday->title;
+    $form['holiday']['type']['#default_value'] = $holiday->type;
     $form['holiday']['description']['#default_value'] = $holiday->description;
     $form['holiday']['date']['#default_value'] = date('Y-m-d', $holiday->date);
 
     if ($is_manager || $is_administer) {
       $form['holiday']['enabled']['#default_value'] = $holiday->enabled;
+    }
+
+    if ($holiday->type == MFCS_HOLIDAY_TYPE_NONE) {
+      $form['holiday']['type']['#options'] = $holiday_types_all;
+
+      if (!($is_manager || $is_administer)) {
+        $form['holiday']['type']['#readonly'] = TRUE;
+        $form['holiday']['type']['#disabled'] = TRUE;
+      }
     }
   }
 
@@ -1001,6 +1039,7 @@ function mfcs_request_holiday_0_edit_form_pre_validate(&$form, &$form_state) {
 
   if ($clicked_id == 'mfcs-holiday-edit-submit-cancel') {
     $form['holiday']['title']['#required'] = FALSE;
+    $form['holiday']['type']['#required'] = FALSE;
     $form['holiday']['date']['#required'] = FALSE;
   }
 }
@@ -1111,6 +1150,7 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
 
     $fields = array();
     $fields['title'] = $form_state['values']['holiday']['title'];
+    $fields['type'] = $form_state['values']['holiday']['type'];
     $fields['description'] = $form_state['values']['holiday']['description'];
     $fields['date'] = $date;
     $fields['year'] = (int) $form['form']['year']['#value'];

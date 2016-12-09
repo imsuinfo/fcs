@@ -1458,6 +1458,14 @@ function mfcs_schema() {
         'serialize' => TRUE,
         'not null' => TRUE,
       ),
+      'type' => array(
+        'description' => $t("Represents the holiday type."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 1,
+      ),
       'description' => array(
         'description' => $t("Represents the description of the entry."),
         'type' => 'varchar',
@@ -2429,6 +2437,11 @@ function mfcs_install() {
   db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_UNAVAILABLE . ', \'unavailable\', \'Unavailable\')');
   db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_ISSUES . ', \'issues\', \'Issues\')');
   db_query('INSERT INTO {mfcs_taxonomy_review_decisions} (id, machine_name, human_name) VALUES (' . (int) MFCS_REVIEW_DECISION_ISSUES_NONE . ', \'issues_none\', \'No Issues\')');
+
+  db_query('INSERT INTO {mfcs_taxonomy_holiday_type} (id, machine_name, human_name, hidden) VALUES (' . (int) MFCS_HOLIDAY_TYPE_NONE . ', \'none\', \'None\', 1)');
+  db_query('INSERT INTO {mfcs_taxonomy_holiday_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_HOLIDAY_TYPE_HOLIDAY . ', \'holiday\', \'Holiday\')');
+  db_query('INSERT INTO {mfcs_taxonomy_holiday_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_HOLIDAY_TYPE_FORCED_CLOSURE . ', \'forced_closure\', \'Forced Closure\')');
+  db_query('INSERT INTO {mfcs_taxonomy_holiday_type} (id, machine_name, human_name) VALUES (' . (int) MFCS_HOLIDAY_TYPE_BREAK . ', \'break\', \'Break\')');
 
 
   db_query('ALTER TABLE {mfcs_requests} ADD CONSTRAINT classification_fkey FOREIGN KEY (classification) REFERENCES {mfcs_taxonomy_request_classification} (id) ON UPDATE CASCADE ON DELETE RESTRICT');

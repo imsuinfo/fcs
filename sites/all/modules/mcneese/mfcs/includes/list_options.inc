@@ -128,6 +128,14 @@ define('MFCS_EMAIL_TYPE_UNCANCELLED', 24);
 define('MFCS_EMAIL_TYPE_UNREVIEWED_REQUEST', 25);
 
 /**
+ * Defines Taxonomy TIDs for request revenue.
+ */
+ define('MFCS_HOLIDAY_TYPE_NONE', 0);
+ define('MFCS_HOLIDAY_TYPE_HOLIDAY', 1);
+ define('MFCS_HOLIDAY_TYPE_FORCED_CLOSURE', 2);
+ define('MFCS_HOLIDAY_TYPE_BREAK', 3);
+
+/**
  * Returns an array of facilities use status options for populating lists.
  *
  * @param string|null $option
@@ -1453,6 +1461,45 @@ function mfcs_get_user_calendar_list_options($option = NULL, $hidden = FALSE, $d
 
   $options_all[MFCS_USER_CALENDAR_ORIGINAL] = 'Original Calendar';
   $options_all[MFCS_USER_CALENDAR_FULL] = 'Full Calendar';
+
+  foreach ($options_all as $option_id => $option_name) {
+    $options[$option_id] = $option_name;
+  }
+
+  asort($options);
+
+  return $options;
+}
+
+/**
+ * Returns an array of holiday types.
+ *
+ * @param string|null $option
+ *   (optional) A string designating how the list will be populated.
+ * @param bool $hidden
+ *   (optional) When TRUE, will include hidden/special case classifications
+ *   that are not normally exposed through the select list options.
+ * @param bool $disabled
+ *   (optional) When TRUE, load disabled options in addition to existing options.
+ *
+ * @return array
+ *   An array of options available.
+ */
+function mfcs_get_holiday_type_list_options($option = NULL, $hidden = FALSE, $disabled = FALSE) {
+  $options = array();
+  $options_all = array();
+
+  if ($hidden) {
+    $options_all[MFCS_HOLIDAY_TYPE_NONE] = 'None';
+  }
+
+  $options_all[MFCS_HOLIDAY_TYPE_HOLIDAY] = 'Holiday';
+  $options_all[MFCS_HOLIDAY_TYPE_FORCED_CLOSURE] = 'Forced Closure';
+  $options_all[MFCS_HOLIDAY_TYPE_BREAK] = 'Break';
+
+  if ($option == 'select') {
+    $options[''] = '- Select -';
+  }
 
   foreach ($options_all as $option_id => $option_name) {
     $options[$option_id] = $option_name;

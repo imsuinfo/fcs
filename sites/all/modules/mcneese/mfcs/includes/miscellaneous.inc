@@ -1752,6 +1752,7 @@ function mfcs_miscellaneous_check_requests_problem_holiday($request_id = NULL) {
 
     $query->addField('mh', 'id', 'holiday_id');
     $query->addField('mh', 'title', 'holiday_title');
+    $query->addField('mh', 'type', 'holiday_type');
     $query->addField('mh', 'year', 'holiday_year');
 
     $query->addField('mfdd', 'delta', 'delta');
@@ -1796,6 +1797,7 @@ function mfcs_miscellaneous_check_requests_problem_holiday($request_id = NULL) {
             'holiday' => array(
               'id' => (int) $result->holiday_id,
               'title' => $result->holiday_title,
+              'type' => $result->holiday_type,
               'year' => (int) $result->holiday_year,
             ),
           );

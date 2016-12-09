@@ -12868,12 +12868,14 @@ function mfcs_get_request_already_reviewed_as_classifications($request_id, $revi
  *   (optional) When TRUE, only load holidays when the deleted column is 1.
  *   When FALSE, only load holidays when the deleted column is 0.
  *   When NULL, ignore this column.
+ * @param bool $join
+ *   (optional) When TRUE, will join the holiday type table.
  *
  * @return array|bool
  *   An array of holidays.
  *   FALSE is returned on error.
  */
-function mfcs_get_holidays($year, $timestamp_start = NULL, $timestamp_stop = NULL, $enabled = TRUE, $deleted = FALSE) {
+function mfcs_get_holidays($year, $timestamp_start = NULL, $timestamp_stop = NULL, $enabled = TRUE, $deleted = FALSE, $join = FALSE) {
   if (!cf_is_integer($year)) {
     cf_error::invalid_integer('year');
     return FALSE;
@@ -12899,17 +12901,29 @@ function mfcs_get_holidays($year, $timestamp_start = NULL, $timestamp_stop = NUL
     return FALSE;
   }
 
+  if (!is_bool($join)) {
+    cf_error::invalid_bool('join');
+    return FALSE;
+  }
+
   try {
     $query = db_select('mfcs_holiday', 'mh');
     $query->addField('mh', 'id', 'id');
-    $query->addField('mh', 'date', 'date');
     $query->addField('mh', 'year', 'year');
+    $query->addField('mh', 'date', 'date');
     $query->addField('mh', 'title', 'title');
+    $query->addField('mh', 'type', 'type');
     $query->addField('mh', 'description', 'description');
     $query->addField('mh', 'enabled', 'enabled');
     $query->addField('mh', 'deleted', 'deleted');
     $query->addField('mh', 'created', 'created');
     $query->addField('mh', 'updated', 'updated');
+
+    if ($join) {
+      $query->innerJoin('mfcs_taxonomy_holiday_type', 'mtht', 'mh.type = mtht.id');
+      $query->addField('mtht', 'machine_name', 'type_machine_name');
+      $query->addField('mtht', 'human_name', 'type_human_name');
+    }
 
     $query->condition('mh.year', $year);
 
@@ -12974,12 +12988,14 @@ function mfcs_get_holidays($year, $timestamp_start = NULL, $timestamp_stop = NUL
  *   (optional) When TRUE, only load holidays when the deleted column is 1.
  *   When FALSE, only load holidays when the deleted column is 0.
  *   When NULL, ignore this column.
+ * @param bool $join
+ *   (optional) When TRUE, will join the holiday type table.
  *
  * @return array|bool
  *   An array of holidays.
  *   FALSE is returned on error.
  */
-function mfcs_get_holiday($id, $enabled = TRUE, $deleted = FALSE) {
+function mfcs_get_holiday($id, $enabled = TRUE, $deleted = FALSE, $join = FALSE) {
   if (!cf_is_integer($id)) {
     cf_error::invalid_integer('id');
     return FALSE;
@@ -12995,17 +13011,29 @@ function mfcs_get_holiday($id, $enabled = TRUE, $deleted = FALSE) {
     return FALSE;
   }
 
+  if (!is_bool($join)) {
+    cf_error::invalid_bool('join');
+    return FALSE;
+  }
+
   try {
     $query = db_select('mfcs_holiday', 'mh');
     $query->addField('mh', 'id', 'id');
     $query->addField('mh', 'year', 'year');
     $query->addField('mh', 'date', 'date');
     $query->addField('mh', 'title', 'title');
+    $query->addField('mh', 'type', 'type');
     $query->addField('mh', 'description', 'description');
     $query->addField('mh', 'enabled', 'enabled');
     $query->addField('mh', 'deleted', 'deleted');
     $query->addField('mh', 'created', 'created');
     $query->addField('mh', 'updated', 'updated');
+
+    if ($join) {
+      $query->innerJoin('mfcs_taxonomy_holiday_type', 'mtht', 'mh.type = mtht.id');
+      $query->addField('mtht', 'machine_name', 'type_machine_name');
+      $query->addField('mtht', 'human_name', 'type_human_name');
+    }
 
     $query->condition('mh.id', $id);
 
