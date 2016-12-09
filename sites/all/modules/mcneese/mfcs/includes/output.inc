@@ -623,14 +623,14 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
           if (array_key_exists($item['building'], $building_options)) {
             $tooltip_text .= '<div class="tooltip-item tooltip-item-building">';
             $tooltip_text .= '<span class="tooltip-item-name">Building:</span> ';
-            $tooltip_text .= '<span class="tooltip-item-value">' . $building_options[$item['building']] . '</span>';
+            $tooltip_text .= '<span class="tooltip-item-value">' . check_plain($building_options[$item['building']]) . '</span>';
             $tooltip_text .= '</div>';
           }
 
           if (array_key_exists($item['room'], $room_options)) {
             $tooltip_text .= '<div class="tooltip-item tooltip-item-room">';
             $tooltip_text .= '<span class="tooltip-item-name">Room:</span> ';
-            $tooltip_text .= '<span class="tooltip-item-value">' . $room_options[$item['room']] . '</span>';
+            $tooltip_text .= '<span class="tooltip-item-value">' . check_plain($room_options[$item['room']]) . '</span>';
             $tooltip_text .= '</div>';
           }
 
@@ -666,14 +666,14 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
           if (array_key_exists($item['building'], $building_options)) {
             $tooltip_text .= '<div class="tooltip-item tooltip-item-building">';
             $tooltip_text .= '<span class="tooltip-item-name">Building:</span> ';
-            $tooltip_text .= '<span class="tooltip-item-value">' . $building_options[$item['building']] . '</span>';
+            $tooltip_text .= '<span class="tooltip-item-value">' . check_plain($building_options[$item['building']]) . '</span>';
             $tooltip_text .= '</div>';
           }
 
           if (array_key_exists($item['room'], $room_options)) {
             $tooltip_text .= '<div class="tooltip-item tooltip-item-room">';
             $tooltip_text .= '<span class="tooltip-item-name">Room:</span> ';
-            $tooltip_text .= '<span class="tooltip-item-value">' . $room_options[$item['room']] . '</span>';
+            $tooltip_text .= '<span class="tooltip-item-value">' . check_plain($room_options[$item['room']]) . '</span>';
             $tooltip_text .= '</div>';
           }
 
@@ -683,7 +683,7 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
 
           $tooltip_text_suffix .= '<div class="tooltip-item tooltip-item-footer">';
           $tooltip_text_suffix .= '<span class="tooltip-item-request_id">' . (int) $item_id . '</span> ';
-          $tooltip_text_suffix .= '<span class="tooltip-item-request_type">' . $type_options[$item['type']] . '</span>';
+          $tooltip_text_suffix .= '<span class="tooltip-item-request_type">' . check_plain($type_options[$item['type']]) . '</span>';
           $tooltip_text_suffix .= '</div>';
 
           $class_names = array(
@@ -1956,14 +1956,14 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
           if (array_key_exists($item['building'], $building_options)) {
             $tooltip_text .= '<div class="tooltip-item tooltip-item-building">';
             $tooltip_text .= '<span class="tooltip-item-name">Building:</span> ';
-            $tooltip_text .= '<span class="tooltip-item-value">' . $building_options[$item['building']] . '</span>';
+            $tooltip_text .= '<span class="tooltip-item-value">' . check_plain($building_options[$item['building']]) . '</span>';
             $tooltip_text .= '</div>';
           }
 
           if (array_key_exists($item['room'], $room_options)) {
             $tooltip_text .= '<div class="tooltip-item tooltip-item-room">';
             $tooltip_text .= '<span class="tooltip-item-name">Room:</span> ';
-            $tooltip_text .= '<span class="tooltip-item-value">' . $room_options[$item['room']] . '</span>';
+            $tooltip_text .= '<span class="tooltip-item-value">' . check_plain($room_options[$item['room']]) . '</span>';
             $tooltip_text .= '</div>';
           }
 
@@ -1995,14 +1995,14 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
           if (array_key_exists($item['building'], $building_options)) {
             $tooltip_text .= '<div class="tooltip-item tooltip-item-building">';
             $tooltip_text .= '<span class="tooltip-item-name">Building:</span> ';
-            $tooltip_text .= '<span class="tooltip-item-value">' . $building_options[$item['building']] . '</span>';
+            $tooltip_text .= '<span class="tooltip-item-value">' . check_plain($building_options[$item['building']]) . '</span>';
             $tooltip_text .= '</div>';
           }
 
           if (array_key_exists($item['room'], $room_options)) {
             $tooltip_text .= '<div class="tooltip-item tooltip-item-room">';
             $tooltip_text .= '<span class="tooltip-item-name">Room:</span> ';
-            $tooltip_text .= '<span class="tooltip-item-value">' . $room_options[$item['room']] . '</span>';
+            $tooltip_text .= '<span class="tooltip-item-value">' . check_plain($room_options[$item['room']]) . '</span>';
             $tooltip_text .= '</div>';
           }
 
@@ -2012,7 +2012,7 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
 
           $tooltip_text_suffix .= '<div class="tooltip-item tooltip-item-footer">';
           $tooltip_text_suffix .= '<span class="tooltip-item-request_id">' . (int) $item_id . '</span> ';
-          $tooltip_text_suffix .= '<span class="tooltip-item-request_type">' . $type_options[$item['type']] . '</span>';
+          $tooltip_text_suffix .= '<span class="tooltip-item-request_type">' . check_plain($type_options[$item['type']]) . '</span>';
           $tooltip_text_suffix .= '</div>';
 
           $class_names = array(
@@ -2125,14 +2125,14 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
             if (array_key_exists($item['building'], $building_options)) {
               $tooltip_text .= '<div class="tooltip-item tooltip-item-building">';
               $tooltip_text .= '<span class="tooltip-item-name">Building:</span> ';
-              $tooltip_text .= '<span class="tooltip-item-value">' . $building_options[$item['building']] . '</span>';
+              $tooltip_text .= '<span class="tooltip-item-value">' . check_plain($building_options[$item['building']]) . '</span>';
               $tooltip_text .= '</div>';
             }
 
             if (array_key_exists($item['room'], $room_options)) {
               $tooltip_text .= '<div class="tooltip-item tooltip-item-room">';
               $tooltip_text .= '<span class="tooltip-item-name">Room:</span> ';
-              $tooltip_text .= '<span class="tooltip-item-value">' . $room_options[$item['room']] . '</span>';
+              $tooltip_text .= '<span class="tooltip-item-value">' . check_plain($room_options[$item['room']]) . '</span>';
               $tooltip_text .= '</div>';
             }
 
@@ -2180,14 +2180,14 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
             if (array_key_exists($item['building'], $building_options)) {
               $tooltip_text .= '<div class="tooltip-item tooltip-item-building">';
               $tooltip_text .= '<span class="tooltip-item-name">Building:</span> ';
-              $tooltip_text .= '<span class="tooltip-item-value">' . $building_options[$item['building']] . '</span>';
+              $tooltip_text .= '<span class="tooltip-item-value">' . check_plain($building_options[$item['building']]) . '</span>';
               $tooltip_text .= '</div>';
             }
 
             if (array_key_exists($item['room'], $room_options)) {
               $tooltip_text .= '<div class="tooltip-item tooltip-item-room">';
               $tooltip_text .= '<span class="tooltip-item-name">Room:</span> ';
-              $tooltip_text .= '<span class="tooltip-item-value">' . $room_options[$item['room']] . '</span>';
+              $tooltip_text .= '<span class="tooltip-item-value">' . check_plain($room_options[$item['room']]) . '</span>';
               $tooltip_text .= '</div>';
             }
 
@@ -2197,7 +2197,7 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
 
             $tooltip_text_suffix .= '<div class="tooltip-item tooltip-item-footer">';
             $tooltip_text_suffix .= '<span class="tooltip-item-request_id">' . (int) $item_id . '</span> ';
-            $tooltip_text_suffix .= '<span class="tooltip-item-request_type">' . $type_options[$item['type']] . '</span>';
+            $tooltip_text_suffix .= '<span class="tooltip-item-request_type">' . check_plain($type_options[$item['type']]) . '</span>';
             $tooltip_text_suffix .= '</div>';
 
             $class_names = array(
