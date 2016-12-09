@@ -247,7 +247,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     }
 
     if ($show_unavailabilities) {
-      $unavailabilities = mfcs_get_unavailabilities($year - 1, NULL, $search_building_ids, $absolute_start, $year_start, TRUE, FALSE, TRUE);
+      $unavailabilities_previous = mfcs_get_unavailabilities($year - 1, NULL, $search_building_ids, $absolute_start, $year_start, TRUE, FALSE, TRUE);
       if (is_array($unavailabilities_previous)) {
         foreach ($unavailabilities_previous as $unavailabilities_key => $unavailabilities_value) {
           $holidays[$unavailabilities_key] = $unavailabilities_value;
@@ -255,6 +255,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
       }
       unset($unavailabilities_key);
       unset($unavailabilities_value);
+      unset($unavailabilities_previous);
     }
   }
 
@@ -272,7 +273,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     }
 
     if ($show_unavailabilities) {
-      $unavailabilities = mfcs_get_unavailabilities($year + 1, NULL, $search_building_ids, $year_stop, $absolute_stop, TRUE, FALSE, TRUE);
+      $unavailabilities_next = mfcs_get_unavailabilities($year + 1, NULL, $search_building_ids, $year_stop, $absolute_stop, TRUE, FALSE, TRUE);
       if (is_array($unavailabilities_next)) {
         foreach ($unavailabilities_next as $unavailabilities_key => $unavailabilities_value) {
           $holidays[$unavailabilities_key] = $unavailabilities_value;
@@ -280,6 +281,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
       }
       unset($unavailabilities_key);
       unset($unavailabilities_value);
+      unset($unavailabilities_next);
     }
   }
 
