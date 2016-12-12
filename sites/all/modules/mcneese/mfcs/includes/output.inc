@@ -573,6 +573,7 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
             '\'year-' . $item['year'] . '\'',
             '\'month-' . $item['month'] . '\'',
             '\'day-' . $item['day'] . '\'',
+            '\'type-' . $item['type'] . '\'',
           );
 
           if (array_key_exists('type', $item)) {
@@ -587,6 +588,11 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
             $tooltip_text .= '</div>';
             $tooltip_text .= '<br>';
           }
+
+          $tooltip_text_suffix .= '<div class="tooltip-item tooltip-item-footer">';
+          $tooltip_text_suffix .= '<span class="tooltip-item-holiday_text"></span> ';
+          $tooltip_text_suffix .= '<span class="tooltip-item-holiday_type">' . $item['type_name'] . '</span>';
+          $tooltip_text_suffix .= '</div>';
 
           $javascript_item_common .= $space . 'className: [ ' . implode(', ', $class_names) . ' ]' . "\n";
         }
@@ -1916,6 +1922,7 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
             '\'year-' . $item['year'] . '\'',
             '\'month-' . $item['month'] . '\'',
             '\'day-' . $item['day'] . '\'',
+            '\'type-' . $item['type'] . '\'',
           );
 
           if (array_key_exists('type', $item)) {
@@ -1930,6 +1937,11 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
             $tooltip_text .= '</div>';
             $tooltip_text .= '<br>';
           }
+
+          $tooltip_text_suffix .= '<div class="tooltip-item tooltip-item-footer">';
+          $tooltip_text_suffix .= '<span class="tooltip-item-holiday_text"></span> ';
+          $tooltip_text_suffix .= '<span class="tooltip-item-holiday_type">' . $item['type_name'] . '</span>';
+          $tooltip_text_suffix .= '</div>';
 
           $javascript_item_common .= $space . 'className: [ ' . implode(', ', $class_names) . ' ]' . "\n";
         }
@@ -2101,6 +2113,7 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
               '\'year-' . $item['year'] . '\'',
               '\'month-' . $item['month'] . '\'',
               '\'day-' . $item['day'] . '\'',
+              '\'type-' . $item['type'] . '\'',
             );
 
             if (array_key_exists('type', $item)) {
@@ -2115,6 +2128,11 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
               $tooltip_text .= '</div>';
               $tooltip_text .= '<br>';
             }
+
+            $tooltip_text_suffix .= '<div class="tooltip-item tooltip-item-footer">';
+            $tooltip_text_suffix .= '<span class="tooltip-item-holiday_text"></span> ';
+            $tooltip_text_suffix .= '<span class="tooltip-item-holiday_type">' . $item['type_name'] . '</span>';
+            $tooltip_text_suffix .= '</div>';
 
             $javascript_item_common .= $space . 'className: [ ' . implode(', ', $class_names) . ' ]' . "\n";
           }

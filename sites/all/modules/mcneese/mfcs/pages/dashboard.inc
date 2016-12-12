@@ -277,6 +277,7 @@ function mfcs_dashboard_page() {
 
     if ($show_holidays) {
       $holidays = mfcs_get_holidays($year, $absolute_start, $absolute_stop);
+      $holiday_types = mfcs_get_holiday_type_list_options(NULL, TRUE, TRUE);
     }
 
     if (!is_array($holidays)) {
@@ -370,6 +371,8 @@ function mfcs_dashboard_page() {
         'id' => $holiday->id,
         'title' => check_plain($holiday->title),
         'title-raw' => $holiday->title,
+        'type' => $holiday->type,
+        'type_name' => $holiday_types[$holiday->type],
         'tooltip' => str_replace('"', '&quot;', check_plain($holiday->description)),
         'year' => $year,
         'month' => $month,
