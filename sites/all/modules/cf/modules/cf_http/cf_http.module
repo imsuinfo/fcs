@@ -115,12 +115,12 @@ function cf_http_get_response($server, $path, $port = 80, $headers = NULL, $time
   }
 
   // assign http options on the stream.
-  stream_context_set_option($fp, 'protocol_version', 1.1);
+  stream_context_set_option($fp, 'http', 'protocol_version', 1.1);
 
   // assign ssl security options on the stream.
   if ($ssl) {
-    stream_context_set_option($fp, 'allow_self_signed', TRUE);
-    stream_context_set_option($fp, 'disable_compression', TRUE);
+    stream_context_set_option($fp, 'ssl', 'allow_self_signed', TRUE);
+    stream_context_set_option($fp, 'ssl', 'disable_compression', TRUE);
   }
 
   $server_address = preg_replace('@^\w+://@i', '', $server);
