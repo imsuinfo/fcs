@@ -522,8 +522,8 @@ function mfcs_ical_populate_array(&$ical, $string) {
     $ical['length'] = 0;
   }
 
-  if (!array_key_exists('content', $ical)) {
-    $ical['content'] = '';
+  if (!array_key_exists('content', $ical) || !is_array($ical['content'])) {
+    $ical['content'] = array('');
   }
 
   $ical['length'] += strlen($string) + 2;
