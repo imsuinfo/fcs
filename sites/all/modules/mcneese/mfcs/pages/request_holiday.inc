@@ -944,6 +944,7 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
     '#title' => 'Type',
     '#options' => $holiday_types,
     '#required' => TRUE,
+    '#default_value' => MFCS_HOLIDAY_TYPE_HOLIDAY,
   );
 
   $form['holiday']['description'] = array(
