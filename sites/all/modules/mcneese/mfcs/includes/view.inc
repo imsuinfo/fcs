@@ -1767,7 +1767,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       $fees_are_not_waived = TRUE;
       if (!empty($changelog['requirements']['waived'])) {
         $value = reset($changelog['requirements']['waived']);
-        if ($value) {
+        if ($value->value) {
           $fees_are_not_waived = FALSE;
         }
         unset($value);
@@ -1781,7 +1781,7 @@ function mfcs_view_build_reviews_log(&$form, &$form_state, $request_id, $revisio
       // As of fcs-79, use fees may be specified at almost any time.
       if (!empty($changelog['requirements']['university'])) {
         $value = reset($changelog['requirements']['university']);
-        if ($value) {
+        if ($value->value) {
           $fees_are_not_waived = FALSE;
         }
         unset($value);
