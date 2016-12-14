@@ -6596,13 +6596,13 @@ function mfcs_convert_value_to_database_format($value, $method, $option = array(
     $date_stamp = strtotime($value);
     return (int) date('d', $date_stamp);
   }
-  elseif ($method == 'currency') {
+  elseif ($method == 'numeric') {
     if (is_null($value)) {
       return FALSE;
     }
 
-    // shift decimal over to digits.
-    return floor($value * 100);
+    // this used to be shifted by 100, but now is directly passed.
+    return (float) $value;
   }
 
   return FALSE;
@@ -6648,10 +6648,11 @@ function mfcs_convert_value_from_database_format($value, $method, $option = arra
 
     return $value;
   }
-  elseif ($method == 'currency') {
+  elseif ($method == 'numeric') {
     if (is_null($value)) return NULL;
 
-    return $value / 100;
+    // this used to be shifted by 100, but now is directly passed
+    return (float) $value;
   }
 
   return FALSE;
@@ -13658,7 +13659,7 @@ function mfcs_calculate_use_fees($fees) {
   $amount['description'] = NULL;
 
   if (!empty($fees->rate)) {
-    $amount['rate'] = (float) mfcs_convert_value_from_database_format($fees->rate, 'currency');
+    $amount['rate'] = mfcs_convert_value_from_database_format($fees->rate, 'numeric');
     $amount['total'] = $amount['rate'];
 
     if (!empty($fees->personnel)) {
@@ -13667,12 +13668,12 @@ function mfcs_calculate_use_fees($fees) {
     }
 
     if (!empty($fees->hours)) {
-      $amount['hours'] = (int) $fees->hours;
+      $amount['hours'] = mfcs_convert_value_from_database_format($fees->hours, 'numeric');
       $amount['total'] *= $amount['hours'];
     }
 
     if (!empty($fees->days)) {
-      $amount['days'] = (int) $fees->days;
+      $amount['days'] = mfcs_convert_value_from_database_format($fees->days, 'numeric');
       $amount['total'] *= $amount['days'];
     }
   }
@@ -13682,7 +13683,7 @@ function mfcs_calculate_use_fees($fees) {
       $amount['total'] = 1;
     }
 
-    $amount['supplies'] = (float) mfcs_convert_value_from_database_format($fees->supplies, 'currency');
+    $amount['supplies'] = mfcs_convert_value_from_database_format($fees->supplies, 'numeric');
     $amount['total'] *= $amount['supplies'];
   }
 
@@ -13691,7 +13692,7 @@ function mfcs_calculate_use_fees($fees) {
       $amount['total'] = 1;
     }
 
-    $amount['post'] = (float) mfcs_convert_value_from_database_format($fees->post, 'currency');
+    $amount['post'] = mfcs_convert_value_from_database_format($fees->post, 'numeric');
     $amount['total'] += $amount['post'];
 
     if (!empty($fees->description)) {

@@ -2181,7 +2181,7 @@ function mfcs_install() {
 
   $structure = mfcs_table_install_structure();
 
-  // create the tables that use the 'boolean' data type not currently supported by drupal but supported by postgresql:
+  // create the tables that use the 'boolean' data type not currently supported by drupal but is supported by postgresql:
   db_query('create table mfcs_request_locks (request_id bigint not null, auto_cancel boolean default FALSE, primary key(request_id), constraint mfcs_request_locks_request_id_check check (request_id >= 0))');
   db_query('alter table mfcs_request_locks add constraint request_id_fkey foreign key (request_id) references mfcs_requests (id) on delete cascade');
 
@@ -2189,6 +2189,40 @@ function mfcs_install() {
 
   db_query('create sequence mfcs_banner_classes_id_seq;');
   db_query('alter table mfcs_banner_classes alter id set default nextval(\'mfcs_banner_classes_id_seq\'::regclass);');
+
+
+  // make sure tables that use the 'numeric' data type which is not currently supported by drupal but is supported by postgresql
+  db_query('alter table {mfcs_field_requirements_security_fees} alter column hours type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_security_fees} alter column days type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_security_fees} alter column rate type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_security_fees} alter column supplies type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_security_fees} alter column post type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_custodial_fees} alter column hours type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_custodial_fees} alter column days type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_custodial_fees} alter column rate type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_custodial_fees} alter column supplies type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_custodial_fees} alter column post type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_facilities_fees} alter column hours type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_facilities_fees} alter column days type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_facilities_fees} alter column rate type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_facilities_fees} alter column supplies type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_facilities_fees} alter column post type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_grounds_fees} alter column hours type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_grounds_fees} alter column days type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_grounds_fees} alter column rate type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_grounds_fees} alter column supplies type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_grounds_fees} alter column post type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_maintenance_fees} alter column hours type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_maintenance_fees} alter column days type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_maintenance_fees} alter column rate type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_maintenance_fees} alter column supplies type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_maintenance_fees} alter column post type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_equipment_fees} alter column hours type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_equipment_fees} alter column days type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_equipment_fees} alter column rate type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_equipment_fees} alter column supplies type numeric(998, 2)');
+  db_query('alter table {mfcs_field_requirements_equipment_fees} alter column post type numeric(998, 2)');
+
 
   // create the custom mfcs_users table.
   db_query('create table mfcs_users (

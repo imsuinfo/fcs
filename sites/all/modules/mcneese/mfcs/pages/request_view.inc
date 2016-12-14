@@ -1743,7 +1743,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               );
 
               if (!empty($request['requirements'][$use_name][0])) {
-                $form['review']['operations']['requirements'][$use_name]['group_rates']['hours']['#default_value'] = (int) $request['requirements'][$use_name][0]->hours;
+                $form['review']['operations']['requirements'][$use_name]['group_rates']['hours']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->hours, 'numeric');
                 $form['review']['operations']['requirements'][$use_name]['group_rates']['hours']['#database_value'] = $form['review']['operations']['requirements'][$use_name]['group_rates']['hours']['#default_value'];
               }
 
@@ -1768,7 +1768,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               );
 
               if (!empty($request['requirements'][$use_name][0])) {
-                $form['review']['operations']['requirements'][$use_name]['group_rates']['days']['#default_value'] = (int) $request['requirements'][$use_name][0]->days;
+                $form['review']['operations']['requirements'][$use_name]['group_rates']['days']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->days, 'numeric');
                 $form['review']['operations']['requirements'][$use_name]['group_rates']['days']['#database_value'] = $form['review']['operations']['requirements'][$use_name]['group_rates']['days']['#default_value'];
               }
 
@@ -1792,7 +1792,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               );
 
               if (!empty($request['requirements'][$use_name][0]) && strlen($request['requirements'][$use_name][0]->rate) > 0) {
-                $form['review']['operations']['requirements'][$use_name]['group_rates']['rate']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->rate, 'currency');
+                $form['review']['operations']['requirements'][$use_name]['group_rates']['rate']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->rate, 'numeric');
                 $form['review']['operations']['requirements'][$use_name]['group_rates']['rate']['#database_value'] = $form['review']['operations']['requirements'][$use_name]['group_rates']['rate']['#default_value'];
               }
               elseif (isset($requirements_amount_defaults[$use_name]['rate'])) {
@@ -1834,7 +1834,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               );
 
               if (!empty($request['requirements'][$use_name][0]) && strlen($request['requirements'][$use_name][0]->supplies) > 0) {
-                $form['review']['operations']['requirements'][$use_name]['group_supplies']['supplies']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->supplies, 'currency');
+                $form['review']['operations']['requirements'][$use_name]['group_supplies']['supplies']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->supplies, 'numeric');
                 $form['review']['operations']['requirements'][$use_name]['group_supplies']['supplies']['#database_value'] = $form['review']['operations']['requirements'][$use_name]['group_supplies']['supplies']['#default_value'];
               }
 
@@ -1873,7 +1873,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
               );
 
               if (!empty($request['requirements'][$use_name][0]) && strlen($request['requirements'][$use_name][0]->post) > 0) {
-                $form['review']['operations']['requirements'][$use_name]['group_post']['post']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->post, 'currency');
+                $form['review']['operations']['requirements'][$use_name]['group_post']['post']['#default_value'] = mfcs_convert_value_from_database_format($request['requirements'][$use_name][0]->post, 'numeric');
                 $form['review']['operations']['requirements'][$use_name]['group_post']['post']['#database_value'] = $form['review']['operations']['requirements'][$use_name]['group_post']['post']['#default_value'];
               }
 

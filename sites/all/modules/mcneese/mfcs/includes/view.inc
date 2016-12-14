@@ -673,48 +673,62 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
 
         $rate = NULL;
         if (!is_null($value->rate)) {
-          $rate = mfcs_convert_value_from_database_format($value->rate, 'currency');
+          $fees = mfcs_convert_value_from_database_format($value->rate, 'numeric');
+          if ($fees !== FALSE) {
+            $rate = $fees;
+          }
+          unset($fees);
         }
 
-        if (!is_null($rate) && $rate !== FALSE) {
+        if (!is_null($rate)) {
           // calculate total and append from other fields that should exist.
           $total = $rate;
 
           if (isset($value->personnel) && is_numeric($value->personnel) && $value->personnel > 0) {
-            $total *= $value->personnel;
+            $total *= (int) $value->personnel;
           }
 
           if (isset($value->hours) && is_numeric($value->hours) && $value->hours > 0) {
-            $total *= $value->hours;
+            $fees = mfcs_convert_value_from_database_format($value->hours, 'numeric');
+            if ($fees !== FALSE) {
+              $total *= $fees;
+            }
+            unset($fees);
           }
 
           if (isset($value->days) && is_numeric($value->days) && $value->days > 0) {
-            $total *= $value->days;
+            $fees = mfcs_convert_value_from_database_format($value->days, 'numeric');
+            if ($fees !== FALSE) {
+              $total *= $fees;
+            }
+            unset($fees);
           }
         }
 
         if (isset($value->supplies) && is_numeric($value->supplies) && $value->supplies > 0) {
-          $supplies = mfcs_convert_value_from_database_format($value->supplies, 'currency');
-          if ($supplies !== FALSE) {
+          $fees = mfcs_convert_value_from_database_format($value->supplies, 'numeric');
+          if ($fees !== FALSE) {
             if (is_null($total)) {
-              $total = $supplies;
+              $total = $fees;
             }
             else {
-              $total += $supplies;
+              $total += $fees;
             }
           }
+          unset($fees);
         }
 
         if (isset($value->post) && is_numeric($value->post) && $value->post > 0) {
-          $post = mfcs_convert_value_from_database_format($value->post, 'currency');
-          if ($post !== FALSE) {
+          $fees = mfcs_convert_value_from_database_format($value->post, 'numeric');
+          if ($fees !== FALSE) {
             if (is_null($total)) {
-              $total = $post;
+              $total = $fees;
             }
             else {
-              $total += $post;
+              $total += $fees;
             }
           }
+          unset($fees);
         }
 
         if (!is_null($total)) {
@@ -1009,14 +1023,15 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
           $length += strlen($room_options[$value->{$value_name}]);
         }
       }
-      elseif ($type[$value_name] == 'currency') {
-        $currency = mfcs_convert_value_from_database_format($value->{$value_name}, 'currency');
+      elseif ($type[$value_name] == 'numeric') {
+        $numeric = mfcs_convert_value_from_database_format($value->{$value_name}, 'numeric');
 
-        if ($currency !== FALSE) {
-          $processed_markup = '$' . printf('%01.2f', $currency);
+        if ($numeric !== FALSE) {
+          $processed_markup = '$' . printf('%01.2f', $numeric);
           $markup .= $processed_markup;
           $length += strlen($processed_markup);
         }
+        unset($numeric);
       }
       elseif ($type[$value_name] == 'boolean') {
         $boolean = (bool) $value->{$value_name};
@@ -1049,41 +1064,52 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
       }
       elseif ($type[$value_name] == 'requirement_hours') {
         if (isset($value->{$value_name}) && $value->{$value_name} > 0) {
-          $markup .= ' ' . $value->{$value_name} . ' hours';
-          $length += strlen(' ' . $value->{$value_name} . ' hours');
+          $hours = mfcs_convert_value_from_database_format($value->{$value_name}, 'numeric');
+          if ($hours !== FALSE) {
+            $markup .= ' ' . sprintf('%01.2f', $hours) . ' hours';
+            $length += strlen(' $' . sprintf('%01.2f', $hours) . ' hours');
+          }
+          unset($hours);
         }
       }
       elseif ($type[$value_name] == 'requirement_days') {
         if (isset($value->{$value_name}) && $value->{$value_name} > 0) {
-          $markup .= ' ' . $value->{$value_name} . ' days';
-          $length += strlen(' ' . $value->{$value_name} . ' days');
+          $days = mfcs_convert_value_from_database_format($value->{$value_name}, 'numeric');
+          if ($days !== FALSE) {
+            $markup .= ' ' . sprintf('%01.2f', $days) . ' days';
+            $length += strlen(' $' . sprintf('%01.2f', $days) . ' days');
+          }
+          unset($days);
         }
       }
       elseif ($type[$value_name] == 'requirement_rate') {
         if (isset($value->{$value_name}) && $value->{$value_name} > 0) {
-          $rate = mfcs_convert_value_from_database_format($value->rate, 'currency');
+          $rate = mfcs_convert_value_from_database_format($value->rate, 'numeric');
           if ($rate !== FALSE) {
             $markup .=  ' at $' . sprintf('%01.2f', $rate);
             $length += strlen(' at $' . sprintf('%01.2f', $rate));
           }
+          unset($rate);
         }
       }
       elseif ($type[$value_name] == 'requirement_supplies') {
         if (isset($value->{$value_name}) && $value->{$value_name} > 0) {
-          $supplies = mfcs_convert_value_from_database_format($value->{$value_name}, 'currency');
+          $supplies = mfcs_convert_value_from_database_format($value->{$value_name}, 'numeric');
           if ($supplies !== FALSE) {
             $markup .= ' supplies = $' . sprintf('%01.2f', $supplies);
             $length += strlen(' $' . sprintf('%01.2f', $supplies));
           }
+          unset($supplies);
         }
       }
       elseif ($type[$value_name] == 'requirement_post') {
         if (isset($value->{$value_name}) && $value->{$value_name} > 0) {
-          $post = mfcs_convert_value_from_database_format($value->{$value_name}, 'currency');
+          $post = mfcs_convert_value_from_database_format($value->{$value_name}, 'numeric');
           if ($post !== FALSE) {
             $markup .= ' post = $' . sprintf('%01.2f', $post);
             $length += strlen(' $' . sprintf('%01.2f', $post));
           }
+          unset($post);
         }
       }
       elseif ($type[$value_name] == 'requirement_description') {

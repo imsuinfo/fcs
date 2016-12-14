@@ -1260,7 +1260,13 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
             $requirements['hours'] = NULL;
           }
           else {
-            $requirements['hours'] = (int) $extra['requirements'][$use]['hours'];
+            $hours = mfcs_convert_value_to_database_format($extra['requirements'][$use]['hours'], 'numeric');
+
+            if ($hours !== FALSE) {
+              $requirements['hours'] = $hours;
+            }
+
+            unset($hours);
           }
         }
 
@@ -1269,7 +1275,13 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
             $requirements['days'] = NULL;
           }
           else {
-            $requirements['days'] = (int) $extra['requirements'][$use]['days'];
+            $days = mfcs_convert_value_to_database_format($extra['requirements'][$use]['days'], 'numeric');
+
+            if ($days !== FALSE) {
+              $requirements['days'] = $days;
+            }
+
+            unset($days);
           }
         }
 
@@ -1278,7 +1290,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
             $requirements['rate'] = NULL;
           }
           else {
-            $rate = mfcs_convert_value_to_database_format($extra['requirements'][$use]['rate'], 'currency');
+            $rate = mfcs_convert_value_to_database_format($extra['requirements'][$use]['rate'], 'numeric');
 
             if ($rate !== FALSE) {
               $requirements['rate'] = $rate;
@@ -1293,7 +1305,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
             $requirements['supplies'] = NULL;
           }
           else {
-            $supplies = mfcs_convert_value_to_database_format($extra['requirements'][$use]['supplies'], 'currency');
+            $supplies = mfcs_convert_value_to_database_format($extra['requirements'][$use]['supplies'], 'numeric');
 
             if ($supplies !== FALSE) {
               $requirements['supplies'] = $supplies;
@@ -1308,7 +1320,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
             $requirements['post'] = NULL;
           }
           else {
-            $post = mfcs_convert_value_to_database_format($extra['requirements'][$use]['post'], 'currency');
+            $post = mfcs_convert_value_to_database_format($extra['requirements'][$use]['post'], 'numeric');
 
             if ($post !== FALSE) {
               $requirements['post'] = $post;

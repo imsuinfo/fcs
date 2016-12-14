@@ -1502,8 +1502,8 @@ function mfcs_check_range_limit($field, $form, $structure, $size, $delta, $value
     // note: I would be using number_form() on the outputs, but PHP's number_format() does not function properly wioth large integers.
     // for example: 9223372036854775807 gets reported as 9223372036854775808.
 
-    // currency uses an integer that is shifted by 10^2 places.
-    if ($storage == 'currency') {
+    // numeric uses an integer that is shifted by 10^2 places.
+    if ($storage == 'numeric') {
       $max = floor($max / 100);
     }
 

@@ -2810,7 +2810,7 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
           $and[$target_field_name]['join'] = MFCS_JOIN_LEFT;
         }
         elseif ($target_values['hours'] == '0' || !empty($target_values['hours'])) {
-          $and[$target_field_name]['search'] = (int) $target_values['hours'];
+          $and[$target_field_name]['search'] = mfcs_convert_value_to_database_format($target_values['hours'], 'numeric');
 
           if ($and[$target_field_name]['search'] === FALSE) {
             $and[$target_field_name]['search'] = NULL;
@@ -2835,7 +2835,7 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
           $and[$target_field_name]['join'] = MFCS_JOIN_LEFT;
         }
         elseif ($target_values['days'] == '0' || !empty($target_values['days'])) {
-          $and[$target_field_name]['search'] = (int) $target_values['days'];
+          $and[$target_field_name]['search'] = mfcs_convert_value_to_database_format($target_values['days'], 'numeric');
 
           if ($and[$target_field_name]['search'] === FALSE) {
             $and[$target_field_name]['search'] = NULL;
@@ -2860,7 +2860,7 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
           $and[$target_field_name]['join'] = MFCS_JOIN_LEFT;
         }
         elseif ($target_values['rate'] == '0' || !empty($target_values['rate'])) {
-          $and[$target_field_name]['search'] = mfcs_convert_value_to_database_format($target_values['rate'], 'currency');
+          $and[$target_field_name]['search'] = mfcs_convert_value_to_database_format($target_values['rate'], 'numeric');
 
           if ($and[$target_field_name]['search'] === FALSE) {
             $and[$target_field_name]['search'] = NULL;
@@ -2885,7 +2885,7 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
           $and[$target_field_name]['join'] = MFCS_JOIN_LEFT;
         }
         elseif ($target_values['supplies'] == '0' || !empty($target_values['supplies'])) {
-          $and[$target_field_name]['search'] = mfcs_convert_value_to_database_format($target_values['supplies'], 'currency');
+          $and[$target_field_name]['search'] = mfcs_convert_value_to_database_format($target_values['supplies'], 'numeric');
 
           if ($and[$target_field_name]['search'] === FALSE) {
             $and[$target_field_name]['search'] = NULL;
@@ -2910,7 +2910,7 @@ function mfcs_request_search_0_form_build_search_target($structure, $target_name
           $and[$target_field_name]['join'] = MFCS_JOIN_LEFT;
         }
         elseif ($target_values['post'] == '0' || !empty($target_values['post'])) {
-          $and[$target_field_name]['search'] = mfcs_convert_value_to_database_format($target_values['post'], 'currency');
+          $and[$target_field_name]['search'] = mfcs_convert_value_to_database_format($target_values['post'], 'numeric');
 
           if ($and[$target_field_name]['search'] === FALSE) {
             $and[$target_field_name]['search'] = NULL;
