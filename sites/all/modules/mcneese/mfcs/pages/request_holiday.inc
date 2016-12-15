@@ -58,7 +58,7 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  mfcs_add_canonical_headers('requests/holiday-0/' . $year);
+  mfcs_add_canonical_headers('holiday-0/' . $year);
 
   drupal_set_title('Holidays for ' . $year);
 
@@ -180,12 +180,12 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
       'class' => $class_operations,
     );
 
-    $row['operations']['data'] .= '<div class="column-item item-operations item-operations-view"><a href="' . $base_path . 'requests/holiday-0/view/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View Holiday">View</a></div>';
+    $row['operations']['data'] .= '<div class="column-item item-operations item-operations-view"><a href="' . $base_path . 'holiday-0/view/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View Holiday">View</a></div>';
 
     if ($can_edit) {
-      $row['operations']['data'] .= '<div class="column-item item-operations item-operations-edit"><a href="' . $base_path . 'requests/holiday-0/edit/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-edit" title="Edit Holiday">Edit</a></div>';
-      $row['operations']['data'] .= '<div class="column-item item-operations item-operations-create"><a href="' . $base_path . 'requests/holiday-0/create/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-copy" title="Copy Holiday">Copy</a></div>';
-      $row['operations']['data'] .= '<div class="column-item item-operations item-operations-delete"><a href="' . $base_path . 'requests/holiday-0/delete/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete" title="Delete Holiday">Delete</a></div>';
+      $row['operations']['data'] .= '<div class="column-item item-operations item-operations-edit"><a href="' . $base_path . 'holiday-0/edit/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-edit" title="Edit Holiday">Edit</a></div>';
+      $row['operations']['data'] .= '<div class="column-item item-operations item-operations-create"><a href="' . $base_path . 'holiday-0/create/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-copy" title="Copy Holiday">Copy</a></div>';
+      $row['operations']['data'] .= '<div class="column-item item-operations item-operations-delete"><a href="' . $base_path . 'holiday-0/delete/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete" title="Delete Holiday">Delete</a></div>';
     }
 
     $rows[] = $row;
@@ -276,14 +276,14 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
 
   if ($can_edit) {
     $form['holiday_list']['#markup'] .= '<div class="holiday_links-create clear no-print">';
-    $form['holiday_list']['#markup'] .= 'You may <a href="' . $base_path . 'requests/holiday-0/create/' . $year . $url_arguments . '">create a new ' . $year . ' holiday</a>.<br>';
-    $form['holiday_list']['#markup'] .= 'You may <a href="' . $base_path . 'requests/holiday-0/copy/' . $year . $url_arguments . '">copy all holidays from another year</a>.<br>';
+    $form['holiday_list']['#markup'] .= 'You may <a href="' . $base_path . 'holiday-0/create/' . $year . $url_arguments . '">create a new ' . $year . ' holiday</a>.<br>';
+    $form['holiday_list']['#markup'] .= 'You may <a href="' . $base_path . 'holiday-0/copy/' . $year . $url_arguments . '">copy all holidays from another year</a>.<br>';
     $form['holiday_list']['#markup'] .= '</div>';
   }
 
   $form['holiday_list']['#markup'] .= '<div class="holiday_links-year no-print">';
-  $form['holiday_list']['#markup'] .= '<a href="' . $base_path . 'requests/holiday-0/' . ($year - 1) . $url_arguments . '" class="year-previous inline-block margin-10 float-left" title="Holidays for ' . ($year - 1) . '">Previous Year</a> ';
-  $form['holiday_list']['#markup'] .= '<a href="' . $base_path . 'requests/holiday-0/' . ($year + 1) . $url_arguments . '" class="year-next inline-block margin-10 float-right" title="Holidays for ' . ($year + 1) . '">Next Year</a> ';
+  $form['holiday_list']['#markup'] .= '<a href="' . $base_path . 'holiday-0/' . ($year - 1) . $url_arguments . '" class="year-previous inline-block margin-10 float-left" title="Holidays for ' . ($year - 1) . '">Previous Year</a> ';
+  $form['holiday_list']['#markup'] .= '<a href="' . $base_path . 'holiday-0/' . ($year + 1) . $url_arguments . '" class="year-next inline-block margin-10 float-right" title="Holidays for ' . ($year + 1) . '">Next Year</a> ';
   $form['holiday_list']['#markup'] .= '</div>';
 
   $form['holiday_list']['#markup'] .= '<br class="clear">';
@@ -362,7 +362,7 @@ function mfcs_request_holiday_0_page($year, $holiday_id) {
   $type = check_plain($holiday->type_human_name);
   $description = check_plain($holiday->description);
 
-  mfcs_add_canonical_headers('requests/holiday-0/view/' . $year . '/' . $holiday_id);
+  mfcs_add_canonical_headers('holiday-0/view/' . $year . '/' . $holiday_id);
   drupal_set_title('' . $year . ' Holiday: ' . $holiday->title);
 
   $markup = '<div id="mfcs-holiday_page-view" class="mfcs-holiday_page-view">';
@@ -380,9 +380,9 @@ function mfcs_request_holiday_0_page($year, $holiday_id) {
     if ($year >= $current_year) {
       $markup .= '<br class="no-print">';
       $markup .= '<div class="holiday_page-operations no-print">';
-      $markup .= '<div class="operation-wrapper operation-wrapper-edit"><a href="' . $base_path . 'requests/holiday-0/edit/' . $year . '/' . $holiday_id . $url_arguments . '" class="operation-edit">Edit this holiday</a></div> ';
-      $markup .= '<div class="operation-wrapper operation-wrapper-create"><a href="' . $base_path . 'requests/holiday-0/create/' . $year . '/' . $holiday_id . $url_arguments . '" class="operation-copy">Copy this holiday</a></div> ';
-      $markup .= '<div class="operation-wrapper operation-wrapper-delete"><a href="' . $base_path . 'requests/holiday-0/delete/' . $year . '/' . $holiday_id . $url_arguments . '" class="operation-delete">Delete this holiday</a></div>';
+      $markup .= '<div class="operation-wrapper operation-wrapper-edit"><a href="' . $base_path . 'holiday-0/edit/' . $year . '/' . $holiday_id . $url_arguments . '" class="operation-edit">Edit this holiday</a></div> ';
+      $markup .= '<div class="operation-wrapper operation-wrapper-create"><a href="' . $base_path . 'holiday-0/create/' . $year . '/' . $holiday_id . $url_arguments . '" class="operation-copy">Copy this holiday</a></div> ';
+      $markup .= '<div class="operation-wrapper operation-wrapper-delete"><a href="' . $base_path . 'holiday-0/delete/' . $year . '/' . $holiday_id . $url_arguments . '" class="operation-delete">Delete this holiday</a></div>';
       $markup .= '</div>';
     }
 
@@ -446,7 +446,7 @@ function mfcs_request_holiday_0_copy_form($form, &$form_state, $year) {
 
   $user = cf_current_user();
 
-  mfcs_add_canonical_headers('requests/holiday-0/copy/' . $year);
+  mfcs_add_canonical_headers('holiday-0/copy/' . $year);
   drupal_set_title('Copy to ' . $year . ' Holidays');
 
   // a year offset is necessary to create the date field for a specific year.
@@ -638,7 +638,7 @@ function mfcs_request_holiday_0_copy_form_submit($form, &$form_state) {
 
   if ($clicked_id == 'mfcs-holiday-copy-submit-cancel') {
     if (empty($form_state['values']['redirect_to'])) {
-      $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/' . $form['form']['year']['#value']);
+      $form_state['redirect'] = mfcs_build_redirect_array('holiday-0/' . $form['form']['year']['#value']);
     }
     else {
       $form_state['redirect'] = $form_state['values']['redirect_to'];
@@ -760,7 +760,7 @@ function mfcs_request_holiday_0_copy_form_submit($form, &$form_state) {
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
-    $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/' . $form['form']['year']['#value']);
+    $form_state['redirect'] = mfcs_build_redirect_array('holiday-0/' . $form['form']['year']['#value']);
   }
   else {
     $form_state['redirect'] = $form_state['values']['redirect_to'];
@@ -863,17 +863,17 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
   }
 
   if (is_null($holiday)) {
-    mfcs_add_canonical_headers('requests/holiday-0/create/' . $year);
+    mfcs_add_canonical_headers('holiday-0/create/' . $year);
 
     $page_title = 'Create ' . $year . ' Holiday';
   }
   elseif ($copy) {
-    mfcs_add_canonical_headers('requests/holiday-0/create/' . $year . '/' . $holiday_id);
+    mfcs_add_canonical_headers('holiday-0/create/' . $year . '/' . $holiday_id);
 
     $page_title = 'Copy ' . $year . ' Holiday: ' . $holiday->title;
   }
   else {
-    mfcs_add_canonical_headers('requests/holiday-0/edit/' . $year . '/' . $holiday_id);
+    mfcs_add_canonical_headers('holiday-0/edit/' . $year . '/' . $holiday_id);
 
     $page_title = 'Edit ' . $year . ' Holiday: ' . $holiday->title;
   }
@@ -1117,10 +1117,10 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
   if ($clicked_id == 'mfcs-holiday-edit-submit-cancel') {
     if (empty($form_state['values']['redirect_to'])) {
       if (is_object($holiday)) {
-        $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/view/' . $holiday->year . '/' . $holiday->id);
+        $form_state['redirect'] = mfcs_build_redirect_array('holiday-0/view/' . $holiday->year . '/' . $holiday->id);
       }
       else {
-        $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/' . $form['form']['year']['#value']);
+        $form_state['redirect'] = mfcs_build_redirect_array('holiday-0/' . $form['form']['year']['#value']);
       }
     }
     else {
@@ -1294,10 +1294,10 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
     if (is_numeric($holiday_id)) {
-      $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/view/' . $form['form']['year']['#value'] . '/' . $holiday_id);
+      $form_state['redirect'] = mfcs_build_redirect_array('holiday-0/view/' . $form['form']['year']['#value'] . '/' . $holiday_id);
     }
     else {
-      $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/' . $form['form']['year']['#value']);
+      $form_state['redirect'] = mfcs_build_redirect_array('holiday-0/' . $form['form']['year']['#value']);
     }
   }
   else {
@@ -1390,7 +1390,7 @@ function mfcs_request_holiday_0_delete_form($form, &$form_state, $year, $holiday
   }
 
   $year = date('Y', $holiday->date);
-  mfcs_add_canonical_headers('requests/holiday-0/delete/' . $year . '/' . $holiday_id);
+  mfcs_add_canonical_headers('holiday-0/delete/' . $year . '/' . $holiday_id);
 
   drupal_set_title('Delete ' . $year . ' Holiday: ' . $holiday->title);
 
@@ -1489,10 +1489,10 @@ function mfcs_request_holiday_0_delete_form_submit($form, &$form_state) {
       if (empty($holiday_id)) {
         $year = (int) $form['form']['year']['#value'];
 
-        $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/' . $year);
+        $form_state['redirect'] = mfcs_build_redirect_array('holiday-0/' . $year);
       }
       else {
-        $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0/view/' . $holiday_year . '/' . $holiday_id);
+        $form_state['redirect'] = mfcs_build_redirect_array('holiday-0/view/' . $holiday_year . '/' . $holiday_id);
       }
     }
     else {
@@ -1553,7 +1553,7 @@ function mfcs_request_holiday_0_delete_form_submit($form, &$form_state) {
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
-    $form_state['redirect'] = mfcs_build_redirect_array('requests/holiday-0');
+    $form_state['redirect'] = mfcs_build_redirect_array('holiday-0');
   }
   else {
     $form_state['redirect'] = $form_state['values']['redirect_to'];

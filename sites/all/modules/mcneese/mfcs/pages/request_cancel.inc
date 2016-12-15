@@ -757,7 +757,7 @@ function mfcs_request_cancelling_0_form_validate($form, &$form_state) {
 
       if (!empty($holidays[$day_start])) {
         $holiday = reset($holidays[$day_start]);
-        drupal_set_message(t('Warning: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'requests/holiday-0/view/' . $holiday->year . '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => date('Y', $holiday->date), '@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title)), 'warning');
+        drupal_set_message(t('Warning: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'holiday-0/view/' . $holiday->year . '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => date('Y', $holiday->date), '@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title)), 'warning');
       }
       unset($holiday);
       unset($day_start);

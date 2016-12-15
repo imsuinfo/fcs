@@ -720,7 +720,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
 
         if (!empty($holidays[$day_start])) {
           $holiday = reset($holidays[$day_start]);
-          drupal_set_message(t('Warning: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'requests/holiday-0/view/' . $holiday->year . '/' . $holiday->id . $url_arguments . '" title="View details about holiday." target="_blank">@holiday</a></strong>.', array('@year' => date('Y', $holiday->date), '@date' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $holiday->date), '@holiday' => $holiday->title)), 'warning');
+          drupal_set_message(t('Warning: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'holiday-0/view/' . $holiday->year . '/' . $holiday->id . $url_arguments . '" title="View details about holiday." target="_blank">@holiday</a></strong>.', array('@year' => date('Y', $holiday->date), '@date' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $holiday->date), '@holiday' => $holiday->title)), 'warning');
           unset($holiday);
         }
       }

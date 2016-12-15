@@ -2211,7 +2211,7 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
 
     if (isset($details['holiday'])) {
       $holiday_date = reset($details['dates']);
-      $form['markup']['#markup'] .= '<strong>Holiday:</strong> <a href="' . $base_path . 'requests/holiday-0/view/' . (int) $details['holiday']['year'] . '/' . (int) $details['holiday']['id'] . $url_arguments . '">' . check_plain($details['holiday']['title']) . '</a><br>';
+      $form['markup']['#markup'] .= '<strong>Holiday:</strong> <a href="' . $base_path . 'holiday-0/view/' . (int) $details['holiday']['year'] . '/' . (int) $details['holiday']['id'] . $url_arguments . '">' . check_plain($details['holiday']['title']) . '</a><br>';
       $form['markup']['#markup'] .= '<strong>Date of Holiday:</strong> ' . check_plain(date(MFCS_DATE_FORMAT_DATE, $holiday_date)) . '<br>';
       unset($holiday_date);
     }

@@ -695,7 +695,7 @@ function mfcs_ical_generate_holidays(&$ical, $holidays, $date_settings, $ical_eo
     // see: https://tools.ietf.org/html/rfc5545#section-3.8.1.2
     $holiday_categories[] = mfcs_ical_sanitize_text($holiday->type_human_name);
 
-    $holiday_url = $base_url . '/requests/holiday-0/view/' . $holiday->year . '/' . $holiday->id;
+    $holiday_url = $base_url . '/holiday-0/view/' . $holiday->year . '/' . $holiday->id;
 
     $holiday_description_begin = '';
     $holiday_description_begin .= $holiday->title . ' is a holiday, break, or office closure for McNeese State University on: ' . date(MFCS_DATE_FORMAT_DATE, $holiday->date) . '.' . "\n";

@@ -204,11 +204,11 @@ function mfcs_management_page() {
     }
 
     if ($manager || $administer) {
-      $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/holiday-0' . $url_arguments . '" class="item-link">Manage Holidays</a></h4>';
+      $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'holiday-0' . $url_arguments . '" class="item-link">Manage Holidays</a></h4>';
       $help = '<div class="item-description inline-block">View and manage the list of holidays.</div>';
     }
     else {
-      $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/holiday-0' . $url_arguments . '" class="item-link">View Holidays</a></h4>';
+      $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'holiday-0' . $url_arguments . '" class="item-link">View Holidays</a></h4>';
       $help = '<div class="item-description inline-block">View the list of holidays.</div>';
     }
 
