@@ -52,6 +52,9 @@ function mfcs_request_unavailability_0_rooms_page() {
     }
   }
 
+  $instance = mfcs_instance();
+  $year = date('Y', $instance);
+
 
   $class_building_id = '';
   $class_building_code = '';
@@ -177,6 +180,7 @@ function mfcs_request_unavailability_0_rooms_page() {
 
     if (array_key_exists($item->id, $items_editable)) {
       $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-manage" title="Manage Unavailability for this Room">Manage</a> ';
+      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/create/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-manage" title="Create New ' . $year . ' Unavailability for this Room">Create</a> ';
     }
     else {
       $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-manage" title="View Unavailability for this Room">View</a> ';
