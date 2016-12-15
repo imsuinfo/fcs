@@ -483,6 +483,34 @@ function mfcs_hook_menu_requests_basic(&$items, $module_path) {
     'tab_root' => 'requests',
     'type' => MENU_CALLBACK,
   );
+
+  $items['requests/synchronize-0/ical/%/%/%'] = array(
+    'title' => 'Synchronize Requests',
+    'description' => 'Perform iCalendar synchronization operations.',
+    'page callback' => 'mfcs_request_synchronize_0_ical_page',
+    'page arguments' => array(3, 4, 5),
+    'file' => 'request_synchronize.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_synchronize_request_access',
+    'access arguments' => array('' . MFCS_SYNCHRONIZE_TYPE_ICAL, 3),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/synchronize-0/ical/%/%/%/%'] = array(
+    'title' => 'Synchronize Requests',
+    'description' => 'Perform iCalendar synchronization operations.',
+    'page callback' => 'mfcs_request_synchronize_0_ical_page',
+    'page arguments' => array(3, 4, 5, 6),
+    'file' => 'request_synchronize.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_synchronize_request_access',
+    'access arguments' => array('' . MFCS_SYNCHRONIZE_TYPE_ICAL, 3),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
 }
 
 /**

@@ -371,6 +371,8 @@ define('MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE', 'D, M j, Y h:ia');
 define('MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE', 'D, M j, Y h:i:sa');
 define('MFCS_DATE_FORMAT_DATE_SQUEEZE_NO_YEAR', 'D, M j');
 define('MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE_NO_YEAR', 'D, M j h:ia');
+define('MFCS_DATE_FORMAT_DATE_HUMAN', 'l, F jS, Y');
+define('MFCS_DATE_FORMAT_DATE_TIME_HUMAN', 'h:ia l, F jS, Y');
 
 /**
  * Insurance Settings
@@ -13160,6 +13162,7 @@ function mfcs_get_unavailabilities($year, $room_id = NULL, $building_id = NULL, 
     $query->addField('mu', 'class_id', 'class_id');
     $query->addField('mu', 'date_start', 'date_start');
     $query->addField('mu', 'date_stop', 'date_stop');
+    $query->addField('mu', 'year', 'year');
     $query->addField('mu', 'title', 'title');
     $query->addField('mu', 'description', 'description');
     $query->addField('mu', 'enabled', 'enabled');

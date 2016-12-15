@@ -203,8 +203,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   }
 
   if ($show_holidays) {
-    $holidays = mfcs_get_holidays($year, $absolute_start, $absolute_stop);
-    $holiday_types = mfcs_get_holiday_type_list_options(NULL, TRUE, TRUE);
+    $holidays = mfcs_get_holidays($year, $absolute_start, $absolute_stop, TRUE, FALSE, TRUE);
   }
 
   if (!is_array($holidays)) {
@@ -300,7 +299,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
       'title' => check_plain($holiday->title),
       'title-raw' => $holiday->title,
       'type' => $holiday->type,
-      'type_name' => $holiday_types[$holiday->type],
+      'type_name' => $holiday->type_human_name,
       'tooltip' => str_replace('"', '&quot;', check_plain($holiday->description)),
       'year' => $year,
       'month' => $month,
@@ -875,8 +874,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   }
 
   if ($show_holidays) {
-    $holidays = mfcs_get_holidays($year, $day_start, $day_stop);
-    $holiday_types = mfcs_get_holiday_type_list_options(NULL, TRUE, TRUE);
+    $holidays = mfcs_get_holidays($year, $day_start, $day_stop, TRUE, FALSE, TRUE);
   }
 
   if (!is_array($holidays)) {
@@ -897,7 +895,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
       'title' => check_plain($holiday->title),
       'title-raw' => $holiday->title,
       'type' => $holiday->type,
-      'type_name' => $holiday_types[$holiday->type],
+      'type_name' => $holiday->type_human_name,
       'tooltip' => str_replace('"', '&quot;', $description),
       'description' => str_replace("\n", '<br>', $description),
       'year' => $year,

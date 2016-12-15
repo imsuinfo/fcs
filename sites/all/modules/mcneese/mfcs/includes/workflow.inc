@@ -3304,7 +3304,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       $remaining_content = '';
       $remaining_markup = '';
 
-      $current_date = date('l, F jS, Y', $instance);
+      $current_date = date(MFCS_DATE_FORMAT_DATE_HUMAN, $instance);
       if (isset($parameters['reminder_data']->interval)) {
         if ($parameters['reminder_data']->interval == MFCS_REMINDER_INTERVAL_DAY_30) {
           $remaining_content = "\n" . 'This is the 30-day reminder e-mail submitted on: ' . $current_date . ".\n";
@@ -3358,7 +3358,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       $remaining_markup = '';
       $remaining_days = '';
 
-      $current_date = date('l, F jS, Y', $instance);
+      $current_date = date(MFCS_DATE_FORMAT_DATE_HUMAN, $instance);
       if (isset($parameters['reminder_data']->interval)) {
         if ($parameters['reminder_data']->interval == MFCS_REMINDER_INTERVAL_DAY_7) {
           $remaining_days = '7';
@@ -3593,7 +3593,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
       $requests = mfcs_ical_generate_array_from_id($request_id);
 
       if (is_array($requests)) {
-        $ical = mfcs_ical_generate($requests);
+        $ical = mfcs_ical_generate($requests, array(), array());
 
         if ($ical !== FALSE) {
           if (!isset($email_params['files'])) {

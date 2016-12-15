@@ -34,6 +34,7 @@ function mfcs_request_ical_year_0_page($year = NULL) {
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
 
   $instance = mfcs_instance();
+  $user = cf_current_user();
 
   $parameter_year = FALSE;
 
@@ -62,6 +63,44 @@ function mfcs_request_ical_year_0_page($year = NULL) {
     }
   }
 
+  $search_building_ids = NULL;
+  if (!empty($mfcs_determined['filters']['field_top-building-0']['search'])) {
+    $search_building_ids = $mfcs_determined['filters']['field_top-building-0']['search'];
+  }
+
+
+  // conditionally load holidays.
+  $holidays = NULL;
+  $show_holidays = TRUE;
+  if (isset($user->mfcs['calendar_holidays']) && $user->mfcs['calendar_holidays'] === FALSE) {
+    $show_holidays = FALSE;
+  }
+
+  if ($show_holidays) {
+    $holidays = mfcs_get_holidays($year, $year_start, $year_stop, TRUE, FALSE, TRUE);
+  }
+
+  if (!is_array($holidays)) {
+    $holidays = array();
+  }
+
+
+  // conditionally load unavailabilities.
+  $unavailabilities = NULL;
+  $show_unavailabilities = TRUE;
+  if (isset($user->mfcs['calendar_unavailabilities']) && $user->mfcs['calendar_unavailabilities'] === FALSE) {
+    $show_unavailabilities = FALSE;
+  }
+
+  if ($show_unavailabilities) {
+    $unavailabilities = mfcs_get_unavailabilities($year, NULL, $search_building_ids, $year_start, $year_stop, TRUE, FALSE, TRUE);
+  }
+
+  if (!is_array($unavailabilities)) {
+    $unavailabilities = array();
+  }
+
+
   $options = array(
     'limit' => 0,
     'sort' => array('date' => 'ASC'),
@@ -84,7 +123,7 @@ function mfcs_request_ical_year_0_page($year = NULL) {
   if ($items !== FALSE) {
     mfcs_include(MFCS_INCLUDE_ICAL);
 
-    $ical = mfcs_ical_generate($items, $year_start, $year_stop);
+    $ical = mfcs_ical_generate($items, $holidays, $unavailabilities, $year_start, $year_stop);
   }
 
   if ($ical === FALSE) {
@@ -227,6 +266,44 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
     }
   }
 
+  $search_building_ids = NULL;
+  if (!empty($mfcs_determined['filters']['field_top-building-0']['search'])) {
+    $search_building_ids = $mfcs_determined['filters']['field_top-building-0']['search'];
+  }
+
+
+  // conditionally load holidays.
+  $holidays = NULL;
+  $show_holidays = TRUE;
+  if (isset($user->mfcs['calendar_holidays']) && $user->mfcs['calendar_holidays'] === FALSE) {
+    $show_holidays = FALSE;
+  }
+
+  if ($show_holidays) {
+    $holidays = mfcs_get_holidays($year, $absolute_start, $absolute_stop, TRUE, FALSE, TRUE);
+  }
+
+  if (!is_array($holidays)) {
+    $holidays = array();
+  }
+
+
+  // conditionally load unavailabilities.
+  $unavailabilities = NULL;
+  $show_unavailabilities = TRUE;
+  if (isset($user->mfcs['calendar_unavailabilities']) && $user->mfcs['calendar_unavailabilities'] === FALSE) {
+    $show_unavailabilities = FALSE;
+  }
+
+  if ($show_unavailabilities) {
+    $unavailabilities = mfcs_get_unavailabilities($year, NULL, $search_building_ids, $absolute_start, $absolute_stop, TRUE, FALSE, TRUE);
+  }
+
+  if (!is_array($unavailabilities)) {
+    $unavailabilities = array();
+  }
+
+
   $options = array(
     'limit' => 0,
     'sort' => array('date' => 'ASC'),
@@ -249,7 +326,7 @@ function mfcs_request_ical_month_0_page($year = NULL, $month = NULL) {
   if ($items !== FALSE) {
     mfcs_include(MFCS_INCLUDE_ICAL);
 
-    $ical = mfcs_ical_generate($items, $absolute_start, $absolute_stop);
+    $ical = mfcs_ical_generate($items, $holidays, $unavailabilities, $absolute_start, $absolute_stop);
   }
 
   if ($ical === FALSE) {
@@ -370,6 +447,44 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
     }
   }
 
+  $search_building_ids = NULL;
+  if (!empty($mfcs_determined['filters']['field_top-building-0']['search'])) {
+    $search_building_ids = $mfcs_determined['filters']['field_top-building-0']['search'];
+  }
+
+
+  // conditionally load holidays.
+  $holidays = NULL;
+  $show_holidays = TRUE;
+  if (isset($user->mfcs['calendar_holidays']) && $user->mfcs['calendar_holidays'] === FALSE) {
+    $show_holidays = FALSE;
+  }
+
+  if ($show_holidays) {
+    $holidays = mfcs_get_holidays($year, $day_start, $day_stop, TRUE, FALSE, TRUE);
+  }
+
+  if (!is_array($holidays)) {
+    $holidays = array();
+  }
+
+
+  // conditionally load unavailabilities.
+  $unavailabilities = NULL;
+  $show_unavailabilities = TRUE;
+  if (isset($user->mfcs['calendar_unavailabilities']) && $user->mfcs['calendar_unavailabilities'] === FALSE) {
+    $show_unavailabilities = FALSE;
+  }
+
+  if ($show_unavailabilities) {
+    $unavailabilities = mfcs_get_unavailabilities($year, NULL, $search_building_ids, $day_start, $day_stop, TRUE, FALSE, TRUE);
+  }
+
+  if (!is_array($unavailabilities)) {
+    $unavailabilities = array();
+  }
+
+
   $options = array(
     'limit' => 0,
     'sort' => array('date' => 'ASC'),
@@ -392,7 +507,7 @@ function mfcs_request_ical_day_0_page($year = NULL, $month = NULL, $day = NULL) 
   if ($items !== FALSE) {
     mfcs_include(MFCS_INCLUDE_ICAL);
 
-    $ical = mfcs_ical_generate($items, $day_start, $day_stop);
+    $ical = mfcs_ical_generate($items, $holidays, $unavailabilities, $day_start, $day_stop);
   }
 
   if ($ical === FALSE) {
@@ -490,7 +605,7 @@ function mfcs_request_ical_request_0_page($request_id) {
     drupal_exit();
   }
 
-  $ical = mfcs_ical_generate($requests);
+  $ical = mfcs_ical_generate($requests, array(), array());
 
   if ($ical === FALSE) {
     drupal_not_found();

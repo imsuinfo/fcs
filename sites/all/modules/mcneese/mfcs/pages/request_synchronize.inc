@@ -415,8 +415,16 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
  * @param string|null $custom
  *   When NULL, requests for the current moment in time and forward are loaded.
  *   When 'all', requests for the past, present, and future are loaded.
+ * @param int $load_holidays
+ *   When 2, holidays are not loaded.
+ *   When 1, holidays are loaded.
+ *   When 0, use user settings.
+ * @param int $load_unavailabilities
+ *   When 2, unavailabilities are not loaded.
+ *   When 1, unavailabilities are loaded.
+ *   When 0, use user settings.
  */
-function mfcs_request_synchronize_0_ical_page($password, $custom = NULL) {
+function mfcs_request_synchronize_0_ical_page($password, $custom = NULL, $load_holidays = 0, $load_unavailabilities = 2) {
   if (!is_string($password) || empty($password)) {
     cf_error::invalid_string('password');
     return;
@@ -448,7 +456,45 @@ function mfcs_request_synchronize_0_ical_page($password, $custom = NULL) {
   global $base_url;
   global $mfcs_determined;
 
+  $user = cf_current_user();
+
   $instance = mfcs_instance();
+
+  if (!is_null($load_holidays) && !is_numeric($load_holidays) && $load_holidays != 0 && $load_holidays != 1 && $load_holidays != 2) {
+    cf_error::invalid_integer('load_holidays');
+    return;
+  }
+
+  if ($load_holidays == 2) {
+    $load_holidays = FALSE;
+  }
+  elseif ($load_holidays == 1) {
+    $load_holidays = TRUE;
+  }
+  elseif (isset($user->mfcs['calendar_holidays']) && $user->mfcs['calendar_holidays'] === FALSE) {
+    $show_holidays = FALSE;
+  }
+  else {
+    $show_holidays = TRUE;
+  }
+
+  if (!is_null($load_unavailabilities) && !is_numeric($load_unavailabilities) && $load_unavailabilities != 0 && $load_unavailabilities != 1 && $load_unavailabilities != 2) {
+    cf_error::invalid_integer('load_unavailabilities');
+    return;
+  }
+
+  if ($load_unavailabilities == 2) {
+    $load_unavailabilities = FALSE;
+  }
+  elseif ($load_unavailabilities == 1) {
+    $load_unavailabilities = TRUE;
+  }
+  elseif (isset($user->mfcs['calendar_unavailabilities']) && $user->mfcs['calendar_unavailabilities'] === FALSE) {
+    $show_unavailabilities = FALSE;
+  }
+  else {
+    $show_unavailabilities = TRUE;
+  }
 
   $search = array();
   if ($custom == 'all') {
@@ -499,11 +545,49 @@ function mfcs_request_synchronize_0_ical_page($password, $custom = NULL) {
     $items = FALSE;
   }
 
+  $search_building_ids = NULL;
+  if (!empty($mfcs_determined['filters']['field_top-building-0']['search'])) {
+    $search_building_ids = $mfcs_determined['filters']['field_top-building-0']['search'];
+  }
+
+
+  // conditionally load holidays.
+  $holidays = NULL;
+  $show_holidays = TRUE;
+  if (isset($user->mfcs['calendar_holidays']) && $user->mfcs['calendar_holidays'] === FALSE) {
+    $show_holidays = FALSE;
+  }
+
+  if ($show_holidays) {
+    $holidays = mfcs_get_holidays($year, $min_date, NULL, FALSE, TRUE);
+  }
+
+  if (!is_array($holidays)) {
+    $holidays = array();
+  }
+
+
+  // conditionally load unavailabilities.
+  $unavailabilities = NULL;
+  $show_unavailabilities = TRUE;
+  if (isset($user->mfcs['calendar_unavailabilities']) && $user->mfcs['calendar_unavailabilities'] === FALSE) {
+    $show_unavailabilities = FALSE;
+  }
+
+  if ($show_unavailabilities) {
+    $unavailabilities = mfcs_get_unavailabilities($year, NULL, $search_building_ids, $min_date, NULL, TRUE, FALSE, TRUE);
+  }
+
+  if (!is_array($unavailabilities)) {
+    $unavailabilities = array();
+  }
+
+
   $ical = FALSE;
   if ($items !== FALSE) {
     mfcs_include(MFCS_INCLUDE_ICAL);
 
-    $ical = mfcs_ical_generate($items, $min_date);
+    $ical = mfcs_ical_generate($items, $holidays, $unavailabilities, $min_date);
   }
 
   if ($ical === FALSE) {
