@@ -896,7 +896,7 @@ function mfcs_ical_generate_unavailabilities(&$ical, $unavailabilities, $date_se
     // see: https://tools.ietf.org/html/rfc5545#section-3.8.1.2
     $unavailability_categories[] = mfcs_ical_sanitize_text($unavailability_types[$unavailability->type]);
 
-    $unavailability_url = $base_url . '/requests/unavailability-0/view/' . $unavailability->year . '/' . $unavailability->id;
+    $unavailability_url = $base_url . '/unavailable-0/view/' . $unavailability->year . '/' . $unavailability->id;
     $unavailability_zone = $building_options[$unavailability->building_id] . ' ' . $room_options[$unavailability->room_id];
 
     $unavailability_description_begin = '';

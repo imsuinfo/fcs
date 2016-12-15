@@ -464,7 +464,7 @@ function mfcs_dashboard_page() {
           $rows[$month_day]['unavailability-' . $unavailability->id] = array(
             'is' => 'unavailable',
             'id' => 'unavailability-' . ((int) $unavailability->id),
-            'href' => $base_path . 'requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
+            'href' => $base_path . 'unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
             'title' => check_plain($unavailability->title),
             'title-raw' => $unavailability->title,
             'tooltip' => str_replace('"', '&quot;', $tooltip),
@@ -496,7 +496,7 @@ function mfcs_dashboard_page() {
             $rows[$month_day]['unavailability-' . $unavailability->id] = array(
               'is' => 'unavailable',
               'id' => 'unavailability-' . ((int) $unavailability->id),
-              'href' => $base_path . 'requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
+              'href' => $base_path . 'unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
               'title' => check_plain($unavailability->title),
               'title-raw' => $unavailability->title,
               'tooltip' => str_replace('"', '&quot;', $tooltip),

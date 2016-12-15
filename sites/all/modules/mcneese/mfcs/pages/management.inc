@@ -233,11 +233,11 @@ function mfcs_management_page() {
     }
 
     if ($reviewer || $manager || $administer) {
-      $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/unavailable-0' . $url_arguments . '" class="item-link">Room Unavailability</a></h4>';
+      $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'unavailable-0' . $url_arguments . '" class="item-link">Room Unavailability</a></h4>';
       $help = '<div class="item-description inline-block">Manage unavailability dates for specific rooms.</div>';
     }
     else {
-      $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/unavailable-0' . $url_arguments . '" class="item-link">Room Unavailability</a></h4>';
+      $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'unavailable-0' . $url_arguments . '" class="item-link">Room Unavailability</a></h4>';
       $help = '<div class="item-description inline-block">View unavailability dates for specific rooms.</div>';
     }
 

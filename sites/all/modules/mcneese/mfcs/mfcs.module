@@ -8218,7 +8218,7 @@ function mfcs_build_room_unavailable_message($availability_issues, $blank_target
       }
 
       $unavailable_message .= ' because of: ';
-      $unavailable_message .= '<strong><a href="' . $base_path . 'requests/unavailable-0/view/' . $year . '/' . $unavailable->room_id. '/' . $unavailable->id . $url_arguments . '" title="View details about room unavailability."' . $unavailable_target . '>';
+      $unavailable_message .= '<strong><a href="' . $base_path . 'unavailable-0/view/' . $year . '/' . $unavailable->room_id. '/' . $unavailable->id . $url_arguments . '" title="View details about room unavailability."' . $unavailable_target . '>';
       $unavailable_message .= check_plain(preg_replace('/\.\s*$/i', '', $unavailable->title)) . '</a></strong>.';
       $unavailable_message .= '</li>';
 

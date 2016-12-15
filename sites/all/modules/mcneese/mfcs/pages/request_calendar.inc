@@ -333,7 +333,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
       $rows[$month_day]['unavailability-' . $unavailability->id] = array(
         'is' => 'unavailable',
         'id' => 'unavailability-' . ((int) $unavailability->id),
-        'href' => $base_path . 'requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
+        'href' => $base_path . 'unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
         'title' => check_plain($unavailability->title),
         'title-raw' => $unavailability->title,
         'tooltip' => str_replace('"', '&quot;', $tooltip),
@@ -365,7 +365,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
         $rows[$month_day]['unavailability-' . $unavailability->id] = array(
           'is' => 'unavailable',
           'id' => 'unavailability-' . ((int) $unavailability->id),
-          'href' => $base_path . 'requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
+          'href' => $base_path . 'unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
           'title' => check_plain($unavailability->title),
           'title-raw' => $unavailability->title,
           'tooltip' => str_replace('"', '&quot;', $tooltip),
@@ -1104,7 +1104,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
       $rows['all_day'][$date]['unavailability-' . $unavailability->id] = array(
         'is' => 'unavailable',
         'id' => $unavailability->id,
-        'href' => $base_path . 'requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
+        'href' => $base_path . 'unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
         'title' => check_plain($unavailability->title),
         'title-raw' => $unavailability->title,
         'tooltip' => str_replace('"', '&quot;', $tooltip),
@@ -1171,7 +1171,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
         $rows['range'][$time_count][$time_slot]['unavailable-' . $unavailability->id] = array(
           'is' => 'unavailable',
           'id' => $unavailability->id,
-          'href' => $base_path . 'requests/unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
+          'href' => $base_path . 'unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
           'title' => check_plain($unavailability->title),
           'title-raw' => $unavailability->title,
           'tooltip' => str_replace('"', '&quot;', $tooltip),

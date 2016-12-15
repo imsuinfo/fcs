@@ -30,7 +30,7 @@ function mfcs_request_unavailability_0_rooms_page() {
   if (!empty($mfcs_determined['complete'])) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
-  mfcs_add_canonical_headers('requests/unavailable-0');
+  mfcs_add_canonical_headers('unavailable-0');
   drupal_set_title('Room Unavailability');
 
   $user = cf_current_user();
@@ -179,11 +179,11 @@ function mfcs_request_unavailability_0_rooms_page() {
     }
 
     if (array_key_exists($item->id, $items_editable)) {
-      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-manage" title="Manage Unavailability for this Room">Manage</a> ';
-      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/create/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-manage" title="Create New ' . $year . ' Unavailability for this Room">Create</a> ';
+      $row['operations']['data'] .= '<a href="' . $base_path . 'unavailable-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-manage" title="Manage Unavailability for this Room">Manage</a> ';
+      $row['operations']['data'] .= '<a href="' . $base_path . 'unavailable-0/create/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-manage" title="Create New ' . $year . ' Unavailability for this Room">Create</a> ';
     }
     else {
-      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-manage" title="View Unavailability for this Room">View</a> ';
+      $row['operations']['data'] .= '<a href="' . $base_path . 'unavailable-0/' . $item->id . $url_arguments . '" class="operation-link operation-link-manage" title="View Unavailability for this Room">View</a> ';
     }
 
     $rows[] = $row;
@@ -265,7 +265,7 @@ function mfcs_request_unavailability_0_rooms_page() {
   $markup = '<div id="mfcs-unavailable_0-manage_rooms-page">';
 
   $markup .= '<div class="no-print margin-bottom-15">';
-  $markup .= 'You may also <a href="' . $base_path . 'requests/unavailable-0/all' . $url_arguments . '" class="operation-link operation-link-manage">view and manage all unavavailabilities</a> instead of viewing and managing unavailabilities per room.';
+  $markup .= 'You may also <a href="' . $base_path . 'unavailable-0/all' . $url_arguments . '" class="operation-link operation-link-manage">view and manage all unavavailabilities</a> instead of viewing and managing unavailabilities per room.';
   $markup .= '</div>';
 
   $markup .= mcneese_libraries_theme_table($availability_list, $datatable_settings);
@@ -319,7 +319,7 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
 
   // do not provide a page for a non-existent room id.
   if (is_null($room_id)) {
-    mfcs_add_canonical_headers('requests/unavailable-0/all/' . $year);
+    mfcs_add_canonical_headers('unavailable-0/all/' . $year);
 
     drupal_set_title($year . ' Room Unavailabilities');
   }
@@ -330,7 +330,7 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
       drupal_exit();
     }
 
-    mfcs_add_canonical_headers('requests/unavailable-0/' . $room_id . '/' . $year);
+    mfcs_add_canonical_headers('unavailable-0/' . $room_id . '/' . $year);
 
     drupal_set_title($year . ' Room Unavailability for ' . $room->building_code . ' ' . $room->room_number);
   }
@@ -568,12 +568,12 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
     }
 
     $row['operations']['data'] = '';
-    $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/view/' . $year . '/' . $item->room_id . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View Unavailability">View</a> ';
+    $row['operations']['data'] .= '<a href="' . $base_path . 'unavailable-0/view/' . $year . '/' . $item->room_id . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View Unavailability">View</a> ';
 
     if ($year >= $current_year && array_key_exists($item->id, $items_editable) && is_null($item->class_id)) {
-      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/edit/' . $year . '/' . $item->room_id . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-edit" title="Edit Unavailability">Edit</a> ';
-      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/create/' . $year . '/' . $item->room_id . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-copy" title="Edit Unavailability">Copy</a> ';
-      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/unavailable-0/delete/' . $year . '/' . $item->room_id . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete" title="Delete Unavailability">Delete</a> ';
+      $row['operations']['data'] .= '<a href="' . $base_path . 'unavailable-0/edit/' . $year . '/' . $item->room_id . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-edit" title="Edit Unavailability">Edit</a> ';
+      $row['operations']['data'] .= '<a href="' . $base_path . 'unavailable-0/create/' . $year . '/' . $item->room_id . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-copy" title="Edit Unavailability">Copy</a> ';
+      $row['operations']['data'] .= '<a href="' . $base_path . 'unavailable-0/delete/' . $year . '/' . $item->room_id . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete" title="Delete Unavailability">Delete</a> ';
     }
 
     $rows[] = $row;
@@ -692,8 +692,8 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
 
   if (is_null($room_id)) {
     $markup .= '<div class="unavailable_0_links-year no-print">';
-    $markup .= '<a href="' . $base_path . 'requests/unavailable-0/' . ($year - 1) . '/all' . $url_arguments . '" class="year-previous inline-block margin-10 float-left" title="Unavailabilities for ' . ($year - 1) . '">Previous Year</a> ';
-    $markup .= '<a href="' . $base_path . 'requests/unavailable-0/' . ($year + 1) . '/all' . $url_arguments . '" class="year-next inline-block margin-10 float-right" title="Unavailabilities for ' . ($year + 1) . '">Next Year</a> ';
+    $markup .= '<a href="' . $base_path . 'unavailable-0/' . ($year - 1) . '/all' . $url_arguments . '" class="year-previous inline-block margin-10 float-left" title="Unavailabilities for ' . ($year - 1) . '">Previous Year</a> ';
+    $markup .= '<a href="' . $base_path . 'unavailable-0/' . ($year + 1) . '/all' . $url_arguments . '" class="year-next inline-block margin-10 float-right" title="Unavailabilities for ' . ($year + 1) . '">Next Year</a> ';
     $markup .= '</div>';
     $markup .= '<br class="clear">';
   }
@@ -720,14 +720,14 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
 
     if ($can_create) {
       $markup .= '<div class="no-print">';
-      $markup .= 'You may <a href="' . $base_path . 'requests/unavailable-0/create/' . $year . '/' . $room_id . $url_arguments . '">create a new unavailable date and time</a> for this room.<br>';
-      $markup .= 'You may <a href="' . $base_path . 'requests/unavailable-0/copy/' . $year . '/' . $room_id . $url_arguments . '">copy all unavailable dates and times</a> for this room from another year (Type \'Class\' is never copied).';
+      $markup .= 'You may <a href="' . $base_path . 'unavailable-0/create/' . $year . '/' . $room_id . $url_arguments . '">create a new unavailable date and time</a> for this room.<br>';
+      $markup .= 'You may <a href="' . $base_path . 'unavailable-0/copy/' . $year . '/' . $room_id . $url_arguments . '">copy all unavailable dates and times</a> for this room from another year (Type \'Class\' is never copied).';
       $markup .= '</div>';
     }
 
     $markup .= '<div class="unavailable_0_links-year no-print">';
-    $markup .= '<a href="' . $base_path . 'requests/unavailable-0/' . ($year - 1) . '/' . $room_id . $url_arguments . '" class="year-previous inline-block margin-10 float-left" title="Unavailabilities for ' . ($year - 1) . '">Previous Year</a> ';
-    $markup .= '<a href="' . $base_path . 'requests/unavailable-0/' . ($year + 1) . '/' . $room_id . $url_arguments . '" class="year-next inline-block margin-10 float-right" title="Unavailabilities for ' . ($year + 1) . '">Next Year</a> ';
+    $markup .= '<a href="' . $base_path . 'unavailable-0/' . ($year - 1) . '/' . $room_id . $url_arguments . '" class="year-previous inline-block margin-10 float-left" title="Unavailabilities for ' . ($year - 1) . '">Previous Year</a> ';
+    $markup .= '<a href="' . $base_path . 'unavailable-0/' . ($year + 1) . '/' . $room_id . $url_arguments . '" class="year-next inline-block margin-10 float-right" title="Unavailabilities for ' . ($year + 1) . '">Next Year</a> ';
     $markup .= '</div>';
     $markup .= '<br class="clear">';
   }
@@ -779,15 +779,15 @@ function mfcs_request_unavailability_redirect_page($operation, $unavailability_i
   }
 
   if ($operation == 'view') {
-    drupal_goto('requests/unavailable-0/view/' . $unavailable->year . '/' . $unavailable->room_id . '/' . $unavailability_id);
+    drupal_goto('unavailable-0/view/' . $unavailable->year . '/' . $unavailable->room_id . '/' . $unavailability_id);
     drupal_exit();
   }
   elseif ($operation == 'edit') {
-    drupal_goto('requests/unavailable-0/edit/' . $unavailable->year . '/' . $unavailable->room_id . '/' . $unavailability_id);
+    drupal_goto('unavailable-0/edit/' . $unavailable->year . '/' . $unavailable->room_id . '/' . $unavailability_id);
     drupal_exit();
   }
   elseif ($operation == 'delete') {
-    drupal_goto('requests/unavailable-0/delete/' . $unavailable->year . '/' . $unavailable->room_id . '/' . $unavailability_id);
+    drupal_goto('unavailable-0/delete/' . $unavailable->year . '/' . $unavailable->room_id . '/' . $unavailability_id);
     drupal_exit();
   }
 
@@ -908,7 +908,7 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
   $title = check_plain($unavailable->title);
   $description = str_replace("\n", '<br>', check_plain($unavailable->description));
 
-  mfcs_add_canonical_headers('requests/unavailable-0/view/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id);
+  mfcs_add_canonical_headers('unavailable-0/view/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id);
   drupal_set_title('' . $unavailable->year . ' Room Unavailable: ' . $unavailable->title);
 
   $can_troubleshoot = mfcs_page_generic_access('troubleshoot', NULL, $user);
@@ -975,9 +975,9 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
       if ($year >= $current_year) {
         $markup .= '<br class="no-print">';
         $markup .= '<div class="unavailability_page-operations no-print">';
-        $markup .= '<div class="operation-wrapper operation-wrapper-edit"><a href="' . $base_path . 'requests/unavailable-0/edit/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-edit">Edit this unavailability</a></div> ';
-        $markup .= '<div class="operation-wrapper operation-wrapper-create"><a href="' . $base_path . 'requests/unavailable-0/create/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-copy">Copy this unavailability</a></div> ';
-        $markup .= '<div class="operation-wrapper operation-wrapper-delete"><a href="' . $base_path . 'requests/unavailable-0/delete/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-delete">Delete this unavailability</a></div>';
+        $markup .= '<div class="operation-wrapper operation-wrapper-edit"><a href="' . $base_path . 'unavailable-0/edit/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-edit">Edit this unavailability</a></div> ';
+        $markup .= '<div class="operation-wrapper operation-wrapper-create"><a href="' . $base_path . 'unavailable-0/create/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-copy">Copy this unavailability</a></div> ';
+        $markup .= '<div class="operation-wrapper operation-wrapper-delete"><a href="' . $base_path . 'unavailable-0/delete/' . $year . '/' . $unavailable->room_id . '/' . $unavailability_id . $url_arguments . '" class="operation-delete">Delete this unavailability</a></div>';
         $markup .= '</div>';
       }
 
@@ -1071,7 +1071,7 @@ function mfcs_request_unavailability_0_copy_form($form, &$form_state, $year, $ro
     drupal_exit();
   }
 
-  mfcs_add_canonical_headers('requests/unavailable-0/copy/' . $year . '/' . $room_id);
+  mfcs_add_canonical_headers('unavailable-0/copy/' . $year . '/' . $room_id);
 
   $page_title = 'Copy Unavailable for ' . $room->building_code . ' ' . $room->room_number . ' to ' . $year;
   $form['#id'] = 'mfcs-unavailable_0-copy-page';
@@ -1309,7 +1309,7 @@ function mfcs_request_unavailability_0_copy_form_submit($form, &$form_state) {
 
   if ($clicked_id == 'mfcs-unavailable-copy-submit-cancel') {
     if (empty($form_state['values']['redirect_to'])) {
-      $form_state['redirect'] = mfcs_build_redirect_array('requests/unavailable-0/' . $form['form']['year']['#value'] . '/' . $room_id);
+      $form_state['redirect'] = mfcs_build_redirect_array('unavailable-0/' . $form['form']['year']['#value'] . '/' . $room_id);
     }
     else {
       $form_state['redirect'] = $form_state['values']['redirect_to'];
@@ -1418,7 +1418,7 @@ function mfcs_request_unavailability_0_copy_form_submit($form, &$form_state) {
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
-    $form_state['redirect'] = mfcs_build_redirect_array('requests/unavailable-0/' . $form['form']['year']['#value'] . '/' . $room_id);
+    $form_state['redirect'] = mfcs_build_redirect_array('unavailable-0/' . $form['form']['year']['#value'] . '/' . $room_id);
   }
   else {
     $form_state['redirect'] = $form_state['values']['redirect_to'];
@@ -1542,21 +1542,21 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
   }
 
   if (is_null($unavailability_id)) {
-    mfcs_add_canonical_headers('requests/unavailable-0/create/' . $year . '/' . $room_id);
+    mfcs_add_canonical_headers('unavailable-0/create/' . $year . '/' . $room_id);
 
     $page_title = 'Create ' . $year . ' Room Unavailable for ' . $room->building_code . ' ' . $room->room_number;
 
     $form['#id'] = 'mfcs-unavailable_0-create-page';
   }
   elseif ($copy) {
-    mfcs_add_canonical_headers('requests/unavailable-0/create/' . $year . '/' . $room_id . '/' . $unavailability_id);
+    mfcs_add_canonical_headers('unavailable-0/create/' . $year . '/' . $room_id . '/' . $unavailability_id);
 
     $page_title = 'Copy ' . $year . ' Room Unavailable: ' . $unavailable->title;
 
     $form['#id'] = 'mfcs-unavailable_0-copy-page';
   }
   else {
-    mfcs_add_canonical_headers('requests/unavailable-0/edit/' . $year . '/' . $room_id . '/' . $unavailability_id);
+    mfcs_add_canonical_headers('unavailable-0/edit/' . $year . '/' . $room_id . '/' . $unavailability_id);
 
     $page_title = 'Edit ' . $year . ' Room Unavailable: ' . $unavailable->title;
 
@@ -1988,10 +1988,10 @@ function mfcs_request_unavailability_0_edit_form_submit($form, &$form_state) {
   if ($clicked_id == 'mfcs-unavailable-edit-submit-cancel') {
     if (empty($form_state['values']['redirect_to'])) {
       if (is_object($unavailable)) {
-        $form_state['redirect'] = mfcs_build_redirect_array('requests/unavailable-0/view/' . $form['form']['year']['#value'] . '/' . $form['form']['room_id']['#value'] . '/' . $unavailable->id);
+        $form_state['redirect'] = mfcs_build_redirect_array('unavailable-0/view/' . $form['form']['year']['#value'] . '/' . $form['form']['room_id']['#value'] . '/' . $unavailable->id);
       }
       else {
-        $form_state['redirect'] = mfcs_build_redirect_array('requests/unavailable-0/' . $form['form']['year']['#value'] . '/' . $form['form']['room_id']['#value']);
+        $form_state['redirect'] = mfcs_build_redirect_array('unavailable-0/' . $form['form']['year']['#value'] . '/' . $form['form']['room_id']['#value']);
       }
     }
     else {
@@ -2155,10 +2155,10 @@ function mfcs_request_unavailability_0_edit_form_submit($form, &$form_state) {
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
     if (is_int($id)) {
-      $form_state['redirect'] = mfcs_build_redirect_array('requests/unavailable-0/view/' . $form['form']['year']['#value'] . '/' . $form['form']['room_id']['#value'] . '/' . $id);
+      $form_state['redirect'] = mfcs_build_redirect_array('unavailable-0/view/' . $form['form']['year']['#value'] . '/' . $form['form']['room_id']['#value'] . '/' . $id);
     }
     else {
-      $form_state['redirect'] = mfcs_build_redirect_array('requests/unavailable-0/' . $form['form']['year']['#value'] . '/' . $form['form']['room_id']['#value']);
+      $form_state['redirect'] = mfcs_build_redirect_array('unavailable-0/' . $form['form']['year']['#value'] . '/' . $form['form']['room_id']['#value']);
     }
   }
   else {
@@ -2253,7 +2253,7 @@ function mfcs_request_unavailability_0_delete_form($form, &$form_state, $year, $
     drupal_exit();
   }
 
-  mfcs_add_canonical_headers('requests/unavailable-0/delete/' . $year . '/' . $room_id . '/' . $unavailability_id);
+  mfcs_add_canonical_headers('unavailable-0/delete/' . $year . '/' . $room_id . '/' . $unavailability_id);
 
   // do not provide a page for a non-existent room id.
   $room = mfcs_load_rooms(NULL, $unavailable->building_id, $room_id, TRUE);
@@ -2406,7 +2406,7 @@ function mfcs_request_unavailability_0_delete_form_submit($form, &$form_state) {
         $form_state['redirect'] = mfcs_build_redirect_array('requests');
       }
       else {
-        $form_state['redirect'] = mfcs_build_redirect_array('requests/unavailable-0/view/' . $year . '/' . $room_id . '/' . $id);
+        $form_state['redirect'] = mfcs_build_redirect_array('unavailable-0/view/' . $year . '/' . $room_id . '/' . $id);
       }
     }
     else {
@@ -2467,7 +2467,7 @@ function mfcs_request_unavailability_0_delete_form_submit($form, &$form_state) {
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
-    $form_state['redirect'] = mfcs_build_redirect_array('requests/unavailable-0/' . $year . '/' . $room_id);
+    $form_state['redirect'] = mfcs_build_redirect_array('unavailable-0/' . $year . '/' . $room_id);
   }
   else {
     $form_state['redirect'] = $form_state['values']['redirect_to'];

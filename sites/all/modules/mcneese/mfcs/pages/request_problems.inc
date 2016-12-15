@@ -2158,7 +2158,7 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
     $details = unserialize($problem->details);
 
     if (isset($details['room']) && isset($details['building'])) {
-      $form['markup']['#markup'] .= '<strong>Room Unavailabilities:</strong> <a href="' . $base_path . 'requests/unavailable-0/' . (int) $details['room']['id'] . $url_arguments . '">' . check_plain($details['building']['machine_name']) . ' ' . check_plain($details['room']['machine_name']) . '</a><br>';
+      $form['markup']['#markup'] .= '<strong>Room Unavailabilities:</strong> <a href="' . $base_path . 'unavailable-0/' . (int) $details['room']['id'] . $url_arguments . '">' . check_plain($details['building']['machine_name']) . ' ' . check_plain($details['room']['machine_name']) . '</a><br>';
       $form['markup']['#markup'] .= '<strong>Room Information:</strong> <a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . (int) $details['room']['id'] . $url_arguments . '">' . check_plain($details['room']['human_name']) . '</a><br>';
       $form['markup']['#markup'] .= '<strong>Building Information:</strong> <a href="' . $base_path . 'requests/troubleshoot-0/buildings/' . (int) $details['building']['id'] . $url_arguments . '">' . check_plain($details['building']['human_name']) . '</a><br>';
     }
@@ -2240,7 +2240,7 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
         unset($unavailability_date_start);
         unset($unavailability_date_stop);
 
-        $form['markup']['#markup'] .= '<li><a href="' . $base_path . 'requests/unavailable-0/view/' . $unavailability['year'] . '/' . $details['room_id']  . '/' . $unavailability['id'] . $url_arguments . '">' . check_plain($unavailability['title']) . '</a> (' . $date_string .')</li>';
+        $form['markup']['#markup'] .= '<li><a href="' . $base_path . 'unavailable-0/view/' . $unavailability['year'] . '/' . $details['room_id']  . '/' . $unavailability['id'] . $url_arguments . '">' . check_plain($unavailability['title']) . '</a> (' . $date_string .')</li>';
       }
       $form['markup']['#markup'] .= '</ul>';
       unset($date_string);

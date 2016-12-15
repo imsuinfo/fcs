@@ -1696,7 +1696,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
-  $items['requests/unavailable-0'] = array(
+  $items['unavailable-0'] = array(
     'title' => 'Room Unavailabilities',
     'description' => 'View or manage when specific rooms are unavailable for reservation.',
     'page callback' => 'mfcs_request_unavailability_0_rooms_page',
@@ -1709,7 +1709,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
-  $items['requests/unavailable-0/all'] = array(
+  $items['unavailable-0/all'] = array(
     'title' => 'Room Unavailabilities',
     'description' => 'Unavailabilities.',
     'page callback' => 'mfcs_request_unavailability_0_room_page',
@@ -1722,89 +1722,89 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
-  $items['requests/unavailable-0/%/all'] = array(
+  $items['unavailable-0/%/all'] = array(
     'title' => 'Room Unavailabilities',
     'description' => 'Unavailabilities.',
     'page callback' => 'mfcs_request_unavailability_0_room_page',
-    'page arguments' => array(NULL, 2),
+    'page arguments' => array(NULL, 1),
     'file' => 'request_unavailability.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_unavailability_request_access',
-    'access arguments' => array('manage', 2),
+    'access arguments' => array('manage', 1),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
 
-  $items['requests/unavailable-0/%'] = array(
+  $items['unavailable-0/%'] = array(
     'title' => 'Room Unavailabilities',
     'description' => 'Unavailabilities.',
     'page callback' => 'mfcs_request_unavailability_0_room_page',
-    'page arguments' => array(2),
+    'page arguments' => array(1),
     'file' => 'request_unavailability.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_unavailability_request_access',
-    'access arguments' => array('manage', NULL, 2),
+    'access arguments' => array('manage', NULL, 1),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
 
-  $items['requests/unavailable-0/%/%'] = array(
+  $items['unavailable-0/%/%'] = array(
     'title' => 'Room Unavailabilities',
     'description' => 'Unavailabilities.',
     'page callback' => 'mfcs_request_unavailability_0_room_page',
-    'page arguments' => array(3, 2),
+    'page arguments' => array(2, 1),
     'file' => 'request_unavailability.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_unavailability_request_access',
-    'access arguments' => array('manage', 2, 3),
+    'access arguments' => array('manage', 1, 2),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
 
-  $items['requests/unavailable-0/copy/%/%'] = array(
+  $items['unavailable-0/copy/%/%'] = array(
     'title' => 'Copy Unavailabilities',
     'description' => 'Unavailabilities.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_unavailability_0_copy_form', 3, 4),
+    'page arguments' => array('mfcs_request_unavailability_0_copy_form', 2, 3),
     'file' => 'request_unavailability.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_unavailability_request_access',
-    'access arguments' => array('create', 3, 4),
+    'access arguments' => array('create', 2, 3),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
 
-  $items['requests/unavailable-0/create/%/%'] = array(
+  $items['unavailable-0/create/%/%'] = array(
     'title' => 'Create Unavailabilities',
     'description' => 'Unavailabilities.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_unavailability_0_edit_form', 3, 4),
+    'page arguments' => array('mfcs_request_unavailability_0_edit_form', 2, 3),
     'file' => 'request_unavailability.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_unavailability_request_access',
-    'access arguments' => array('create', 3, 4),
+    'access arguments' => array('create', 2, 3),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
 
-  $items['requests/unavailable-0/create/%/%/%'] = array(
+  $items['unavailable-0/create/%/%/%'] = array(
     'title' => 'Edit Unavailabilities',
     'description' => 'Unavailabilities.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_unavailability_0_edit_form', 3, 4, 5, TRUE),
+    'page arguments' => array('mfcs_request_unavailability_0_edit_form', 2, 3, 4, TRUE),
     'file' => 'request_unavailability.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_unavailability_request_access',
-    'access arguments' => array('edit', 3, 4, 5),
+    'access arguments' => array('edit', 2, 3, 4),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
 
-  $items['requests/unavailable-0/view/%'] = array(
+  $items['unavailable-0/view/%'] = array(
     'title' => 'View Unavailabilities',
     'description' => 'Unavailabilities.',
     'page callback' => 'mfcs_request_unavailability_redirect_page',
-    'page arguments' => array('view', 3),
+    'page arguments' => array('view', 2),
     'file' => 'request_unavailability.inc',
     'file path' => $module_path . '/pages',
     'access callback' => TRUE,
@@ -1812,24 +1812,24 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
-  $items['requests/unavailable-0/view/%/%/%'] = array(
+  $items['unavailable-0/view/%/%/%'] = array(
     'title' => 'View Unavailabilities',
     'description' => 'Unavailabilities.',
     'page callback' => 'mfcs_request_unavailability_0_page',
-    'page arguments' => array(3, 4, 5),
+    'page arguments' => array(2, 3, 4),
     'file' => 'request_unavailability.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_unavailability_request_access',
-    'access arguments' => array('view', 4, 5),
+    'access arguments' => array('view', 3, 4),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
 
-  $items['requests/unavailable-0/edit/%'] = array(
+  $items['unavailable-0/edit/%'] = array(
     'title' => 'Edit Unavailabilities',
     'description' => 'Unavailabilities.',
     'page callback' => 'mfcs_request_unavailability_redirect_page',
-    'page arguments' => array('edit', 3),
+    'page arguments' => array('edit', 2),
     'file' => 'request_unavailability.inc',
     'file path' => $module_path . '/pages',
     'access callback' => TRUE,
@@ -1837,24 +1837,24 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
-  $items['requests/unavailable-0/edit/%/%/%'] = array(
+  $items['unavailable-0/edit/%/%/%'] = array(
     'title' => 'Edit Unavailabilities',
     'description' => 'Unavailabilities.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_unavailability_0_edit_form', 3, 4, 5),
+    'page arguments' => array('mfcs_request_unavailability_0_edit_form', 2, 3, 4),
     'file' => 'request_unavailability.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_unavailability_request_access',
-    'access arguments' => array('edit', 3, 4, 5),
+    'access arguments' => array('edit', 2, 3, 4),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
 
-  $items['requests/unavailable-0/delete/%'] = array(
+  $items['unavailable-0/delete/%'] = array(
     'title' => 'Delete Unavailabilities',
     'description' => 'Unavailabilities.',
     'page callback' => 'mfcs_request_unavailability_redirect_page',
-    'page arguments' => array('delete', 3),
+    'page arguments' => array('delete', 2),
     'file' => 'request_unavailability.inc',
     'file path' => $module_path . '/pages',
     'access callback' => TRUE,
@@ -1862,15 +1862,15 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
-  $items['requests/unavailable-0/delete/%/%/%'] = array(
+  $items['unavailable-0/delete/%/%/%'] = array(
     'title' => 'Delete Unavailabilities',
     'description' => 'Unavailabilities.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_unavailability_0_delete_form', 3, 4, 5),
+    'page arguments' => array('mfcs_request_unavailability_0_delete_form', 2, 3, 4),
     'file' => 'request_unavailability.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_unavailability_request_access',
-    'access arguments' => array('delete', 3, 4, 5, NULL, FALSE),
+    'access arguments' => array('delete', 2, 3, 4, NULL, FALSE),
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
