@@ -792,14 +792,24 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
             $javascript_items .= '    }';
           }
           else {
+            // pre-process the times to add all dates to each entry.
+            $text_date_times = '';
+            foreach ($item['times'] as $delta => $times) {
+              $text_date_times .= '<div class="tooltip-item tooltip-item-times tooltip-item-time-' . $delta . '">';
+              $text_date_times .= date(MFCS_DATE_FORMAT_TIME, $times['start']) . ' to ' . date(MFCS_DATE_FORMAT_TIME, $times['stop']);
+              $text_date_times .= '</div>';
+            }
+            unset($delta);
+            unset($times);
+
+            $tooltip_text .= $text_date_times;
+            unset($text_date_times);
+
+            // full calendar requires only allows a single start/stop time range and so separate entries must be made for each time slot range.
             foreach ($item['times'] as $delta => $times) {
               if (!is_null($javascript_items)) {
                 $javascript_items .= ',' . "\n";
               }
-
-              $tooltip_text .= '<div class="tooltip-item tooltip-item-times tooltip-item-time-' . $delta . '">';
-              $tooltip_text .= date(MFCS_DATE_FORMAT_TIME, $times['start']) . ' to ' . date(MFCS_DATE_FORMAT_TIME, $times['stop']);
-              $tooltip_text .= '</div>';
 
               $javascript_items .= '    {' . "\n";
 
@@ -819,6 +829,8 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
               $javascript_items .= $javascript_item_common;
               $javascript_items .= '    }';
             }
+            unset($delta);
+            unset($times);
           }
         }
 
