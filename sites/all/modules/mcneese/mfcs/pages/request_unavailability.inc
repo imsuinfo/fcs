@@ -381,6 +381,8 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
   mfcs_include(MFCS_INCLUDE_MANAGEMENT);
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
+  $module_path = drupal_get_path('module', 'mfcs');
+
   // load sorting information
   $order = NULL;
   if (isset($_GET['order'])) {
@@ -748,7 +750,30 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
       $room_value = check_plain($room->room_name);
     }
 
+
     $markup .= '<div class="room_information-wrapper">';
+
+    // look for generic building-specific images.
+    $image_file_path = NULL;
+    if (file_exists(DRUPAL_ROOT . '/sites/all/modules/mcneese/mfcs/images/buildings/' . $room->building_id . '.png')) {
+      $image_file_path = $base_path . $module_path . '/images/buildings/' . $room->building_id . '.png';
+    }
+    elseif (file_exists(DRUPAL_ROOT . '/sites/all/modules/mcneese/mfcs/images/buildings/' . $room->building_id . '.jpg')) {
+      $image_file_path = $base_path . $module_path . '/images/buildings/' . $room->building_id . '.jpg';
+    }
+    elseif (file_exists(DRUPAL_ROOT . '/sites/all/modules/mcneese/mfcs/images/buildings/0.png')) {
+      $image_file_path = $base_path . $module_path . '/images/buildings/0.png';
+    }
+
+    if (!is_null($image_file_path)) {
+      $markup .= '<div class="room_information-item item-building_extra">';
+      $markup .= '<div class="item-image">';
+      $markup .= '<img src="' . $image_file_path . '" alt="' . check_plain($room->building_name) . '" class="building_image">';
+      $markup .= '</div>';
+      $markup .= '</div>';
+    }
+    unset($image_file_path);
+
     $markup .= '<div class="room_information-item item-building_name">';
     $markup .= '<div class="room_information-item-label">Building Name:</div>';
     $markup .= '<div class="room_information-item-value">' . $building_value . '</div>';
