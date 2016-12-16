@@ -2757,6 +2757,8 @@ function mfcs_request_problems_0_request_recheck($problem_id) {
   if ($result !== FALSE) {
     $redirect_array = mfcs_build_redirect_array('problems-0/requests');
 
+    drupal_set_message('Successfully re-checked problem <em>' . (int) $problem_id . ': ' . $problem->reason . '</em>');
+
     drupal_goto('problems-0/requests', array('query' => drupal_get_query_parameters()));
     return '';
   }
