@@ -181,7 +181,7 @@ function mfcs_management_page() {
       $items_array = &$items_1;
     }
 
-    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/problems-0' . $url_arguments . '" class="item-link">Manage Problems</a></h4>';
+    $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'problems-0' . $url_arguments . '" class="item-link">Manage Problems</a></h4>';
     $help = '<div class="item-description inline-block">Manage and troubleshoot problems that have been detected by the system.</div>';
     $items_array[] = array(
       'data' => $link . '<br>' . $help,

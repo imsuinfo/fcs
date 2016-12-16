@@ -174,8 +174,8 @@ function mfcs_request_unavailability_0_rooms_page() {
     $row['operations']['data'] = '';
 
     if ($can_troubleshoot) {
-      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/troubleshoot-0/buildings/' . $item->building_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Building Information">Building</a> ';
-      $row['operations']['data'] .= '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Room Information">Room</a> ';
+      $row['operations']['data'] .= '<a href="' . $base_path . 'troubleshoot-0/buildings/' . $item->building_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Building Information">Building</a> ';
+      $row['operations']['data'] .= '<a href="' . $base_path . 'troubleshoot-0/rooms/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Room Information">Room</a> ';
     }
 
     if (array_key_exists($item->id, $items_editable)) {
@@ -699,8 +699,8 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
   }
   else {
     if ($can_troubleshoot) {
-      $building_value = '<a href="' . $base_path . 'requests/troubleshoot-0/buildings/' . $room->building_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Building Information">' . check_plain($room->building_name) . '</a>';
-      $room_value = '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Room Information">' . check_plain($room->room_name) . '</a>';
+      $building_value = '<a href="' . $base_path . 'troubleshoot-0/buildings/' . $room->building_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Building Information">' . check_plain($room->building_name) . '</a>';
+      $room_value = '<a href="' . $base_path . 'troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Room Information">' . check_plain($room->room_name) . '</a>';
     }
     else {
       $building_value = check_plain($room->building_name);
@@ -916,8 +916,8 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
   $markup = '<div id="mfcs-unavailable_0-view-page" class="mfcs-unavailable_0-view-page">';
 
   if ($can_troubleshoot) {
-    $building_value = '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Building Information">' . check_plain($room->building_name) . '</a>';
-    $room_value = '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Room Information">' . check_plain($room->room_name) . '</a>';
+    $building_value = '<a href="' . $base_path . 'troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Building Information">' . check_plain($room->building_name) . '</a>';
+    $room_value = '<a href="' . $base_path . 'troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Room Information">' . check_plain($room->room_name) . '</a>';
   }
   else {
     $building_value = check_plain($room->building_name);
@@ -1131,8 +1131,8 @@ function mfcs_request_unavailability_0_copy_form($form, &$form_state, $year, $ro
   );
 
   if ($can_troubleshoot) {
-    $building_value = '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Building Information">' . check_plain($room->building_name) . '</a>';
-    $room_value = '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Room Information">' . check_plain($room->room_name) . '</a>';
+    $building_value = '<a href="' . $base_path . 'troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Building Information">' . check_plain($room->building_name) . '</a>';
+    $room_value = '<a href="' . $base_path . 'troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Room Information">' . check_plain($room->room_name) . '</a>';
   }
   else {
     $building_value = check_plain($room->building_name);
@@ -1636,8 +1636,8 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
   );
 
   if ($can_troubleshoot) {
-    $building_value = '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Building Information">' . check_plain($room->building_name) . '</a>';
-    $room_value = '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Room Information">' . check_plain($room->room_name) . '</a>';
+    $building_value = '<a href="' . $base_path . 'troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Building Information">' . check_plain($room->building_name) . '</a>';
+    $room_value = '<a href="' . $base_path . 'troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Room Information">' . check_plain($room->room_name) . '</a>';
   }
   else {
     $building_value = check_plain($room->building_name);
@@ -2284,8 +2284,8 @@ function mfcs_request_unavailability_0_delete_form($form, &$form_state, $year, $
   );
 
   if ($can_troubleshoot) {
-    $building_value = '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Building Information">' . check_plain($room->building_name) . '</a>';
-    $room_value = '<a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Room Information">' . check_plain($room->room_name) . '</a>';
+    $building_value = '<a href="' . $base_path . 'troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Building Information">' . check_plain($room->building_name) . '</a>';
+    $room_value = '<a href="' . $base_path . 'troubleshoot-0/rooms/' . $room_id . $url_arguments . '" class="operation-link operation-link-view" title="View Technical Room Information">' . check_plain($room->room_name) . '</a>';
   }
   else {
     $building_value = check_plain($room->building_name);

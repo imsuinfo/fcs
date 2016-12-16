@@ -1039,11 +1039,11 @@ function mfcs_ajax_problems_0_users_list() {
       foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE, MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED, MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES, MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE, MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID, MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) as $taxonomy_id) {
         if (($problem->problems & $taxonomy_id) > 0) {
           if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE || $taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE || $taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) {
-            $additional_operations .= ' <a href="' . $base_path . 'requests/problems-0/users/resynchronize/' . $problem->user_id . $url_arguments . '" class="operation-link operation-link-resynchronize" title="Re-Synchronize the user\'s settings.">Re-Sync</a>';
+            $additional_operations .= ' <a href="' . $base_path . 'problems-0/users/resynchronize/' . $problem->user_id . $url_arguments . '" class="operation-link operation-link-resynchronize" title="Re-Synchronize the user\'s settings.">Re-Sync</a>';
           }
 
           if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) {
-            $additional_operations .= ' <a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $problem->user_id . '">Requests</a>';
+            $additional_operations .= ' <a href="' . $base_path . 'problems-0/users/disabled_in_use/' . $problem->user_id . '">Requests</a>';
           }
 
           if (is_null($row[4])) {
@@ -1088,7 +1088,7 @@ function mfcs_ajax_problems_0_users_list() {
       unset($taxonomy_id);
 
       $row[7] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $problem->updated_problems));
-      $row[8] = '<a href="' . $base_path . 'requests/problems-0/users/user/' . $problem->user_id . $url_arguments . '" class="operation-link operation-link-view">View</a>' . $additional_operations;
+      $row[8] = '<a href="' . $base_path . 'problems-0/users/user/' . $problem->user_id . $url_arguments . '" class="operation-link operation-link-view">View</a>' . $additional_operations;
 
       $response['data'][] = $row;
     }
@@ -1332,9 +1332,9 @@ function mfcs_ajax_problems_0_requests_list($argument_1 = NULL) {
       $row[3] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $problem->date));
       $row[4] = (isset($problem->reason) ? check_plain($problem->reason) : '');
       $row[5] = (isset($problem->ignore) && $problem->ignore == 1 ? 'Yes' : 'No');
-      $row[6] = '<a href="' . $base_path . 'requests/problems-0/requests/request/' . $problem->id . $url_arguments . '" class="operation-link operation-link-details">Details</a>';
+      $row[6] = '<a href="' . $base_path . 'problems-0/requests/request/' . $problem->id . $url_arguments . '" class="operation-link operation-link-details">Details</a>';
       $row[6] .= ' <a href="' . $base_path . 'requests/view-0/' . $problem->request_id . $url_arguments . '" class="operation-link operation-link-request">Request</a>';
-      $row[6] .= ' <a href="' . $base_path . 'requests/problems-0/requests/request/' . $problem->id . '/recheck' . $url_arguments . '" class="operation-link operation-link-recheck white-space-nowrap">Re-Check</a>';
+      $row[6] .= ' <a href="' . $base_path . 'problems-0/requests/request/' . $problem->id . '/recheck' . $url_arguments . '" class="operation-link operation-link-recheck white-space-nowrap">Re-Check</a>';
 
       $response['data'][] = $row;
     }
@@ -2202,7 +2202,7 @@ function mfcs_ajax_users_0_list($argument_1 = NULL) {
         $row[10] .= ' <a href="' . $base_path . 'users-0/customize/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Customize User">Customize</a>' ;
 
         if ($item->problems != MFCS_USER_PROBLEM_NONE) {
-          $row[10] .= ' <a href="' . $base_path . 'requests/problems-0/users/user/' . $item->id . $url_arguments . '" class="operation-link operation-link-problems" title="View User Problems">Problems</a>' ;
+          $row[10] .= ' <a href="' . $base_path . 'problems-0/users/user/' . $item->id . $url_arguments . '" class="operation-link operation-link-problems" title="View User Problems">Problems</a>' ;
         }
       }
       elseif ($item->id == $user->uid && ($is_requester || $is_reviewer)) {

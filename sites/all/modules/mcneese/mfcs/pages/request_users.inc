@@ -300,7 +300,7 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
       $row['operations']['data'] .= ' <a href="' . $base_path . 'users-0/customize/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Customize User">Customize</a>' ;
 
       if ($item->problems != MFCS_USER_PROBLEM_NONE) {
-        $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/problems-0/users/user/' . $item->id . $url_arguments . '" class="operation-link operation-link-problems" title="View User Problems">Problems</a>' ;
+        $row['operations']['data'] .= ' <a href="' . $base_path . 'problems-0/users/user/' . $item->id . $url_arguments . '" class="operation-link operation-link-problems" title="View User Problems">Problems</a>' ;
       }
     }
     elseif ($item->id == $user->uid && ($is_requester || $is_reviewer)) {
@@ -925,7 +925,7 @@ function mfcs_request_users_0_view_page($user_id) {
       foreach ($problems_list as $problem_id => $problem_text) {
         $problem_id = (int) $problem_id;
         if (($account->mfcs['problems'] & $problem_id) != 0) {
-          $problems_detected .= '<div class="view_user-item view_user-item-problems"><a href="' . $base_path . 'requests/problems-0/users/user/' . $account->uid . $url_arguments . '" class="problem problem-' . $problem_id . ' no_print_links_as_link">' . $problem_text . '</a></div>';
+          $problems_detected .= '<div class="view_user-item view_user-item-problems"><a href="' . $base_path . 'problems-0/users/user/' . $account->uid . $url_arguments . '" class="problem problem-' . $problem_id . ' no_print_links_as_link">' . $problem_text . '</a></div>';
         }
       }
       unset($problem_text);
@@ -3067,7 +3067,7 @@ function mfcs_request_users_0_check_page($user_id) {
     drupal_set_message('Something went wrong while checking user.', 'error');
   }
 
-  $redirect_array = mfcs_build_redirect_array('requests/problems-0/users');
+  $redirect_array = mfcs_build_redirect_array('problems-0/users');
 
   drupal_goto('users-0/view/' . $user_id, array('query' => drupal_get_query_parameters()));
 }

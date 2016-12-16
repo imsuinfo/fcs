@@ -74,7 +74,7 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
       return array();
     }
 
-    mfcs_add_canonical_headers('requests/troubleshoot-0/' . $request_id);
+    mfcs_add_canonical_headers('troubleshoot-0/' . $request_id);
   }
 
   $page_title = 'Facilities Use Troubleshooting Tools';
@@ -294,9 +294,9 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
   $markup .= '</div>';
   $markup .= '<div class="code-links">';
   $markup .= '  <ul class="code-links-list">';
-  $markup .= '    <li class="code-links-list-item"><a href="' . $base_path . 'requests/troubleshoot-0/locations' . $url_arguments . '" class="code-links-list-item-link">View Banner Location Information.</a></li>';
-  $markup .= '    <li class="code-links-list-item"><a href="' . $base_path . 'requests/troubleshoot-0/buildings' . $url_arguments . '" class="code-links-list-item-link">View Banner Building Information.</a></li>';
-  $markup .= '    <li class="code-links-list-item"><a href="' . $base_path . 'requests/troubleshoot-0/rooms' . $url_arguments . '" class="code-links-list-item-link">View Banner Room Information.</a></li>';
+  $markup .= '    <li class="code-links-list-item"><a href="' . $base_path . 'troubleshoot-0/locations' . $url_arguments . '" class="code-links-list-item-link">View Banner Location Information.</a></li>';
+  $markup .= '    <li class="code-links-list-item"><a href="' . $base_path . 'troubleshoot-0/buildings' . $url_arguments . '" class="code-links-list-item-link">View Banner Building Information.</a></li>';
+  $markup .= '    <li class="code-links-list-item"><a href="' . $base_path . 'troubleshoot-0/rooms' . $url_arguments . '" class="code-links-list-item-link">View Banner Room Information.</a></li>';
   $markup .= '  </ul>';
   $markup .= '</div>';
   $form['form'][$code]['pre_markup'] = array(
@@ -331,7 +331,7 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
   $markup .= 'Requests are periodically checked for problems, such as date conflicts or deleted rooms.' . '<br>';
   $markup .= '<br>';
   $markup .= 'Using this troubleshoot will perform integrity checks on requests.' . '<br>';
-  $markup .= 'Problems are displayed under the <a href="' . $base_path . 'requests/problems-0/requests">Manage Request Problems</a> page.' . '<br>';
+  $markup .= 'Problems are displayed under the <a href="' . $base_path . 'problems-0/requests">Manage Request Problems</a> page.' . '<br>';
   $markup .= '</div>';
   $form['form'][$code]['pre_markup'] = array(
     '#type' => 'markup',
@@ -377,7 +377,7 @@ function mfcs_request_troubleshoot_0_form($form, &$form_state, $request_id = NUL
   $markup .= 'Users are periodically checked for problems, generally when they log into the system.' . '<br>';
   $markup .= '<br>';
   $markup .= 'Using this troubleshoot will perform integrity checks on users.' . '<br>';
-  $markup .= 'Problems are displayed under the <a href="' . $base_path . 'requests/problems-0/users">Manage User Problems</a> page.' . '<br>';
+  $markup .= 'Problems are displayed under the <a href="' . $base_path . 'problems-0/users">Manage User Problems</a> page.' . '<br>';
   $markup .= '</div>';
   $form['form'][$code]['pre_markup'] = array(
     '#type' => 'markup',
@@ -1009,7 +1009,7 @@ function mfcs_request_troubleshoot_0_locations_page($location_id = NULL) {
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-human_name odd">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Location Name:</div> ';
-      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'requests/troubleshoot-0/locations/' . $entry->location_id . '/edit' . $url_arguments . '" class="information_page-entry-list-item-value-link">' . $entry->human_name . '</a></div>';
+      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'troubleshoot-0/locations/' . $entry->location_id . '/edit' . $url_arguments . '" class="information_page-entry-list-item-value-link">' . $entry->human_name . '</a></div>';
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-date odd">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Last Updated:</div> ';
@@ -1111,7 +1111,7 @@ function mfcs_request_troubleshoot_0_locations_edit_name_form($form, &$form_stat
     drupal_exit();
   }
 
-  mfcs_add_canonical_headers('requests/troubleshoot-0/locations/' . $location_id . '/edit');
+  mfcs_add_canonical_headers('troubleshoot-0/locations/' . $location_id . '/edit');
 
   $page_title = 'Troubleshooting - Locations - Edit Name';
   drupal_set_title($page_title);
@@ -1237,7 +1237,7 @@ function mfcs_request_troubleshoot_0_locations_edit_name_form_submit($form, &$fo
 
   if ($clicked_id == 'locations-edit_name-submit-cancel') {
     if (empty($form_state['values']['redirect_to'])) {
-      $form_state['redirect'] = mfcs_build_redirect_array('requests/troubleshoot-0/locations');
+      $form_state['redirect'] = mfcs_build_redirect_array('troubleshoot-0/locations');
     }
     else {
       $form_state['redirect'] = $form_state['values']['redirect_to'];
@@ -1281,7 +1281,7 @@ function mfcs_request_troubleshoot_0_locations_edit_name_form_submit($form, &$fo
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
-    $form_state['redirect'] = mfcs_build_redirect_array('requests/troubleshoot-0/locations');
+    $form_state['redirect'] = mfcs_build_redirect_array('troubleshoot-0/locations');
   }
   else {
     $form_state['redirect'] = $form_state['values']['redirect_to'];
@@ -1384,7 +1384,7 @@ function mfcs_request_troubleshoot_0_buildings_page($building_id = NULL) {
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_id even">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Location ID:</div> ';
-      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'requests/troubleshoot-0/locations/' . $entry->location_id . $url_arguments . '" class="no_print_links_as_link">' . $entry->location_id . '</a></div>';
+      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'troubleshoot-0/locations/' . $entry->location_id . $url_arguments . '" class="no_print_links_as_link">' . $entry->location_id . '</a></div>';
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_code odd">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Location Code:</div> ';
@@ -1573,7 +1573,7 @@ function mfcs_request_troubleshoot_0_rooms_page($room_id = NULL) {
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_id even">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Building ID:</div> ';
-      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'requests/troubleshoot-0/buildings/' . $entry->building_id . $url_arguments . '" class="no_print_links_as_link">' . $entry->building_id . '</a></div>';
+      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'troubleshoot-0/buildings/' . $entry->building_id . $url_arguments . '" class="no_print_links_as_link">' . $entry->building_id . '</a></div>';
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-building_code odd">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Building Code:</div> ';
@@ -1593,7 +1593,7 @@ function mfcs_request_troubleshoot_0_rooms_page($room_id = NULL) {
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_id odd">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Location ID:</div> ';
-      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'requests/troubleshoot-0/locations/' . $entry->location_id . $url_arguments . '" class="no_print_links_as_link">' . $entry->location_id . '</a></div>';
+      $target_markup .= '      <div class="information_page-entry-list-item-value"><a href="' . $base_path . 'troubleshoot-0/locations/' . $entry->location_id . $url_arguments . '" class="no_print_links_as_link">' . $entry->location_id . '</a></div>';
       $target_markup .= '    </li>';
       $target_markup .= '    <li class="information_page-entry-list-item information_page-entry-list-item-location_code even">';
       $target_markup .= '      <div class="information_page-entry-list-item-name">Location Machine Name:</div> ';

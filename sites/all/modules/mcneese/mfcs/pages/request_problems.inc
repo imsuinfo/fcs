@@ -27,14 +27,14 @@ function mfcs_management_problems_page() {
 
   $user = cf_current_user();
 
-  mfcs_add_canonical_headers('requests/problems-0');
+  mfcs_add_canonical_headers('problems-0');
 
   $items_1 = array();
   $items_2 = array();
 
   $items_array = &$items_1;
 
-  $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/problems-0/users' . $url_arguments . '" class="item-link">User Problems</a></h4>';
+  $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'problems-0/users' . $url_arguments . '" class="item-link">User Problems</a></h4>';
   $help = '<div class="item-description inline-block">Access a list of user accounts in which problems have been detected.</div>';
   $items_array[] = array(
     'data' => $link . '<br>' . $help,
@@ -44,7 +44,7 @@ function mfcs_management_problems_page() {
 
   $items_array = &$items_2;
 
-  $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/problems-0/requests' . $url_arguments . '" class="item-link">Request Problems</a></h4>';
+  $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'problems-0/requests' . $url_arguments . '" class="item-link">Request Problems</a></h4>';
   $help = '<div class="item-description inline-block">Access a list of requests in which problems have been detected.</div>';
   $items_array[] = array(
     'data' => $link . '<br>' . $help,
@@ -64,7 +64,7 @@ function mfcs_management_problems_page() {
     $items_array = &$items_1;
   }
 
-  $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'requests/troubleshoot-0' . $url_arguments . '" class="item-link">Troubleshooting Tools</a></h4>';
+  $link = '<h4 class="item-link-wrapper inline-block"><a href="' . $base_path . 'troubleshoot-0' . $url_arguments . '" class="item-link">Troubleshooting Tools</a></h4>';
   $help = '<div class="item-description inline-block">Utilize troubleshooting tools to help fix problems on the system.</div>';
   $items_array[] = array(
     'data' => $link . '<br>' . $help,
@@ -134,7 +134,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     $page_number = 0;
   }
 
-  mfcs_add_canonical_headers('requests/problems-0/users/' . $page_number);
+  mfcs_add_canonical_headers('problems-0/users/' . $page_number);
 
   $page_title = 'Facilities Use Problems - Users';
   drupal_set_title($page_title);
@@ -282,11 +282,11 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE, MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED, MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES, MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE, MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID, MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) as $taxonomy_id) {
       if (($item->problems & $taxonomy_id) > 0) {
         if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE || $taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE || $taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) {
-          $additional_operations .= ' <a href="' . $base_path . 'requests/problems-0/users/resynchronize/' . $item->user_id . $url_arguments . '" class="operation-link operation-link-resynchronize" title="Re-Synchronize the user\'s settings.">Re-Sync</a>';
+          $additional_operations .= ' <a href="' . $base_path . 'problems-0/users/resynchronize/' . $item->user_id . $url_arguments . '" class="operation-link operation-link-resynchronize" title="Re-Synchronize the user\'s settings.">Re-Sync</a>';
         }
 
         if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) {
-          $additional_operations .= ' <a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $item->user_id . '">Requests</a>';
+          $additional_operations .= ' <a href="' . $base_path . 'problems-0/users/disabled_in_use/' . $item->user_id . '">Requests</a>';
         }
 
         if (is_null($problem_account)) {
@@ -370,7 +370,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     );
 
     $row['operations'] = array(
-      'data' => '<a href="' . $base_path . 'requests/problems-0/users/user/' . $item->user_id . $url_arguments . '" class="operation-link operation-link-view">View</a>' . $additional_operations,
+      'data' => '<a href="' . $base_path . 'problems-0/users/user/' . $item->user_id . $url_arguments . '" class="operation-link operation-link-view">View</a>' . $additional_operations,
       'class' => $class_operations,
     );
 
@@ -422,7 +422,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     'processing' => TRUE,
     'serverSide' => TRUE,
     'ajax' => array(
-      'url' => '\'' . $base_path . 'requests/problems-0/users/ajax' . $url_arguments . '\'',
+      'url' => '\'' . $base_path . 'problems-0/users/ajax' . $url_arguments . '\'',
       'type' => '\'POST\'',
     ),
     'deferRender' => TRUE,
@@ -462,13 +462,13 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
   $navigation_bottom = '';
   if ($page_number > 0) {
     if ($page_number == 1) {
-      $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/users' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
-      $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/users' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_top .= '<a href="' . $base_path . 'problems-0/users' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'problems-0/users' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
     }
     else {
       $previous_page = $page_number - 1;
-      $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/users/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
-      $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/users/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_top .= '<a href="' . $base_path . 'problems-0/users/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'problems-0/users/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
     }
   }
 
@@ -489,8 +489,8 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
 
   if ($items_total > ($options['start'] + $rows_per_page)) {
     $next_page = $page_number + 1;
-    $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/users/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
-    $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/users/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+    $navigation_top .= '<a href="' . $base_path . 'problems-0/users/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+    $navigation_bottom .= '<a href="' . $base_path . 'problems-0/users/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
   }
 
   $form = array();
@@ -542,7 +542,7 @@ function mfcs_request_problems_0_users_form_submit($form, &$form_state) {
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
-    $form_state['redirect'] = mfcs_build_redirect_array('requests/problems-0/users');
+    $form_state['redirect'] = mfcs_build_redirect_array('problems-0/users');
   }
   else {
     $form_state['redirect'] = $form_state['values']['redirect_to'];
@@ -583,7 +583,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  mfcs_add_canonical_headers('requests/problems-0/users/user/' . $problem_user_id);
+  mfcs_add_canonical_headers('problems-0/users/user/' . $problem_user_id);
 
   $user_name = $problem_user->name;
   if (!empty($problem_user->mfcs['first_name']) && !empty($problem_user->mfcs['last_name'])) {
@@ -794,7 +794,7 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       'explanation' =>
         'This flag gets set when a deleted or disabled user account is assigned as a venue coordinator or similar access roles.<br>' .
         '<br>' .
-        'This is generally casued when an account is deleted but <a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $problem_user_id . '">active or on-going requests have not been re-assigned</a>.<br>' .
+        'This is generally casued when an account is deleted but <a href="' . $base_path . 'problems-0/users/disabled_in_use/' . $problem_user_id . '">active or on-going requests have not been re-assigned</a>.<br>' .
         '<br>' .
         'Requests will need to be re-assigned.<br>',
       'resettable' => TRUE,
@@ -1144,7 +1144,7 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
-    $form_state['redirect'] = mfcs_build_redirect_array('requests/problems-0/users');
+    $form_state['redirect'] = mfcs_build_redirect_array('problems-0/users');
   }
   else {
     $form_state['redirect'] = $form_state['values']['redirect_to'];
@@ -1181,22 +1181,22 @@ function mfcs_request_problems_0_users_resynchronize($user_id) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  mfcs_add_canonical_headers('requests/problems-0/users/resynchronize/' . $user_id);
+  mfcs_add_canonical_headers('problems-0/users/resynchronize/' . $user_id);
 
   $page_title = 'Facilities Use Problems - Resynchronize User';
   drupal_set_title($page_title);
 
   $result = mfcs_synchronize_user_settings($user);
   if ($result === TRUE) {
-    $redirect_array = mfcs_build_redirect_array('requests/problems-0/users');
+    $redirect_array = mfcs_build_redirect_array('problems-0/users');
 
-    drupal_goto('requests/problems-0/users', array('query' => drupal_get_query_parameters()));
+    drupal_goto('problems-0/users', array('query' => drupal_get_query_parameters()));
     return '';
   }
 
   $markup = '<div>';
   $markup .= 'Failed to re-synchronize user.<br>';
-  $markup .= 'You may go back to the <a href="' . $base_path . 'requests/problems-0/users">user problems management page</a>.';
+  $markup .= 'You may go back to the <a href="' . $base_path . 'problems-0/users">user problems management page</a>.';
   $markup .= '</div>';
 
   return $markup;
@@ -1251,7 +1251,7 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
     $page_number = 0;
   }
 
-  mfcs_add_canonical_headers('requests/problems-0/users/disabled_in_use/' . $user_id);
+  mfcs_add_canonical_headers('problems-0/users/disabled_in_use/' . $user_id);
 
   $page_title = 'Facilities Use Problems - Disabled Account In Use - ' . $user->name;
   drupal_set_title($page_title);
@@ -1410,7 +1410,7 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
   $options['columns'] = $columns;
   $options['columns_default'] = $columns_default;
 
-  $options['ajax_path'] = '\'' . $base_path . 'requests/problems-0/users/disabled_in_use/ajax/' . $user_id . $url_arguments . '\'';
+  $options['ajax_path'] = '\'' . $base_path . 'problems-0/users/disabled_in_use/ajax/' . $user_id . $url_arguments . '\'';
   $options['defer_loading'] = (int) $items_total;
 
   $table = mfcs_build_request_ajax_table($items_returned, $conditions, $options);
@@ -1422,13 +1422,13 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
   $navigation_bottom = '';
   if ($page_number > 0) {
     if ($page_number == 1) {
-      $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/users/disabled_in_use' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
-      $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/users/disabled_in_use' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_top .= '<a href="' . $base_path . 'problems-0/users/disabled_in_use' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'problems-0/users/disabled_in_use' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
     }
     else {
       $previous_page = $page_number - 1;
-      $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
-      $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_top .= '<a href="' . $base_path . 'problems-0/users/disabled_in_use/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'problems-0/users/disabled_in_use/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
     }
   }
 
@@ -1449,8 +1449,8 @@ function mfcs_request_problems_0_users_disabled_in_use($user_id, $page_number = 
 
   if ($items_total > ($options['start'] + $rows_per_page)) {
     $next_page = $page_number + 1;
-    $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
-    $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/users/disabled_in_use/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+    $navigation_top .= '<a href="' . $base_path . 'problems-0/users/disabled_in_use/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+    $navigation_bottom .= '<a href="' . $base_path . 'problems-0/users/disabled_in_use/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
   }
 
   $output = '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
@@ -1532,7 +1532,7 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
     $page_number = 0;
   }
 
-  mfcs_add_canonical_headers('requests/problems-0/requests/' . $page_number);
+  mfcs_add_canonical_headers('problems-0/requests/' . $page_number);
 
   $page_title = 'Facilities Use Problems - Requests';
   drupal_set_title($page_title);
@@ -1695,12 +1695,12 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
     );
 
     $row['operations'] = array(
-      'data' => '<a href="' . $base_path . 'requests/problems-0/requests/request/' . $item->id . $url_arguments . '" class="operation-link operation-link-details">Details</a>',
+      'data' => '<a href="' . $base_path . 'problems-0/requests/request/' . $item->id . $url_arguments . '" class="operation-link operation-link-details">Details</a>',
       'class' => $class_operations,
     );
 
     $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/view-0/' . $item->request_id . $url_arguments . '" class="operation-link operation-link-request">Request</a>';
-    $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/problems-0/requests/request/' . $item->id . '/recheck' . $url_arguments . '" class="operation-link operation-link-recheck white-space-nowrap">Re-Check</a>';
+    $row['operations']['data'] .= ' <a href="' . $base_path . 'problems-0/requests/request/' . $item->id . '/recheck' . $url_arguments . '" class="operation-link operation-link-recheck white-space-nowrap">Re-Check</a>';
 
     $rows[] = $row;
   }
@@ -1748,7 +1748,7 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
     'processing' => TRUE,
     'serverSide' => TRUE,
     'ajax' => array(
-      'url' => '\'' . $base_path . 'requests/problems-0/requests/ajax' . $url_arguments . '\'',
+      'url' => '\'' . $base_path . 'problems-0/requests/ajax' . $url_arguments . '\'',
       'type' => '\'POST\'',
     ),
     'deferRender' => TRUE,
@@ -1782,7 +1782,7 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
     'responsive' => TRUE,
   );
 
-  $ajax_path = $base_path . 'requests/problems-0/requests/ajax';
+  $ajax_path = $base_path . 'problems-0/requests/ajax';
 
   $including_ignored = 'function (e, dt, node, config) {' . "\n";
   $including_ignored .= '  var data = dt.ajax.params();' . "\n";
@@ -1817,13 +1817,13 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
   $navigation_bottom = '';
   if ($page_number > 0) {
     if ($page_number == 1) {
-      $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/requests' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
-      $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/requests' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_top .= '<a href="' . $base_path . 'problems-0/requests' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'problems-0/requests' . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
     }
     else {
       $previous_page = $page_number - 1;
-      $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/requests/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
-      $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/requests/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_top .= '<a href="' . $base_path . 'problems-0/requests/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
+      $navigation_bottom .= '<a href="' . $base_path . 'problems-0/requests/' . $previous_page . $url_arguments . '" class="table_listing-choice table_listing-choice-previous no-print" title="Previous Page">Prev</a>';
     }
   }
 
@@ -1844,8 +1844,8 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
 
   if ($items_total > ($options['start'] + $rows_per_page)) {
     $next_page = $page_number + 1;
-    $navigation_top .= '<a href="' . $base_path . 'requests/problems-0/requests/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
-    $navigation_bottom .= '<a href="' . $base_path . 'requests/problems-0/requests/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+    $navigation_top .= '<a href="' . $base_path . 'problems-0/requests/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
+    $navigation_bottom .= '<a href="' . $base_path . 'problems-0/requests/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
   }
 
   $form = array();
@@ -1897,7 +1897,7 @@ function mfcs_request_problems_0_requests_form_submit($form, &$form_state) {
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
-    $form_state['redirect'] = mfcs_build_redirect_array('requests/problems-0/requests');
+    $form_state['redirect'] = mfcs_build_redirect_array('problems-0/requests');
   }
   else {
     $form_state['redirect'] = $form_state['values']['redirect_to'];
@@ -1933,7 +1933,7 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-  mfcs_add_canonical_headers('requests/problems-0/requests/request/' . $problem_id);
+  mfcs_add_canonical_headers('problems-0/requests/request/' . $problem_id);
 
   $problem_results = mfcs_miscellaneous_problems_request_load($problem_id, TRUE, TRUE);
   if (empty($problem_results)) {
@@ -2152,15 +2152,15 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_ROOM) {
     $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the room assigned to a request no longer exists, is disabled, or is otherwise invalid.' . '<br>';
     $form['markup']['#markup'] .= '<br>';
-    $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'requests/troubleshoot-0/rooms' . $url_arguments . '">look at the listing of rooms according to the local banner information</a>.' . '<br>';
+    $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'troubleshoot-0/rooms' . $url_arguments . '">look at the listing of rooms according to the local banner information</a>.' . '<br>';
     $form['markup']['#markup'] .= '<br>';
 
     $details = unserialize($problem->details);
 
     if (isset($details['room']) && isset($details['building'])) {
       $form['markup']['#markup'] .= '<strong>Room Unavailabilities:</strong> <a href="' . $base_path . 'unavailable-0/' . (int) $details['room']['id'] . $url_arguments . '">' . check_plain($details['building']['machine_name']) . ' ' . check_plain($details['room']['machine_name']) . '</a><br>';
-      $form['markup']['#markup'] .= '<strong>Room Information:</strong> <a href="' . $base_path . 'requests/troubleshoot-0/rooms/' . (int) $details['room']['id'] . $url_arguments . '">' . check_plain($details['room']['human_name']) . '</a><br>';
-      $form['markup']['#markup'] .= '<strong>Building Information:</strong> <a href="' . $base_path . 'requests/troubleshoot-0/buildings/' . (int) $details['building']['id'] . $url_arguments . '">' . check_plain($details['building']['human_name']) . '</a><br>';
+      $form['markup']['#markup'] .= '<strong>Room Information:</strong> <a href="' . $base_path . 'troubleshoot-0/rooms/' . (int) $details['room']['id'] . $url_arguments . '">' . check_plain($details['room']['human_name']) . '</a><br>';
+      $form['markup']['#markup'] .= '<strong>Building Information:</strong> <a href="' . $base_path . 'troubleshoot-0/buildings/' . (int) $details['building']['id'] . $url_arguments . '">' . check_plain($details['building']['human_name']) . '</a><br>';
     }
 
     unset($details);
@@ -2168,13 +2168,13 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_BUILDING) {
     $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the building assigned to a request no longer exists, is disabled, or is otherwise invalid.' . '<br>';
     $form['markup']['#markup'] .= '<br>';
-    $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'requests/troubleshoot-0/buildings' . $url_arguments . '">look at the listing of buildings according to the local banner information</a>.' . '<br>';
+    $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'troubleshoot-0/buildings' . $url_arguments . '">look at the listing of buildings according to the local banner information</a>.' . '<br>';
     $form['markup']['#markup'] .= '<br>';
 
     $details = unserialize($problem->details);
 
     if (isset($details['building'])) {
-      $form['markup']['#markup'] .= '<strong>Building Information:</strong> <a href="' . $base_path . 'requests/troubleshoot-0/buildings/' . $details['building']['id'] . $url_arguments . '">' . check_plain($details['building']['human_name']) . '</a><br>';
+      $form['markup']['#markup'] .= '<strong>Building Information:</strong> <a href="' . $base_path . 'troubleshoot-0/buildings/' . $details['building']['id'] . $url_arguments . '">' . check_plain($details['building']['human_name']) . '</a><br>';
     }
 
     unset($details);
@@ -2182,13 +2182,13 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
   elseif ($problem->problem == MFCS_REQUEST_PROBLEM_LOCATION) {
     $form['markup']['#markup'] .= 'A <strong>' . $problem_code_name . '</strong> problem is a problem where the location assigned to a request no longer exists, is disabled, or is otherwise invalid.' . '<br>';
     $form['markup']['#markup'] .= '<br>';
-    $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'requests/troubleshoot-0/locations' . $url_arguments . '">look at the listing of locations according to the local banner information</a>.' . '<br>';
+    $form['markup']['#markup'] .= 'You can may want to <a href="' . $base_path . 'troubleshoot-0/locations' . $url_arguments . '">look at the listing of locations according to the local banner information</a>.' . '<br>';
     $form['markup']['#markup'] .= '<br>';
 
     $details = unserialize($problem->details);
 
     if (isset($details['location'])) {
-      $form['markup']['#markup'] .= '<strong>Location Information:</strong> <a href="' . $base_path . 'requests/troubleshoot-0/locations/' . $details['location']['id'] . $url_arguments . '">' . check_plain($details['location']['human_name']) . '</a><br>';
+      $form['markup']['#markup'] .= '<strong>Location Information:</strong> <a href="' . $base_path . 'troubleshoot-0/locations/' . $details['location']['id'] . $url_arguments . '">' . check_plain($details['location']['human_name']) . '</a><br>';
     }
 
     unset($details);
@@ -2701,10 +2701,10 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
     if ($return_to_problem_page) {
-      $form_state['redirect'] = mfcs_build_redirect_array('requests/problems-0/requests/request/' . $form['form']['problem']['#value']->id);
+      $form_state['redirect'] = mfcs_build_redirect_array('problems-0/requests/request/' . $form['form']['problem']['#value']->id);
     }
     else {
-      $form_state['redirect'] = mfcs_build_redirect_array('requests/problems-0/requests');
+      $form_state['redirect'] = mfcs_build_redirect_array('problems-0/requests');
     }
   }
   else {
@@ -2738,7 +2738,7 @@ function mfcs_request_problems_0_request_recheck($problem_id) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  mfcs_add_canonical_headers('requests/problems-0/requests/request/' . $problem_id . '/recheck');
+  mfcs_add_canonical_headers('problems-0/requests/request/' . $problem_id . '/recheck');
 
   $page_title = 'Facilities Use Problems - Re-Check Problem';
   drupal_set_title($page_title);
@@ -2755,15 +2755,15 @@ function mfcs_request_problems_0_request_recheck($problem_id) {
   }
 
   if ($result !== FALSE) {
-    $redirect_array = mfcs_build_redirect_array('requests/problems-0/requests');
+    $redirect_array = mfcs_build_redirect_array('problems-0/requests');
 
-    drupal_goto('requests/problems-0/requests', array('query' => drupal_get_query_parameters()));
+    drupal_goto('problems-0/requests', array('query' => drupal_get_query_parameters()));
     return '';
   }
 
   $markup = '<div>';
   $markup .= 'Failed to re-check problem.<br>';
-  $markup .= 'You may go back to the <a href="' . $base_path . 'requests/problems-0/requests">request problems management page</a>.';
+  $markup .= 'You may go back to the <a href="' . $base_path . 'problems-0/requests">request problems management page</a>.';
   $markup .= '</div>';
 
   return $markup;
