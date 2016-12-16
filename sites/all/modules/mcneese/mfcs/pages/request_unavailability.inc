@@ -36,6 +36,7 @@ function mfcs_request_unavailability_0_rooms_page() {
   $user = cf_current_user();
 
   mfcs_include(MFCS_INCLUDE_MANAGEMENT);
+  mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
   // load sorting information
   $order = NULL;
@@ -132,6 +133,9 @@ function mfcs_request_unavailability_0_rooms_page() {
     }
   }
 
+  $building_options_special = mfcs_get_request_building_list_options(NULL, 'special', TRUE, TRUE);
+  $room_options_special = mfcs_get_request_room_list_options(NULL, 'special', TRUE, TRUE);
+
   $rows = array();
   foreach ($items as $item) {
     $row = array();
@@ -151,6 +155,24 @@ function mfcs_request_unavailability_0_rooms_page() {
       'class' => $class_building_name,
     );
 
+    if (isset($building_options_special[$item->building_id])) {
+      $tooltip_attributes = array(
+        'qtip_tooltip-title' => 'Building',
+        'qtip_tooltip-text' => $building_options_special[$item->building_id],
+        'qtip_tooltip-class' => 'item-tooltip request_item-tooltip-building',
+      );
+
+      $extra_class = ' mfcs-qtip-tooltip mfcs-qtip-datatable_tooltip';
+      $tooltip = ' ' . drupal_attributes($tooltip_attributes);
+      unset($tooltip_attributes);
+
+      $row['building_id']['data'] = '<div class="column-building_id item-building_id' . $extra_class . '"' . $tooltip . '>' . check_plain($item->building_id) . '</div>';
+      $row['building_code']['data'] = '<div class="column-building_code item-building_code' . $extra_class . '"' . $tooltip . '>' . check_plain($item->building_code) . '</div>';
+      $row['building_name']['data'] = '<div class="column-building_name item-building_name' . $extra_class . '"' . $tooltip . '>' . check_plain($item->building_name) . '</div>';
+      unset($extra_class);
+      unset($tooltip);
+    }
+
     $row['room_id'] = array(
       'data' => (int) $item->id,
       'class' => $class_room_id,
@@ -165,6 +187,25 @@ function mfcs_request_unavailability_0_rooms_page() {
       'data' => check_plain($item->room_name),
       'class' => $class_room_name,
     );
+
+    if (isset($room_options_special[$item->id])) {
+      $tooltip_attributes = array(
+        'qtip_tooltip-id' => $item->id . '-tooltip',
+        'qtip_tooltip-title' => 'Room',
+        'qtip_tooltip-text' => $room_options_special[$item->id],
+        'qtip_tooltip-class' => 'item-tooltip request_item-tooltip-room',
+      );
+
+      $extra_class = ' mfcs-qtip-tooltip mfcs-qtip-datatable_tooltip';
+      $tooltip = ' ' . drupal_attributes($tooltip_attributes);
+      unset($tooltip_attributes);
+
+      $row['room_id']['data'] = '<div class="column-room_id item-room_id' . $extra_class . '"' . $tooltip . '>' . check_plain($item->id) . '</div>';
+      $row['room_number']['data'] = '<div class="column-room_number item-room_number' . $extra_class . '"' . $tooltip . '>' . check_plain($item->room_number) . '</div>';
+      $row['room_name']['data'] = '<div class="column-room_name item-room_name' . $extra_class . '"' . $tooltip . '>' . check_plain($item->room_name) . '</div>';
+      unset($extra_class);
+      unset($tooltip);
+    }
 
     $row['operations'] = array(
       'data' => '',
