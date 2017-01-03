@@ -297,7 +297,8 @@ function mfcs_request_statistics_0_page_markup($year = NULL, $month = NULL, $day
   else {
     $instance = mfcs_instance();
     $year = date('Y', $instance);
-    $statistics['year_start'] = strtotime('midnight january 1, ' . $year);
+    $year_fixed = mfcs_strtotime_year_fixup($year);
+    $statistics['year_start'] = strtotime('midnight january 1, ' . $year_fixed);
     $statistics['year_stop'] = strtotime('next year', $statistics['year_start']);
     $statistics['year_previous'] = strtotime('previous year', $statistics['year_start']);
 

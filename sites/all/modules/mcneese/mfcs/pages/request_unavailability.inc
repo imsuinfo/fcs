@@ -1143,21 +1143,6 @@ function mfcs_request_unavailability_0_copy_form($form, &$form_state, $year, $ro
   $form['#id'] = 'mfcs-unavailable_0-copy-page';
   drupal_set_title($page_title);
 
-  // a year offset is necessary to create the date field for a specific year.
-  // the date field needs to be limited to a certain year and it works based off the offset to the current year.
-  $instance = mfcs_instance();
-  $year_offset = $year - ((int) date('Y', $instance));
-
-  if ($year_offset > 0) {
-    $year_offset = '+' . $year_offset;
-  }
-  elseif ($year_offset < 0) {
-    $year_offset = '-' . abs($year_offset);
-  }
-  else {
-    $year_offset = '0';
-  }
-
   $form['form'] = array(
     '#tree' => TRUE,
   );
@@ -1640,16 +1625,8 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
   // the date field needs to be limited to a certain year and it works based off the offset to the current year.
   $instance = mfcs_instance();
   $year_offset = $year - ((int) date('Y', $instance));
-
-  if ($year_offset > 0) {
-    $year_offset = '+' . $year_offset;
-  }
-  elseif ($year_offset < 0) {
-    $year_offset = '-' . abs($year_offset);
-  }
-  else {
-    $year_offset = '0';
-  }
+  $year_offset_start = 0 + $year_offset;
+  $year_offset_stop = 1 + $year_offset;
 
   $form['form'] = array(
     '#tree' => TRUE,
@@ -1783,13 +1760,13 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
     '#id' => 'field-unavailable-date_start-day',
     '#type' => 'date_popup',
     '#title' => 'Start Day',
-    '#date_format' => 'M d',
+    '#date_format' => 'M d, Y',
     '#date_label_position' => 'invisible',
-    '#date_year_range' => '' . $year_offset . ':' . $year_offset,
+    '#date_year_range' => '' . $year_offset_start . ':' . $year_offset_start,
     '#datepicker_options' => array(
       'changeYear' => FALSE,
     ),
-    '#expected_format' => array('date' => 'M d'),
+    '#expected_format' => array('date' => 'M d, Y'),
     '#required' => TRUE,
     '#default_value' => $date_start_day,
     '#wrapper_attributes' => array(
@@ -1819,20 +1796,20 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#title' => 'Stop Date and Time',
-    '#description' => 'The stop day and time is exclusive.',
+    '#description' => 'The stop day and time is exclusive, meaning that the date specified here is <strong>not</strong> a specified unavailable day.',
   );
 
   $form['unavailable']['date_stop']['day'] = array(
     '#id' => 'field-unavailable-date_stop-day',
     '#type' => 'date_popup',
     '#title' => 'Stop Date',
-    '#date_format' => 'M d',
+    '#date_format' => 'M d, Y',
     '#date_label_position' => 'invisible',
-    '#date_year_range' => '' . $year_offset . ':' . $year_offset,
+    '#date_year_range' => '' . $year_offset_start . ':' . $year_offset_stop,
     '#datepicker_options' => array(
-      'changeYear' => FALSE,
+      'changeYear' => TRUE,
     ),
-    '#expected_format' => array('date' => 'M d'),
+    '#expected_format' => array('date' => 'M d, Y'),
     '#required' => FALSE,
     '#default_value' => $date_stop_day,
     '#wrapper_attributes' => array(
@@ -1961,10 +1938,10 @@ function mfcs_request_unavailability_0_edit_form_validate($form, &$form_state) {
     $form_state['values']['unavailable']['date_start']['day'] = NULL;
   }
 
-  $date_start = strtotime($form['form']['year']['#value'] . '-' . $form_state['values']['unavailable']['date_start']['day']);
+  $date_start = strtotime($form_state['values']['unavailable']['date_start']['day']);
   $date_start = strtotime('midnight today', $date_start);
 
-  if ($date_start === FALSE || date('m-d', $date_start) != $form_state['values']['unavailable']['date_start']['day']) {
+  if ($date_start === FALSE || date('Y-m-d', $date_start) != $form_state['values']['unavailable']['date_start']['day']) {
     form_set_error('unavailable][date_start][day', 'The specified start date day is not valid.');
   }
   elseif (isset($form_state['values']['unavailable']['date_start']['time']) && strlen($form_state['values']['unavailable']['date_start']['time']) > 0) {
@@ -1973,12 +1950,15 @@ function mfcs_request_unavailability_0_edit_form_validate($form, &$form_state) {
       form_set_error('unavailable][date_start][time', 'The specified start date time is not valid.');
     }
   }
+  elseif ((int) date('Y', $date_start) != $form['form']['year']['#value']) {
+    form_set_error('unavailable][date_start][day', 'The specified start date time must be set to the year ' . (int) $form['form']['year']['#value'] . '.');
+  }
 
   if (isset($form_state['values']['unavailable']['date_stop']['day'])) {
-    $date_stop = strtotime($form['form']['year']['#value'] . '-' . $form_state['values']['unavailable']['date_stop']['day']);
+    $date_stop = strtotime($form_state['values']['unavailable']['date_stop']['day']);
     $date_stop = strtotime('midnight today', $date_stop);
 
-    if ($date_stop === FALSE || date('m-d', $date_stop) != $form_state['values']['unavailable']['date_stop']['day']) {
+    if ($date_stop === FALSE || date('Y-m-d', $date_stop) != $form_state['values']['unavailable']['date_stop']['day']) {
       form_set_error('unavailable][date_stop][day', 'The specified stop date day is not valid.');
     }
     elseif (isset($form_state['values']['unavailable']['date_stop']['time']) && strlen($form_state['values']['unavailable']['date_stop']['time']) > 0) {
@@ -2083,19 +2063,19 @@ function mfcs_request_unavailability_0_edit_form_submit($form, &$form_state) {
     $fields['year'] = (int) $form['form']['year']['#value'];
 
     if (isset($form_state['values']['unavailable']['date_start']['time']) && strlen($form_state['values']['unavailable']['date_start']['time']) > 0) {
-      $fields['date_start'] = strtotime($form['form']['year']['#value'] . '-' . $form_state['values']['unavailable']['date_start']['day'] . ' ' . $form_state['values']['unavailable']['date_start']['time']);
+      $fields['date_start'] = strtotime($form_state['values']['unavailable']['date_start']['day'] . ' ' . $form_state['values']['unavailable']['date_start']['time']);
     }
     else {
-      $fields['date_start'] = strtotime($form['form']['year']['#value'] . '-' . $form_state['values']['unavailable']['date_start']['day']);
+      $fields['date_start'] = strtotime($form_state['values']['unavailable']['date_start']['day']);
       $fields['date_start'] = strtotime('midnight today', $fields['date_start']);
     }
 
     if (isset($form_state['values']['unavailable']['date_stop']['day']) && strlen($form_state['values']['unavailable']['date_stop']['day']) > 0) {
       if (isset($form_state['values']['unavailable']['date_stop']['time']) && strlen($form_state['values']['unavailable']['date_stop']['time']) > 0) {
-        $fields['date_stop'] = strtotime($form['form']['year']['#value'] . '-' . $form_state['values']['unavailable']['date_stop']['day'] . ' ' . $form_state['values']['unavailable']['date_stop']['time']);
+        $fields['date_stop'] = strtotime($form_state['values']['unavailable']['date_stop']['day'] . ' ' . $form_state['values']['unavailable']['date_stop']['time']);
       }
       else {
-        $fields['date_stop'] = strtotime($form['form']['year']['#value'] . '-' . $form_state['values']['unavailable']['date_stop']['day']);
+        $fields['date_stop'] = strtotime($form_state['values']['unavailable']['date_stop']['day']);
         $fields['date_stop'] = strtotime('midnight today', $fields['date_stop']);
       }
     }
@@ -2388,7 +2368,7 @@ function mfcs_request_unavailability_0_delete_form($form, &$form_state, $year, $
   $form['unavailable']['confirmation']['#markup'] .= '<strong>Title</strong>: ' . $unavailable->title . '<br>';
   $form['unavailable']['confirmation']['#markup'] .= '<strong>Year</strong>: ' . $unavailable->year . '<br>';
 
-  if ($unavailable->date_start == $unavailable->date_stop) {
+  if ($unavailable->date_start == strtotime('midnight today', $unavailable->date_start) && $unavailable->date_stop == strtotime('midnight tomorrow', $unavailable->date_start)) {
     $form['unavailable']['confirmation']['#markup'] .= '<strong>Start Date</strong>: ' . date(MFCS_DATE_FORMAT_DATE, $unavailable->date_start) . ' (All Day)<br>';
   }
   else {

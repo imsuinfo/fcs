@@ -1444,8 +1444,15 @@ function mfcs_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'date' => array(
-        'description' => $t("Represents the date associated with the entry."),
+      'date_start' => array(
+        'description' => $t("Represents the start date and time associated with the entry."),
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'date_stop' => array(
+        'description' => $t("Represents the stop date and time associated with the entry."),
         'type' => 'int',
         'size' => 'big',
         'unsigned' => TRUE,
@@ -2295,6 +2302,7 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_review_classifications} ADD CONSTRAINT review_id_fkey FOREIGN KEY (review_id) REFERENCES {mfcs_field_review_review} (id) ON UPDATE CASCADE ON DELETE CASCADE');
 
   db_query('ALTER TABLE {mfcs_unavailability} ADD CONSTRAINT ' . $key11_foreign . ' FOREIGN KEY (' . $key11_name . ') REFERENCES {' . $table11_foreign . '} (' . $table11_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
+  db_query('ALTER TABLE {mfcs_unavailability} ADD CONSTRAINT mfcs_unavailability_date_stop_check check (date_stop > date_start)');
 
   db_query('ALTER TABLE {mfcs_log_troubleshoot} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_log_emails} ADD CONSTRAINT ' . $key2_foreign . ' FOREIGN KEY (' . $key2_name . ') REFERENCES {' . $table2_foreign . '} (' . $table2_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
@@ -2305,6 +2313,8 @@ function mfcs_install() {
   db_query('ALTER TABLE {mfcs_synchronize} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_log_troubleshoot} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
   db_query('ALTER TABLE {mfcs_log_problems_requests} ADD CONSTRAINT ' . $key1_foreign . ' FOREIGN KEY (' . $key1_name . ') REFERENCES {' . $table1_foreign . '} (' . $table1_foreign_key . ') ON UPDATE CASCADE ON DELETE CASCADE');
+
+  db_query('ALTER TABLE {mfcs_holiday} ADD CONSTRAINT mfcs_holiday_date_stop_check check (date_stop >= (date_start + 86400))');
 
   db_query('ALTER TABLE {mfcs_log_holiday} ADD CONSTRAINT ' . $key7_foreign . ' FOREIGN KEY (' . $key7_name . ') REFERENCES {' . $table7_foreign . '} (' . $table7_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');
   db_query('ALTER TABLE {mfcs_log_unavailability} ADD CONSTRAINT ' . $key8_foreign . ' FOREIGN KEY (' . $key8_name . ') REFERENCES {' . $table8_foreign . '} (' . $table8_foreign_key . ') ON UPDATE CASCADE ON DELETE RESTRICT');

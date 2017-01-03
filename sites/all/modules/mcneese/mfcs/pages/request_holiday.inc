@@ -114,13 +114,13 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
     }
     elseif ($order == 'type') {
       $sorting['type'] = is_null($sort) ? 'DESC' : $sort;
-      $order_column = array(2 => strtolower($sorting[$order]));
+      $order_column = array(3 => strtolower($sorting[$order]));
       $class_type .= 'sorting_1 ';
     }
     elseif ($order == 'enabled') {
       if ($can_edit) {
         $sorting['enabled'] = is_null($sort) ? 'DESC' : $sort;
-        $order_column = array(3 => strtolower($sorting[$order]));
+        $order_column = array(4 => strtolower($sorting[$order]));
         $class_enabled .= 'sorting_1 ';
       }
     }
@@ -153,8 +153,17 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
       'class' => $class_id,
     );
 
+    if ($item->date_stop == strtotime('midnight tomorrow', $item->date_start)) {
+      $formatted_date = date(MFCS_DATE_FORMAT_DATE, $item->date_start);
+    }
+    else {
+      $formatted_date = date(MFCS_DATE_FORMAT_DATE, $item->date_start);
+      $formatted_date .= ' to ';
+      $formatted_date .= date(MFCS_DATE_FORMAT_DATE, $item->date_stop);
+    }
+
     $row['date'] = array(
-      'data' => '<div class="column-item item-date item-date-0">' . check_plain(date(MFCS_DATE_FORMAT_DATE, $item->date)) . '</div>',
+      'data' => '<div class="column-item item-date_start item-date_start-0">' . check_plain($formatted_date) . '</div>',
       'class' => $class_date,
     );
 
@@ -180,12 +189,17 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
       'class' => $class_operations,
     );
 
-    $row['operations']['data'] .= '<div class="column-item item-operations item-operations-view"><a href="' . $base_path . 'holiday-0/view/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View Holiday">View</a></div>';
+    $item_year = (int) $item->year;
+
+    $row['operations']['data'] .= '<div class="column-item item-operations item-operations-view"><a href="' . $base_path . 'holiday-0/view/' . $item_year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View Holiday">View</a></div>';
 
     if ($can_edit) {
-      $row['operations']['data'] .= '<div class="column-item item-operations item-operations-edit"><a href="' . $base_path . 'holiday-0/edit/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-edit" title="Edit Holiday">Edit</a></div>';
-      $row['operations']['data'] .= '<div class="column-item item-operations item-operations-create"><a href="' . $base_path . 'holiday-0/create/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-copy" title="Copy Holiday">Copy</a></div>';
-      $row['operations']['data'] .= '<div class="column-item item-operations item-operations-delete"><a href="' . $base_path . 'holiday-0/delete/' . $year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete" title="Delete Holiday">Delete</a></div>';
+      $row['operations']['data'] .= '<div class="column-item item-operations item-operations-edit"><a href="' . $base_path . 'holiday-0/edit/' . $item_year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-edit" title="Edit Holiday">Edit</a></div>';
+
+      if ($year == $item_year) {
+        $row['operations']['data'] .= '<div class="column-item item-operations item-operations-create"><a href="' . $base_path . 'holiday-0/create/' . $item_year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-copy" title="Copy Holiday">Copy</a></div>';
+        $row['operations']['data'] .= '<div class="column-item item-operations item-operations-delete"><a href="' . $base_path . 'holiday-0/delete/' . $item_year . '/' . $item->id . $url_arguments . '" class="operation-link operation-link-delete" title="Delete Holiday">Delete</a></div>';
+      }
     }
 
     $rows[] = $row;
@@ -330,7 +344,12 @@ function mfcs_request_holiday_0_page($year, $holiday_id) {
     $is_administer = TRUE;
   }
 
+  $is_power = FALSE;
   if ($is_manager || $is_administer) {
+    $is_power = TRUE;
+  }
+
+  if ($is_power) {
     $holiday = mfcs_get_holiday($holiday_id, NULL, FALSE, TRUE);
   }
   else {
@@ -356,7 +375,14 @@ function mfcs_request_holiday_0_page($year, $holiday_id) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  $formatted_date = date(MFCS_DATE_FORMAT_DATE, $holiday->date);
+  if ($holiday->date_stop == strtotime('midnight tomorrow', $holiday->date_start)) {
+    $formatted_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $holiday->date_start) . '</strong>';
+  }
+  else {
+    $formatted_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $holiday->date_start) . '</strong>';
+    $formatted_date .= ' to ';
+    $formatted_date .= '<strong>' . date(MFCS_DATE_FORMAT_DATE, strtotime('midnight yesterday', $holiday->date_stop)) . '</strong>';
+  }
 
   $title = check_plain($holiday->title);
   $type = check_plain($holiday->type_human_name);
@@ -366,7 +392,7 @@ function mfcs_request_holiday_0_page($year, $holiday_id) {
   drupal_set_title('' . $year . ' Holiday: ' . $holiday->title);
 
   $markup = '<div id="mfcs-holiday_page-view" class="mfcs-holiday_page-view">';
-  $markup .= '<div class="mfcs-holiday_page-title"><strong>' . $title . '</strong> is a holiday, break, or office closure for McNeese State University on: <strong>' . $formatted_date . '</strong>.</div>';
+  $markup .= '<div class="mfcs-holiday_page-title"><strong>' . $title . '</strong> is a holiday, break, or office closure for McNeese State University on: ' . $formatted_date . '.</div>';
   $markup .= '<br>';
   $markup .= '<div class="mfcs-holiday_page-description">' . $description . '</div>';
   $markup .= '<br>';
@@ -377,7 +403,7 @@ function mfcs_request_holiday_0_page($year, $holiday_id) {
 
     $instance = mfcs_instance();
     $current_year = date('Y', $instance);
-    if ($year >= $current_year) {
+    if ($is_power || $year >= $current_year) {
       $markup .= '<br class="no-print">';
       $markup .= '<div class="holiday_page-operations no-print">';
       $markup .= '<div class="operation-wrapper operation-wrapper-edit"><a href="' . $base_path . 'holiday-0/edit/' . $year . '/' . $holiday_id . $url_arguments . '" class="operation-edit">Edit this holiday</a></div> ';
@@ -448,21 +474,6 @@ function mfcs_request_holiday_0_copy_form($form, &$form_state, $year) {
 
   mfcs_add_canonical_headers('holiday-0/copy/' . $year);
   drupal_set_title('Copy to ' . $year . ' Holidays');
-
-  // a year offset is necessary to create the date field for a specific year.
-  // the date field needs to be limited to a certain year and it works based off the offset to the current year.
-  $instance = mfcs_instance();
-  $year_offset = $year - ((int) date('Y', $instance));
-
-  if ($year_offset > 0) {
-    $year_offset = '+' . $year_offset;
-  }
-  elseif ($year_offset < 0) {
-    $year_offset = '-' . abs($year_offset);
-  }
-  else {
-    $year_offset = '0';
-  }
 
   $form['form'] = array(
     '#tree' => TRUE,
@@ -670,11 +681,12 @@ function mfcs_request_holiday_0_copy_form_submit($form, &$form_state) {
     if (!empty($holidays)) {
       foreach ($holidays as $holiday) {
         // copy the holiday.
-        $current_date = '' . $year_current . date('/m/d h:i:s a', $holiday->date);
+        $current_date = '' . $year_current . date('/m/d h:i:s a', $holiday->date_start);
 
         $fields = array();
         $fields['year'] = $year_current;
-        $fields['date'] = strtotime($current_date);
+        $fields['date_start'] = strtotime($current_date);
+        $fields['date_stop'] = $fields['date_start'] + ($holiday->date_stop - $holiday->date_start);
         $fields['title'] = $holiday->title;
         $fields['type'] = $holiday->type;
         $fields['description'] = $holiday->description;
@@ -888,16 +900,8 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
   // the date field needs to be limited to a certain year and it works based off the offset to the current year.
   $instance = mfcs_instance();
   $year_offset = $year - ((int) date('Y', $instance));
-
-  if ($year_offset > 0) {
-    $year_offset = '+' . $year_offset;
-  }
-  elseif ($year_offset < 0) {
-    $year_offset = '-' . abs($year_offset);
-  }
-  else {
-    $year_offset = '0';
-  }
+  $year_offset_start = 0 + $year_offset;
+  $year_offset_stop = 1 + $year_offset;
 
   $form['form'] = array(
     '#tree' => TRUE,
@@ -953,18 +957,52 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
     '#title' => 'Description',
   );
 
-  $form['holiday']['date'] = array(
-    '#id' => 'field-holiday-date',
+  $form['holiday']['date_start'] = array(
+    '#id' => 'section-holiday-date_start',
+    '#type' => 'fieldset',
+    '#tree' => TRUE,
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#title' => 'Start Date',
+    '#description' => 'The start day is inclusive.',
+  );
+
+  $form['holiday']['date_start']['day'] = array(
+    '#id' => 'field-holiday-date_start-day',
     '#type' => 'date_popup',
-    '#title' => 'Date',
-    '#date_format' => 'M d',
+    '#title' => 'Start Date',
+    '#date_format' => 'M d, Y',
     '#date_label_position' => 'invisible',
-    '#date_year_range' => '' . $year_offset . ':' . $year_offset,
+    '#date_year_range' => '' . $year_offset_start . ':' . $year_offset_start,
     '#datepicker_options' => array(
       'changeYear' => FALSE,
     ),
-    '#expected_format' => array('date' => 'M d'),
+    '#expected_format' => array('date' => 'M d, Y'),
     '#required' => TRUE,
+  );
+
+  $form['holiday']['date_stop'] = array(
+    '#id' => 'section-holiday-date_stop',
+    '#type' => 'fieldset',
+    '#tree' => TRUE,
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#title' => 'Stop Date',
+    '#description' => 'The stop day is exclusive, meaning that the date specified here is <strong>not</strong> a specified holiday.',
+  );
+
+  $form['holiday']['date_stop']['day'] = array(
+    '#id' => 'field-holiday-date_stop-day',
+    '#type' => 'date_popup',
+    '#title' => 'Stop Date',
+    '#date_format' => 'M d, Y',
+    '#date_label_position' => 'invisible',
+    '#date_year_range' => '' . $year_offset_start . ':' . $year_offset_stop,
+    '#datepicker_options' => array(
+      'changeYear' => TRUE,
+    ),
+    '#expected_format' => array('date' => 'M d, Y'),
+    '#required' => FALSE,
   );
 
   if ($is_manager || $is_administer) {
@@ -980,7 +1018,8 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
     $form['holiday']['title']['#default_value'] = $holiday->title;
     $form['holiday']['type']['#default_value'] = $holiday->type;
     $form['holiday']['description']['#default_value'] = $holiday->description;
-    $form['holiday']['date']['#default_value'] = date('Y-m-d', $holiday->date);
+    $form['holiday']['date_start']['day']['#default_value'] = date('Y-m-d', $holiday->date_start);
+    $form['holiday']['date_stop']['day']['#default_value'] = date('Y-m-d', $holiday->date_stop);
 
     if ($is_manager || $is_administer) {
       $form['holiday']['enabled']['#default_value'] = $holiday->enabled;
@@ -995,6 +1034,28 @@ function mfcs_request_holiday_0_edit_form($form, &$form_state, $year, $holiday_i
       }
     }
   }
+
+  $form['holiday']['help'] = array(
+    '#id' => 'section-help',
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#title' => 'Help',
+  );
+
+  $form['holiday']['help']['inclusiveness'] = array(
+    '#type' => 'markup',
+    '#markup' => '',
+  );
+
+  $form['holiday']['help']['inclusiveness']['#markup'] .= '<div class="inclusiveness">';
+  $form['holiday']['help']['inclusiveness']['#markup'] .= '<h3 class="inclusiveness-title">Inclusiveness and Exclusiveness</h3>';
+  $form['holiday']['help']['inclusiveness']['#markup'] .= '<div class="inclusiveness-text">';
+  $form['holiday']['help']['inclusiveness']['#markup'] .= 'The start day is <em>inclusive</em>, but the stop day is <em>exclusive</em>.<br>';
+  $form['holiday']['help']['inclusiveness']['#markup'] .= 'What this means is that if you say that start day is July 29th and the stop day is July 30th, then the holiday ends on the second before July 30th begins (aka: ends on 11:59:59pm).<br>';
+  $form['holiday']['help']['inclusiveness']['#markup'] .= 'If you want to ensure that both July 29th and July 30th are included, then the stop day must be July 31st.<br>';
+  $form['holiday']['help']['inclusiveness']['#markup'] .= '</div>';
+  $form['holiday']['help']['inclusiveness']['#markup'] .= '</div>';
 
   $form['holiday']['submit'] = array(
     '#id' => 'mfcs-holiday-edit-submit',
@@ -1041,7 +1102,7 @@ function mfcs_request_holiday_0_edit_form_pre_validate(&$form, &$form_state) {
   if ($clicked_id == 'mfcs-holiday-edit-submit-cancel') {
     $form['holiday']['title']['#required'] = FALSE;
     $form['holiday']['type']['#required'] = FALSE;
-    $form['holiday']['date']['#required'] = FALSE;
+    $form['holiday']['date_start']['#required'] = FALSE;
   }
 }
 
@@ -1062,9 +1123,35 @@ function mfcs_request_holiday_0_edit_form_validate($form, &$form_state) {
   }
 
   if ($clicked_id == 'mfcs-holiday-edit-submit-submit') {
-    $date = strtotime($form['form']['year']['#value'] . '-' . $form_state['values']['holiday']['date']);
-    if ($date === FALSE || date('m-d', $date) != $form_state['values']['holiday']['date']) {
-      form_set_error('holiday][date', 'The specified date is not valid.');
+    // when the field is 'required', but is empty, for some reason an array is provided instead of a string.
+    if (is_array($form_state['values']['holiday']['date_start']['day'])) {
+      $form_state['values']['holiday']['date_start']['day'] = NULL;
+    }
+
+    $date_start = strtotime($form_state['values']['holiday']['date_start']['day']);
+    $date_start = strtotime('midnight today', $date_start);
+
+    if ($date_start === FALSE || date('Y-m-d', $date_start) != $form_state['values']['holiday']['date_start']['day']) {
+      form_set_error('holiday][date_start][day', 'The specified start date day is not valid.');
+    }
+    elseif ((int) date('Y', $date_start) != $form['form']['year']['#value']) {
+      form_set_error('holiday][date_start][day', 'The specified start date time must be set to the year ' . (int) $form['form']['year']['#value'] . '.');
+    }
+
+    if (isset($form_state['values']['holiday']['date_stop']['day'])) {
+      $date_stop = strtotime($form_state['values']['holiday']['date_stop']['day']);
+
+      if ($date_stop === FALSE || date('Y-m-d', $date_stop) != $form_state['values']['holiday']['date_stop']['day']) {
+        form_set_error('holiday][date_stop][day', 'The specified stop date day is not valid.');
+      }
+
+      if ($date_stop == $date_start) {
+          form_set_error('holiday][date_stop][day', 'The specified stop date day cannot be the same as the start date.');
+      }
+
+      if ($date_stop < $date_start) {
+        form_set_error('holiday][date_stop][day', 'The specified stop date day cannot be before the start date.');
+      }
     }
 
     $length = strlen($form_state['values']['holiday']['title']);
@@ -1146,16 +1233,25 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
 
   $success = TRUE;
   try {
-    $date = strtotime($form['form']['year']['#value'] . '-' . $form_state['values']['holiday']['date']);
-    $date = strtotime('midnight today', $date);
-
     $fields = array();
     $fields['title'] = $form_state['values']['holiday']['title'];
     $fields['type'] = $form_state['values']['holiday']['type'];
     $fields['description'] = $form_state['values']['holiday']['description'];
-    $fields['date'] = $date;
     $fields['year'] = (int) $form['form']['year']['#value'];
     $fields['updated'] = mfcs_instance();
+
+    $fields['date_start'] = strtotime($form_state['values']['holiday']['date_start']['day']);
+    $fields['date_start'] = strtotime('midnight today', $fields['date_start']);
+
+    if (isset($form_state['values']['holiday']['date_stop']['day']) && strlen($form_state['values']['holiday']['date_stop']['day']) > 0) {
+      $fields['date_stop'] = strtotime($form_state['values']['holiday']['date_stop']['day']);
+      $fields['date_stop'] = strtotime('midnight today', $fields['date_stop']);
+    }
+    else {
+      // when date stop is not specified, then the event is an all day event.
+      // setting the stop date to 'tomorrow' logically produces an all day event.
+      $fields['date_stop'] = strtotime('midnight tomorrow', $fields['date_start']);
+    }
 
     if ($is_manager || $is_administer) {
       if (isset($form_state['values']['holiday']['enabled'])) {
@@ -1580,7 +1676,7 @@ function mfcs_request_holiday_0_check_for_conflicts($holiday_id) {
     $query = db_select('mfcs_requests', 'mer');
     $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
     $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
-    $query->innerJoin('mfcs_holiday', 'mh', 'mfdd.value = mh.date');
+    $query->innerJoin('mfcs_holiday', 'mh', 'mfdd.value >= mh.date_start and mfdd.value < mh.date_stop');
 
     $query->addField('mer', 'id', 'id');
     $query->addField('mer', 'title', 'title');

@@ -565,6 +565,15 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
         $processed_title_for_fullcalendar = str_replace('\'', '\\\'', $item['title-raw']);
 
         if ($item['is'] == 'holiday') {
+          // skip over duplicate entries.
+          if (array_key_exists($item['id'], $date_range_items)) {
+            continue;
+          }
+
+          if (array_key_exists('date_range_start', $item)) {
+            $date_range_items[$item['id']] = TRUE;
+          }
+
           $javascript_item_common .= $space . 'title: \'' . $processed_title_for_fullcalendar . '\',' . "\n";
 
           $class_names = array(
@@ -597,10 +606,13 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
           $javascript_item_common .= $space . 'className: [ ' . implode(', ', $class_names) . ' ]' . "\n";
         }
         elseif ($item['is'] == 'unavailable') {
-          // the data is structured in a way to be compatibile with the original calendar.
-          // this does not require multiple separate days, so instead use the entire date range as a single entry and skip all other (now duplicate) entries.
+          // skip over duplicate entries.
           if (array_key_exists($item['id'], $date_range_items)) {
             continue;
+          }
+
+          if (array_key_exists('date_range_start', $item)) {
+            $date_range_items[$item['id']] = TRUE;
           }
 
           $javascript_item_common .= $space . 'title: \'' . $processed_title_for_fullcalendar . '\',' . "\n";
@@ -618,10 +630,6 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
 
           if (array_key_exists('type', $item)) {
             $class_names[] = '\'type-' . $item['type'] . '\'';
-          }
-
-          if (array_key_exists('date_range_start', $item)) {
-            $date_range_items[$item['id']] = TRUE;
           }
 
           $tooltip_class .= ' tooltip-is-unavailable year-' . $item['year'] . ' month-' . $item['month'] . ' day-' . $item['day'];
@@ -717,22 +725,27 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
           $date_range_stop_midnight = strtotime('midnight today', $item['date_range_stop']);
 
           $all_day = TRUE;
-          if ($item['date_range_start'] == $date_range_start_midnight) {
+          if ($item['date_range_stop'] == strtotime('midnight tomorrow', $item['date_range_start'])) {
             $tooltip_text .= date(MFCS_DATE_FORMAT_DATE, $item['date_range_start']);
           }
           else {
-            $tooltip_text .= date(MFCS_DATE_FORMAT_DATE_TIME, $item['date_range_start']);
-            $all_day = FALSE;
-          }
+            if ($item['date_range_start'] == $date_range_start_midnight) {
+              $tooltip_text .= date(MFCS_DATE_FORMAT_DATE, $item['date_range_start']);
+            }
+            else {
+              $tooltip_text .= date(MFCS_DATE_FORMAT_DATE_TIME, $item['date_range_start']);
+              $all_day = FALSE;
+            }
 
-          $tooltip_text .= ' to ';
+            $tooltip_text .= ' to ';
 
-          if ($item['date_range_stop'] == $date_range_stop_midnight) {
-            $tooltip_text .= date(MFCS_DATE_FORMAT_DATE, $item['date_range_stop']);
-          }
-          else {
-            $tooltip_text .= date(MFCS_DATE_FORMAT_DATE_TIME, $item['date_range_stop']);
-            $all_day = FALSE;
+            if ($item['date_range_stop'] == $date_range_stop_midnight) {
+              $tooltip_text .= date(MFCS_DATE_FORMAT_DATE, strtotime('midnight yesterday', $item['date_range_stop']));
+            }
+            else {
+              $tooltip_text .= date(MFCS_DATE_FORMAT_DATE_TIME, $item['date_range_stop']);
+              $all_day = FALSE;
+            }
           }
 
           unset($date_range_start_midnight);
@@ -1914,8 +1927,14 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
   $javascript_items = NULL;
   $space = '      ';
   if (!empty($items['all_day'])) {
+    $processed_items = array();
     foreach ($items['all_day'] as $date_items) {
       foreach ($date_items as $item_id => $item) {
+        if (array_key_exists($item_id, $processed_items)) {
+          continue;
+        }
+        $processed_items[$item_id] = $item_id;
+
         $javascript_item_common = '';
 
         $tooltip_text = '';
@@ -2059,7 +2078,17 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
         }
 
         $tooltip_text .= '<div class="tooltip-item tooltip-item-date">';
-        $tooltip_text .= date(MFCS_DATE_FORMAT_DATE, $item['date']);
+        if (array_key_exists('date_range_start', $item)) {
+          if ($item['date_range_stop'] == strtotime('midnight tomorrow', $item['date_range_start'])) {
+            $tooltip_text .= date(MFCS_DATE_FORMAT_DATE, $item['date_range_start']);
+          }
+          else {
+            $tooltip_text .= date(MFCS_DATE_FORMAT_DATE, $item['date_range_start']) . ' to ' . date(MFCS_DATE_FORMAT_DATE, strtotime('midnight yesterday', $item['date_range_stop']));
+          }
+        }
+        else {
+          $tooltip_text .= date(MFCS_DATE_FORMAT_DATE, $item['date']);
+        }
         $tooltip_text .= '</div>';
 
         if (!is_null($javascript_items)) {
@@ -2075,8 +2104,16 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
           $javascript_items .= $space . 'id: \'' . $item_id . '\',' . "\n";
         }
 
-        $javascript_items .= $space . 'start: \'' . date('Y-m-d', $item['date']) . '\',' . "\n";
-        $javascript_items .= $space . 'end: \'' . date('Y-m-d', strtotime('tomorrow', $item['date'])) . '\',' . "\n";
+
+        if (array_key_exists('date_range_start', $item)) {
+          $javascript_items .= $space . 'start: \'' . date('Y-m-d', $item['date_range_start']) . '\',' . "\n";
+          $javascript_items .= $space . 'end: \'' . date('Y-m-d', $item['date_range_stop']) . '\',' . "\n";
+        }
+        else {
+          $javascript_items .= $space . 'start: \'' . date('Y-m-d', $item['date']) . '\',' . "\n";
+          $javascript_items .= $space . 'end: \'' . date('Y-m-d', strtotime('tomorrow', $item['date'])) . '\',' . "\n";
+        }
+
         $javascript_items .= $space . 'allDayDefault: true,' . "\n";
         $javascript_items .= $space . 'tooltipTitle: \'<strong>' . $item['title'] . '</strong>\',' . "\n";
         $javascript_items .= $space . 'tooltipText: \'' . $tooltip_text . $tooltip_text_suffix . '\',' . "\n";
@@ -2087,6 +2124,8 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
         unset($javascript_item_common);
       }
     }
+
+    unset($processed_items);
   }
   unset($item);
   unset($item_id);

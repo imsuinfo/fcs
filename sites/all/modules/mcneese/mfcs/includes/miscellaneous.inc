@@ -13,13 +13,13 @@
 /**
  * Determine the year/month/day according to the parameters.
  *
- * @param int $year
+ * @param int $year|null
  *   The year. Should be 4-digits to avoid php date() and strtotime()
  *   function issues.
- * @param string $month
+ * @param string|null $month
  *   The month name, such as January. Use name instead of digits to avoid
  *   php date() and strtotime() function issues.
- * @param int $day
+ * @param int|null $day
  *   The day. Use 2-digits to avoid php date() and strtotime() function
  *   issues.
  *
@@ -51,9 +51,22 @@ function mfcs_miscellaneous_determine_current_date($year, $month, $day) {
   $instance = mfcs_instance();
 
 
+  // pre-process year
+  if (is_null($year)) {
+    $year = (int) date('Y', $instance);
+  }
+
+  $year = mfcs_strtotime_year_fixup($year);
+
+
   // process month & day
   if (is_null($month)) {
     $month_stamp = strtotime('midnight first day of this month', $instance);
+
+    // year must be corrected.
+    $month_stamp = strtotime(date('m d, ', $month_stamp) . $year, $month_stamp);
+    $month_stamp = strtotime('midnight first day of this month', $month_stamp);
+
     $current_date['day'] = date('d', $month_stamp);
     $current_date['day_stamp'] = $month_stamp;
   }
@@ -62,13 +75,14 @@ function mfcs_miscellaneous_determine_current_date($year, $month, $day) {
       $day_stamp = strtotime('midnight first day of ' . $month . ' ' . $year);
     }
     else {
-      $day_stamp = strtotime($month . ' ' . $day);
+      $day_stamp = strtotime($month . ' ' . $day . ', ' . $year);
+      $day_stamp = strtotime('midnight today',  $day_stamp);
     }
 
     $current_date['day'] = date('d', $day_stamp);
     $current_date['day_stamp'] = $day_stamp;
 
-    $month_stamp = strtotime($month . ' ' . $current_date['day']);
+    $month_stamp = strtotime('midnight first day of this month', $day_stamp);
   }
 
   $current_date['month'] = date('F', $month_stamp);
@@ -76,30 +90,10 @@ function mfcs_miscellaneous_determine_current_date($year, $month, $day) {
 
 
   // process year
-  if ($year < 1000) {
-    if ($year < 100) {
-      if ($year < 10) {
-        if ($year < 0) {
-          $year = '0000';
-        }
-        else {
-          $year = '000' . $year;
-        }
-      }
-      else {
-        $year = '00' . $year;
-      }
-    }
-    else {
-      $year = '0' . $year;
-    }
-  }
-
-  $year_stamp = strtotime($current_date['month'] . ' ' . $year);
+  $year_stamp = strtotime('midnight january 1', $month_stamp);
 
   $current_date['year'] = date('Y', $year_stamp);
   $current_date['year_stamp'] = $year_stamp;
-
 
   return $current_date;
 }
@@ -1742,7 +1736,7 @@ function mfcs_miscellaneous_check_requests_problem_holiday($request_id = NULL) {
     $query = db_select('mfcs_requests', 'mer');
     $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
     $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
-    $query->innerJoin('mfcs_holiday', 'mh', 'mfdd.value = mh.date');
+    $query->innerJoin('mfcs_holiday', 'mh', 'mfdd.value >= mh.date_start and mfdd.value < mh.date_stop');
 
     $query->addField('mer', 'id', 'id');
     $query->addField('mer', 'title', 'title');
@@ -1754,6 +1748,8 @@ function mfcs_miscellaneous_check_requests_problem_holiday($request_id = NULL) {
     $query->addField('mh', 'title', 'holiday_title');
     $query->addField('mh', 'type', 'holiday_type');
     $query->addField('mh', 'year', 'holiday_year');
+    $query->addField('mh', 'date_start', 'holiday_date_start');
+    $query->addField('mh', 'date_stop', 'holiday_date_stop');
 
     $query->addField('mfdd', 'delta', 'delta');
     $query->addField('mfdd', 'value', 'date');
@@ -1799,6 +1795,8 @@ function mfcs_miscellaneous_check_requests_problem_holiday($request_id = NULL) {
               'title' => $result->holiday_title,
               'type' => $result->holiday_type,
               'year' => (int) $result->holiday_year,
+              'date_start' => (int) $result->holiday_date_start,
+              'date_stop' => (int) $result->holiday_date_stop,
             ),
           );
         }

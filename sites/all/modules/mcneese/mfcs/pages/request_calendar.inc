@@ -114,6 +114,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     $month_start = strtotime('midnight first day of', $instance);
     $month_end = strtotime('midnight last day of', $instance);
     $month_stop = strtotime('midnight tomorrow', $month_end);
+    $specific_date = $instance;
   }
   else {
     $current_date = mfcs_miscellaneous_determine_current_date($year, $month, NULL);
@@ -121,13 +122,14 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     $month_start = strtotime('midnight first day of ' . $current_date['month'] . ' ' . $current_date['year']);
     $month_end = strtotime('midnight last day of ' . $current_date['month'] . ' ' . $current_date['year']);
     $month_stop = strtotime('midnight tomorrow', $month_end);
+    $specific_date = $current_date['month_stamp'];
   }
 
-  $month = strtolower(date('F', $month_start));
-  $year = date('Y', $month_start);
+  $month = strtolower(date('F', $specific_date));
+  $year = date('Y', $specific_date);
   mfcs_add_canonical_headers('requests/calendar-0/month/' . $year . '/' . $month);
 
-  $page_title = 'Request Calendar - ' . date('F Y', $current_date['month_stamp']);
+  $page_title = 'Request Calendar - ' . date('F Y', $specific_date);
   drupal_set_title($page_title);
 
   // determine the begin and end weeks for the month.
@@ -195,6 +197,13 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   }
 
 
+  // a separate structure is used for holidays for both original and full calendar.
+  $calendar = MFCS_USER_CALENDAR_ORIGINAL;
+  if (isset($user->mfcs['calendar']) && is_numeric($user->mfcs['calendar'])) {
+    $calendar = (int) $user->mfcs['calendar'];
+  }
+
+
   // conditionally load holidays.
   $holidays = NULL;
   $show_holidays = TRUE;
@@ -235,7 +244,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   $year_stop = strtotime('next year', $year_start);
   if ($absolute_start < $year_start) {
     if ($show_holidays) {
-      $holidays_previous = mfcs_get_holidays($year - 1, $absolute_start, $year_start);
+      $holidays_previous = mfcs_get_holidays($year - 1, $absolute_start, $year_start, TRUE, FALSE, TRUE, TRUE);
       if (is_array($holidays_previous)) {
         foreach ($holidays_previous as $holiday_key => $holiday_value) {
           $holidays[$holiday_key] = $holiday_value;
@@ -247,7 +256,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     }
 
     if ($show_unavailabilities) {
-      $unavailabilities_previous = mfcs_get_unavailabilities($year - 1, NULL, $search_building_ids, $absolute_start, $year_start, TRUE, FALSE, TRUE);
+      $unavailabilities_previous = mfcs_get_unavailabilities($year - 1, NULL, $search_building_ids, $absolute_start, $year_start, TRUE, FALSE, TRUE, TRUE);
       if (is_array($unavailabilities_previous)) {
         foreach ($unavailabilities_previous as $unavailabilities_key => $unavailabilities_value) {
           $holidays[$unavailabilities_key] = $unavailabilities_value;
@@ -261,7 +270,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
 
   if ($absolute_stop > $year_stop) {
     if ($show_holidays) {
-      $holidays_next = mfcs_get_holidays($year + 1, $year_stop, $absolute_stop);
+      $holidays_next = mfcs_get_holidays($year + 1, $year_stop, $absolute_stop, TRUE, FALSE, TRUE, TRUE);
       if (is_array($holidays_next)) {
         foreach ($holidays_next as $holiday_key => $holiday_value) {
           $holidays[$holiday_key] = $holiday_value;
@@ -273,7 +282,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
     }
 
     if ($show_unavailabilities) {
-      $unavailabilities_next = mfcs_get_unavailabilities($year + 1, NULL, $search_building_ids, $year_stop, $absolute_stop, TRUE, FALSE, TRUE);
+      $unavailabilities_next = mfcs_get_unavailabilities($year + 1, NULL, $search_building_ids, $year_stop, $absolute_stop, TRUE, FALSE, TRUE, TRUE);
       if (is_array($unavailabilities_next)) {
         foreach ($unavailabilities_next as $unavailabilities_key => $unavailabilities_value) {
           $holidays[$unavailabilities_key] = $unavailabilities_value;
@@ -286,26 +295,34 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   }
 
   foreach ($holidays as $holiday) {
-    $day = date('j', $holiday->date);
-    $month = date('n', $holiday->date);
-    $month_day = $month . '-' . $day;
-    if (!isset($rows[$month_day])) {
-      $rows[$month_day] = array();
-    }
+    $date_current = $holiday->date_start;
+    while ($date_current < $holiday->date_stop) {
+      $day = date('j', $date_current);
+      $month = date('n', $date_current);
+      $month_day = $month . '-' . $day;
+      if (!isset($rows[$month_day])) {
+        $rows[$month_day] = array();
+      }
 
-    $rows[$month_day]['holiday-' . $holiday->id] = array(
-      'is' => 'holiday',
-      'id' => 'holiday-' . $holiday->id,
-      'title' => check_plain($holiday->title),
-      'title-raw' => $holiday->title,
-      'type' => $holiday->type,
-      'type_name' => $holiday->type_human_name,
-      'tooltip' => str_replace('"', '&quot;', check_plain($holiday->description)),
-      'year' => $year,
-      'month' => $month,
-      'day' => $day,
-      'date' => $holiday->date,
-    );
+      $rows[$month_day]['holiday-' . $holiday->id] = array(
+        'is' => 'holiday',
+        'id' => 'holiday-' . $holiday->id,
+        'title' => check_plain($holiday->title),
+        'title-raw' => $holiday->title,
+        'type' => $holiday->type,
+        'type_name' => $holiday->type_human_name,
+        'tooltip' => str_replace('"', '&quot;', check_plain($holiday->description)),
+        //'description' => str_replace("\n", '<br>', check_plain($holiday->description)),
+        'year' => (int) $holiday->year,
+        'month' => $month,
+        'day' => $day,
+        'date' => $date_current,
+        'date_range_start' => (int) $holiday->date_start,
+        'date_range_stop' => (int) $holiday->date_stop,
+      );
+
+      $date_current = strtotime('midnight tomorrow', $date_current);
+    }
   }
   unset($holiday);
   unset($holidays);
@@ -322,9 +339,10 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
       $tooltip = $building_code . ' ' . $room_number . ': unavailable due to class ' . check_plain($unavailability->title) . '.';
     }
 
-    if ($unavailability->date_start == $unavailability->date_stop) {
-      $day = date('j', $unavailability->date_start);
-      $month = date('n', $unavailability->date_start);
+    $date_current = $unavailability->date_start;
+    while ($date_current < $unavailability->date_stop) {
+      $day = date('j', $date_current);
+      $month = date('n', $date_current);
       $month_day = $month . '-' . $day;
       if (!isset($rows[$month_day])) {
         $rows[$month_day] = array();
@@ -341,7 +359,9 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
         'year' => $year,
         'month' => $month,
         'day' => $day,
-        'date' => $unavailability->date_start,
+        'date' => $date_current,
+        'date_range_start' => $unavailability->date_start,
+        'date_range_stop' => $unavailability->date_stop,
         'building' => $unavailability->building_id,
         'room' => $unavailability->room_id,
         'building_code' => $building_code,
@@ -351,43 +371,8 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
         'type' => $unavailability->type,
         'type_name' => isset($unavailability_type_options[$unavailability->type]) ? $unavailability_type_options[$unavailability->type] : 'Unknown',
       );
-    }
-    else {
-      $date_current = $unavailability->date_start;
-      while ($date_current < $unavailability->date_stop) {
-        $day = date('j', $date_current);
-        $month = date('n', $date_current);
-        $month_day = $month . '-' . $day;
-        if (!isset($rows[$month_day])) {
-          $rows[$month_day] = array();
-        }
 
-        $rows[$month_day]['unavailability-' . $unavailability->id] = array(
-          'is' => 'unavailable',
-          'id' => 'unavailability-' . ((int) $unavailability->id),
-          'href' => $base_path . 'unavailable-0/view/' . $year . '/' . $unavailability->room_id . '/' . $unavailability->id,
-          'title' => check_plain($unavailability->title),
-          'title-raw' => $unavailability->title,
-          'tooltip' => str_replace('"', '&quot;', $tooltip),
-          'description' => str_replace("\n", '<br>', $description),
-          'year' => $year,
-          'month' => $month,
-          'day' => $day,
-          'date' => $date_current,
-          'date_range_start' => $unavailability->date_start,
-          'date_range_stop' => $unavailability->date_stop,
-          'building' => $unavailability->building_id,
-          'room' => $unavailability->room_id,
-          'building_code' => $building_code,
-          'building_name' => $building_name,
-          'room_number' => $room_number,
-          'room_name' => $room_name,
-          'type' => $unavailability->type,
-          'type_name' => isset($unavailability_type_options[$unavailability->type]) ? $unavailability_type_options[$unavailability->type] : 'Unknown',
-        );
-
-        $date_current = strtotime('midnight tomorrow', $date_current);
-      }
+      $date_current = strtotime('midnight tomorrow', $date_current);
     }
     unset($date_current);
     unset($building_code);
@@ -790,17 +775,19 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   if (is_null($year)) {
     $day_start = strtotime('midnight today', $instance);
     $day_stop = strtotime('midnight tomorrow', $day_start);
+    $specific_date = $instance;
   }
   else {
     $current_date = mfcs_miscellaneous_determine_current_date($year, $month, $day);
 
     $day_start = strtotime('midnight ' . $current_date['month'] . ' ' . $current_date['day'] . ' ' . $current_date['year']);
     $day_stop = strtotime('midnight tomorrow', $day_start);
+    $specific_date = $current_date['day_stamp'];
   }
 
-  $month = strtolower(date('F', $day_start));
-  $year = date('Y', $day_start);
-  $day = date('d', $day_start);
+  $month = strtolower(date('F', $specific_date));
+  $year = date('Y', $specific_date);
+  $day = date('d', $specific_date);
   mfcs_add_canonical_headers('requests/calendar-0/day/' . $year . '/' . $month . '/' . $day);
 
   $page_title = 'Request Calendar - ' . date('F j, Y', $day_start);
@@ -882,7 +869,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   }
 
   foreach ($holidays as $holiday) {
-    $date = strtotime('midnight today', $holiday->date);
+    $date = strtotime('midnight today', $holiday->date_start);
 
     if (!isset($rows['all_day'][$date])) {
       $rows['all_day'][$date] = array();
@@ -898,10 +885,11 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
       'type_name' => $holiday->type_human_name,
       'tooltip' => str_replace('"', '&quot;', $description),
       'description' => str_replace("\n", '<br>', $description),
-      'year' => $year,
+      'year' => (int) $holiday->year,
       'month' => $month,
       'day' => $day,
-      'date' => $holiday->date,
+      'date_range_start' => (int) $holiday->date_start,
+      'date_range_stop' => (int) $holiday->date_stop,
     );
     unset($description);
   }
