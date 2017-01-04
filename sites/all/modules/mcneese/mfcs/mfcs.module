@@ -6613,6 +6613,43 @@ function mfcs_convert_value_to_database_format($value, $method, $option = array(
   return FALSE;
 }
 
+/**
+ * Converts a timetamp from current time format to UTC for storage in the database.
+ *
+ * @param int $timestamp
+ *    The timestamp to prepare.
+ *
+ * @return int|FALSE
+ *   The timestamp in UTC format, or FALSE on error.
+ */
+function mfcs_prepare_timestamp_to_database($timestamp) {
+  if (!is_int($timestamp)) {
+    cf_error::invalid_integer('timestamp');
+    return FALSE;
+  }
+
+  $timezone = new DateTimeZone(date_default_timezone_get());
+  if (!is_object($timezone)) {
+    return FALSE;
+  }
+
+  if ($timezone->getName() == MFCS_TIMEZONE_DATABASE) {
+    return $timezone;
+  }
+
+  $date = new DateTime(date('Y/m/d H:i:s', $timestamp));
+  if (!is_object($date)) {
+    return FALSE;
+  }
+
+  $offset = $timezone->getOffset($date);
+  if (!is_int($offset)) {
+    return FALSE;
+  }
+
+  return ($timestamp + $offset);
+}
+
 /***
  * Convert a given value to the appropraite database format.
  *
@@ -6661,6 +6698,43 @@ function mfcs_convert_value_from_database_format($value, $method, $option = arra
   }
 
   return FALSE;
+}
+
+/**
+ * Converts a timetamp from UTC storage in the database to current time format.
+ *
+ * @param int $timestamp
+ *    The timestamp to prepare.
+ *
+ * @return int|FALSE
+ *   The timestamp in current time format, or FALSE on error.
+ */
+function mfcs_prepare_timestamp_from_database($timestamp) {
+  if (!is_int($timestamp)) {
+    cf_error::invalid_integer('timestamp');
+    return FALSE;
+  }
+
+  $timezone = new DateTimeZone(date_default_timezone_get());
+  if (!is_object($timezone)) {
+    return FALSE;
+  }
+
+  if ($timezone->getName() == MFCS_TIMEZONE_LOCAL) {
+    return $timezone;
+  }
+
+  $date = new DateTime(date('Y/m/d H:i:s', $timestamp));
+  if (!is_object($date)) {
+    return FALSE;
+  }
+
+  $offset = $timezone->getOffset($date);
+  if (!is_int($offset)) {
+    return FALSE;
+  }
+
+  return ($timestamp - $offset);
 }
 
 /**
