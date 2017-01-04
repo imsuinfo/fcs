@@ -391,16 +391,15 @@ define('MFCS_USER_CALENDAR_NONE', 0);
 define('MFCS_USER_CALENDAR_ORIGINAL', 1);
 define('MFCS_USER_CALENDAR_FULL', 2);
 
-#define('MFCS_TIMEZONE_DEFUALT', 'UTC');
-define('MFCS_TIMEZONE_DEFUALT', 'America/Chicago');
+define('MFCS_TIMEZONE_DATABASE', 'UTC');
 define('MFCS_TIMEZONE_LOCAL', 'America/Chicago');
 
 /**
  * Implements hook_init().
  */
 function mfcs_init() {
-  // enforce default timezone to ensure consistency in the database.
-  date_default_timezone_set(MFCS_TIMEZONE_DEFUALT);
+  // enforce default timezone to ensure consistency.
+  date_default_timezone_set(MFCS_TIMEZONE_LOCAL);
 
   global $base_path;
   $module_path = drupal_get_path('module', 'mfcs');
