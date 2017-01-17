@@ -176,10 +176,10 @@ function mfcs_ical_generate($requests, $holidays, $unavailabilities, $start = NU
   mfcs_ical_populate_array($ical, 'METHOD:PUBLISH');
 
   if (!empty($requests)) {
-    #$success = mfcs_ical_generate_requests($ical, $requests, $date_settings, $ical_eol, $start, $stop);
-    #if ($success === FALSE) {
-    #  return FALSE;
-    #}
+    $success = mfcs_ical_generate_requests($ical, $requests, $date_settings, $ical_eol, $start, $stop);
+    if ($success === FALSE) {
+      return FALSE;
+    }
   }
 
   if (!empty($holidays)) {
