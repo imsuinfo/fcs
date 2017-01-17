@@ -265,7 +265,9 @@ function mfcs_request_statistics_0_page_markup($year = NULL, $month = NULL, $day
   );
 
   $path_dates = '';
+  $extra_links = NULL;
 
+  $instance = mfcs_instance();
   if (!is_null($year)) {
     $statistics['year_start'] = strtotime('midnight january 1,  ' . $year);
     $statistics['year_stop'] = strtotime('next year', $statistics['year_start']);
@@ -295,7 +297,6 @@ function mfcs_request_statistics_0_page_markup($year = NULL, $month = NULL, $day
     }
   }
   else {
-    $instance = mfcs_instance();
     $year = date('Y', $instance);
     $year_fixed = mfcs_strtotime_year_fixup($year);
     $statistics['year_start'] = strtotime('midnight january 1, ' . $year_fixed);
@@ -317,6 +318,15 @@ function mfcs_request_statistics_0_page_markup($year = NULL, $month = NULL, $day
 
     $string_previous = date('Y', $previous);
     $string_next = date('Y', $next);
+
+    $link_text_prev = 'Previous Year';
+    $link_text_next = 'Next Year';
+
+    $extra_name_month = date('F', $statistics['year_start']) . ' ' . $year;
+    $extra_name_day = date('F', $statistics['year_start']) . ' 01, ' . $year;
+
+    $extra_links .= '<a href="' . $base_path . 'requests/statistics-0/' . $year . '/' . strtolower(date('F', $statistics['year_start'])) . $url_arguments . '" class="statistics-navigation-link link-extra" title="Statistics for month of ' . $extra_name_month . '">for ' . $extra_name_month . '</a>';
+    $extra_links .= ', <a href="' . $base_path . 'requests/statistics-0/' . $year . '/' . strtolower(date('F', $statistics['year_start'])) . '/1'  . $url_arguments . '" class="statistics-navigation-link link-extra" title="Statistics for day of ' . $extra_name_day . '">for ' . $extra_name_day . '</a>';
   }
   elseif (is_null($day)) {
     $previous = strtotime('previous month', $statistics['month_start']);
@@ -330,6 +340,15 @@ function mfcs_request_statistics_0_page_markup($year = NULL, $month = NULL, $day
 
     $string_previous = $statistics['month_name_previous'] . ' ' . date('Y', $previous);
     $string_next = $statistics['month_name_next'] . ' ' . date('Y', $next);
+
+    $link_text_prev = 'Previous Month';
+    $link_text_next = 'Next Month';
+
+    $extra_name_year = $year;
+    $extra_name_day = date('F', $statistics['month_start']) . ' 01, ' . $year;
+
+    $extra_links .= '<a href="' . $base_path . 'requests/statistics-0/' . $year . $url_arguments . '" class="statistics-navigation-link link-extra" title="Statistics for year of ' . $extra_name_year . '">for ' . $extra_name_year . '</a>';
+    $extra_links .= ', <a href="' . $base_path . 'requests/statistics-0/' . $year . '/' . strtolower(date('F', $statistics['month_start'])) . '/1'  . $url_arguments . '" class="statistics-navigation-link link-extra" title="Statistics for day of ' . $extra_name_day . '">for ' . $extra_name_day . '</a>';
   }
   else {
     $previous = strtotime('previous day', $statistics['day_start']);
@@ -343,6 +362,15 @@ function mfcs_request_statistics_0_page_markup($year = NULL, $month = NULL, $day
 
     $string_previous = $statistics['month_name_previous'] . ' ' . date('d', $previous) . ', ' . date('Y', $previous);
     $string_next = $statistics['month_name_next'] . ' ' . date('d', $next) . ', ' . date('Y', $next);
+
+    $link_text_prev = 'Previous Day';
+    $link_text_next = 'Next Day';
+
+    $extra_name_year = $year;
+    $extra_name_month = date('F', $statistics['day_start']) . ' ' . $year;
+
+    $extra_links .= '<a href="' . $base_path . 'requests/statistics-0/' . $year . $url_arguments . '" class="statistics-navigation-link link-extra" title="Statistics for year of ' . $extra_name_year . '">for ' . $extra_name_year . '</a>';
+    $extra_links .= ', <a href="' . $base_path . 'requests/statistics-0/' . $year . '/' . strtolower(date('F', $statistics['day_start'])) . $url_arguments . '" class="statistics-navigation-link link-extra" title="Statistics for month of ' . $extra_name_month . '">for ' . $extra_name_month . '</a>';
   }
 
   $status_options = mfcs_get_request_status_list_options();
@@ -356,8 +384,13 @@ function mfcs_request_statistics_0_page_markup($year = NULL, $month = NULL, $day
 
   // next/prev years
   $statistics['markup'] .= '<div class="statistics-navigation no-print">';
-  $statistics['markup'] .= '  <a href="' . $base_path . 'requests/statistics-0/' . $path_previous . $url_arguments . '" class="statistics-navigation-link link-previous" title="Statistics for ' . $string_previous . '">Prev</a>';
-  $statistics['markup'] .= '  <a href="' . $base_path . 'requests/statistics-0/' . $path_next . $url_arguments . '" class="statistics-navigation-link link-next" title="Statistics for for ' . $string_next . '">Next</a>';
+  $statistics['markup'] .= '  <a href="' . $base_path . 'requests/statistics-0/' . $path_previous . $url_arguments . '" class="statistics-navigation-link link-previous" title="Statistics for ' . $string_previous . '">' . $link_text_prev . '</a>';
+
+  if (!is_null($extra_links)) {
+    $statistics['markup'] .= ' <span class="statistics-navigation-link link-extras">(' . $extra_links . ')</span>';
+  }
+
+  $statistics['markup'] .= '  <a href="' . $base_path . 'requests/statistics-0/' . $path_next . $url_arguments . '" class="statistics-navigation-link link-next" title="Statistics for for ' . $string_next . '">' . $link_text_next . '</a>';
 
   if (file_exists(DRUPAL_ROOT . '/sites/all/modules/mcneese/mfcs/images/pdf/32.png')) {
     $module_path = drupal_get_path('module', 'mfcs');

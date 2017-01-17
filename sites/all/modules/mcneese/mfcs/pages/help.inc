@@ -5158,13 +5158,6 @@ function mfcs_help_topic_manage_section_logs($allowed_topics, $section_informati
   $markup .= '<br>';
   $markup .= '</div>';
 
-  $markup .= '<div class="note"> ';
-  $markup .= 'No links have been added for easily selecting the monthly or daily <dfn class="term">Request</dfn> statistics. ';
-  $markup .= 'To view these statistics, go to the url bar while viewing the <dfn class="term">Request</dfn> statistics page and add in <strong class="bold">/month_name</strong> or <strong class="bold">/month_name/day_number</strong>. ';
-  $markup .= 'An example for <em class="emphasis">October 1, 2016</em> would be: <strong class="bold text-link">' . $base_url . '/requests/statistics-0/2016/october/01</strong>. ';
-  $markup .= '<br>';
-  $markup .= '</div>';
-
   if ($closing_tag) {
     $markup .= '</section>';
   }
