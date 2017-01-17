@@ -4890,13 +4890,13 @@ function mfcs_help_topic_manage_section_problems($allowed_topics, $section_infor
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Core System Form Errors</strong>: ';
   $markup .= '<br>';
-  $markup .= 'An technical problems detected while filling out a form on the system are assigned this flag. ';
+  $markup .= 'Any technical problems detected while filling out a form on the system are assigned this flag. ';
   $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '<li class="list-item">';
   $markup .= '<strong class="bold">Facilities Use Form Errors</strong>: ';
   $markup .= '<br>';
-  $markup .= 'An logical, flow, and presentation problems detected while filling out a form on the system are assigned this flag. ';
+  $markup .= 'Any logical, flow, and presentation problems detected while filling out a form on the system are assigned this flag. ';
   $markup .= '<br>';
   $markup .= '</li>';
   $markup .= '</ul>';
