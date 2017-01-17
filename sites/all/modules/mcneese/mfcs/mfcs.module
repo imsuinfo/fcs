@@ -393,6 +393,7 @@ define('MFCS_USER_CALENDAR_FULL', 2);
 
 define('MFCS_TIMEZONE_DATABASE', 'UTC');
 define('MFCS_TIMEZONE_LOCAL', 'America/Chicago');
+define('MFCS_TIMEZONE_ICALENDAR', 'UTC');
 
 /**
  * Implements hook_init().

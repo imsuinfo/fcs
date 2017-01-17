@@ -396,7 +396,7 @@ function mfcs_ical_generate_requests(&$ical, $requests, $date_settings, $ical_eo
         $ical_date['text'] = date($date_settings['day_format'], $date) . ' from ' . date($date_settings['time_format'], $ical_date['date_start']) . ' to ' . date($date_settings['time_format'], $ical_date['date_stop']) . ' ' . $date_settings['timezone_string'];
 
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.2
-        date_default_timezone_set('UTC');
+        date_default_timezone_set(MFCS_TIMEZONE_ICALENDAR);
         $ical_date['start'] = 'DTSTART:' . date($date_settings['format'], $ical_date['date_start']);
         $ical_date['stop'] = 'DTEND:' . date($date_settings['format'], $ical_date['date_stop']);
         date_default_timezone_set($date_settings['original_timezone']);
@@ -408,7 +408,7 @@ function mfcs_ical_generate_requests(&$ical, $requests, $date_settings, $ical_eo
         $ical_date['text'] = date($date_settings['day_format'], $date);
 
         // see: https://tools.ietf.org/html/rfc5545#section-3.8.2
-        date_default_timezone_set('UTC');
+        date_default_timezone_set(MFCS_TIMEZONE_ICALENDAR);
         $ical_date['start'] = 'DTSTART;VALUE=DATE:' . date($date_settings['format_all_day'], $ical_date['date_start']);
         $ical_date['stop'] = 'DTEND;VALUE=DATE:' . date($date_settings['format_all_day'], $ical_date['date_stop']);
         date_default_timezone_set($date_settings['original_timezone']);
@@ -434,7 +434,7 @@ function mfcs_ical_generate_requests(&$ical, $requests, $date_settings, $ical_eo
     }
 
     // The ical dates() will be in UTC format.
-    date_default_timezone_set('UTC');
+    date_default_timezone_set(MFCS_TIMEZONE_ICALENDAR);
 
     // process the dates, each date will have its own VEVENT because the VEVENT does not support non-repeating multiple dates!
     // @todo: should I implement a hack to simulate multiple dates by using repeating dates using RRULE?
@@ -722,7 +722,7 @@ function mfcs_ical_generate_holidays(&$ical, $holidays, $date_settings, $ical_eo
 
 
     // see: https://tools.ietf.org/html/rfc5545#section-3.8.2
-    date_default_timezone_set('UTC');
+    date_default_timezone_set(MFCS_TIMEZONE_ICALENDAR);
     $date_start = 'DTSTART;VALUE=DATE:' . date($date_settings['format_all_day'], $holiday->date);
     $date_stop = 'DTEND;VALUE=DATE:' . date($date_settings['format_all_day'], strtotime('midnight tomorrow', $holiday->date));
     $date_text = date($date_settings['day_format'], $holiday->date);
@@ -944,7 +944,7 @@ function mfcs_ical_generate_unavailabilities(&$ical, $unavailabilities, $date_se
     $dates_unavailability_markup = '';
 
     // see: https://tools.ietf.org/html/rfc5545#section-3.8.2
-    date_default_timezone_set('UTC');
+    date_default_timezone_set(MFCS_TIMEZONE_ICALENDAR);
     $date_start_string = 'DTSTART;VALUE=DATE:' . date($date_settings['format_all_day'], $date_start);
 
     $all_day = FALSE;
