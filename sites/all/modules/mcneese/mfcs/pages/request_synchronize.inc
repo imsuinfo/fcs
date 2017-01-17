@@ -452,6 +452,7 @@ function mfcs_request_synchronize_0_ical_page($password, $custom = NULL, $load_h
 
   $instance = mfcs_instance();
   $min_date = strtotime('midnight today', $instance);
+  $year = date('Y', $min_date);
 
   global $base_url;
   global $mfcs_determined;
@@ -559,7 +560,7 @@ function mfcs_request_synchronize_0_ical_page($password, $custom = NULL, $load_h
   }
 
   if ($show_holidays) {
-    $holidays = mfcs_get_holidays($year, $min_date, NULL, FALSE, TRUE);
+    $holidays = mfcs_get_holidays($year, $min_date, NULL, FALSE, TRUE, FALSE, FALSE, 1);
   }
 
   if (!is_array($holidays)) {
@@ -575,7 +576,7 @@ function mfcs_request_synchronize_0_ical_page($password, $custom = NULL, $load_h
   }
 
   if ($show_unavailabilities) {
-    $unavailabilities = mfcs_get_unavailabilities($year, NULL, $search_building_ids, $min_date, NULL, TRUE, FALSE, TRUE);
+    $unavailabilities = mfcs_get_unavailabilities($year, NULL, $search_building_ids, $min_date, NULL, TRUE, FALSE, TRUE, FALSE, 1);
   }
 
   if (!is_array($unavailabilities)) {

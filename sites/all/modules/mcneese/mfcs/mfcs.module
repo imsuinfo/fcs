@@ -12954,12 +12954,14 @@ function mfcs_get_request_already_reviewed_as_classifications($request_id, $revi
  *   (optional) When TRUE, will join the holiday type table.
  * @param bool $explicit_year
  *   (optional) When TRUE, $year-1 results will not be included.
+ * @param int $extra_years
+ *   (optional) When > -, $year + $extra_years results will be included.
  *
  * @return array|bool
  *   An array of holidays.
  *   FALSE is returned on error.
  */
-function mfcs_get_holidays($year, $timestamp_start = NULL, $timestamp_stop = NULL, $enabled = TRUE, $deleted = FALSE, $join = FALSE, $explicit_year = FALSE) {
+function mfcs_get_holidays($year, $timestamp_start = NULL, $timestamp_stop = NULL, $enabled = TRUE, $deleted = FALSE, $join = FALSE, $explicit_year = FALSE, $extra_years = 0) {
   if (!cf_is_integer($year)) {
     cf_error::invalid_integer('year');
     return FALSE;
@@ -12995,6 +12997,11 @@ function mfcs_get_holidays($year, $timestamp_start = NULL, $timestamp_stop = NUL
     return FALSE;
   }
 
+  if (!is_int($extra_years) || $extra_years < 0) {
+    cf_error::invalid_integer('extra_years');
+    return FALSE;
+  }
+
   try {
     $query = db_select('mfcs_holiday', 'mh');
     $query->addField('mh', 'id', 'id');
@@ -13019,10 +13026,8 @@ function mfcs_get_holidays($year, $timestamp_start = NULL, $timestamp_stop = NUL
       $query->condition('mh.year', $year);
     }
     else {
-      $or = db_or();
-      $or->condition('mh.year', $year);
-      $or->condition('mh.year', $year - 1);
-      $query->condition($or);
+      $query->condition('mh.year', $year - 1, '>=');
+      $query->condition('mh.year', $year + $extra_years, '<=');
     }
 
     if ($enabled === TRUE) {
@@ -13087,18 +13092,19 @@ function mfcs_get_holidays($year, $timestamp_start = NULL, $timestamp_stop = NUL
       // because year - 1 is included, only load results that include the current year.
       $year_fixed = mfcs_strtotime_year_fixup($year);
       $year_stamp = strtotime('midnight january 1, ' . $year_fixed);
-      $year_next = strtotime('next year', $year_stamp);
+      $year_stamp_last = strtotime('midnight january 1, ' . ($year_fixed + $extra_years));
+      $year_last = strtotime('next year', $year_stamp_last);
 
       $or = db_or();
 
       $and = db_and();
       $and->condition('mh.date_start', $year_stamp, '>=');
-      $and->condition('mh.date_start', $year_next, '<');
+      $and->condition('mh.date_start', $year_last, '<');
       $or->condition($and);
 
       $and = db_and();
       $and->condition('mh.date_stop', $year_stamp, '>');
-      $and->condition('mh.date_stop', $year_next, '<=');
+      $and->condition('mh.date_stop', $year_last, '<=');
       $or->condition($and);
 
       $query->condition($or);
@@ -13248,12 +13254,14 @@ function mfcs_get_holiday($id, $enabled = TRUE, $deleted = FALSE, $join = FALSE)
  *   (optional) When TRUE, additional inner joins will be performed to load the banner room and building information.
  * @param bool $explicit_year
  *   (optional) When TRUE, $year-1 results will not be included.
+ * @param int $extra_years
+ *   (optional) When > -, $year + $extra_years results will be included.
  *
  * @return array|bool
  *   An array of unavailabilities.
  *   FALSE is returned on error.
  */
-function mfcs_get_unavailabilities($year, $room_id = NULL, $building_id = NULL, $timestamp_start = NULL, $timestamp_stop = NULL, $enabled = TRUE, $deleted = FALSE, $inner_joins = FALSE, $explicit_year = FALSE) {
+function mfcs_get_unavailabilities($year, $room_id = NULL, $building_id = NULL, $timestamp_start = NULL, $timestamp_stop = NULL, $enabled = TRUE, $deleted = FALSE, $inner_joins = FALSE, $explicit_year = FALSE, $extra_years = 0) {
   if (!cf_is_integer($year)) {
     cf_error::invalid_integer('year');
     return FALSE;
@@ -13299,6 +13307,11 @@ function mfcs_get_unavailabilities($year, $room_id = NULL, $building_id = NULL, 
     return FALSE;
   }
 
+  if (!is_int($extra_years) || $extra_years < 0) {
+    cf_error::invalid_integer('explicit_year');
+    return FALSE;
+  }
+
   // start and stop integers must not be identical.
   if (!is_null($timestamp_start) && !is_null($timestamp_stop)) {
     if ($timestamp_start == $timestamp_stop) {
@@ -13341,10 +13354,8 @@ function mfcs_get_unavailabilities($year, $room_id = NULL, $building_id = NULL, 
       $query->condition('mu.year', $year);
     }
     else {
-      $or = db_or();
-      $or->condition('mu.year', $year);
-      $or->condition('mu.year', $year - 1);
-      $query->condition($or);
+      $query->condition('mu.year', $year - 1, '>=');
+      $query->condition('mu.year', $year + $explicit_year, '<=');
     }
 
     if (!is_null($room_id)) {
@@ -13427,18 +13438,19 @@ function mfcs_get_unavailabilities($year, $room_id = NULL, $building_id = NULL, 
       // because year - 1 is included, only load results that include the current year.
       $year_fixed = mfcs_strtotime_year_fixup($year);
       $year_stamp = strtotime('midnight january 1, ' . $year_fixed);
-      $year_next = strtotime('next year', $year_stamp);
+      $year_stamp_last = strtotime('midnight january 1, ' . ($year_fixed + $extra_years));
+      $year_last = strtotime('next year', $year_stamp_last);
 
       $or = db_or();
 
       $and = db_and();
       $and->condition('mu.date_start', $year_stamp, '>=');
-      $and->condition('mu.date_start', $year_next, '<');
+      $and->condition('mu.date_start', $year_last, '<');
       $or->condition($and);
 
       $and = db_and();
       $and->condition('mu.date_stop', $year_stamp, '>');
-      $and->condition('mu.date_stop', $year_next, '<=');
+      $and->condition('mu.date_stop', $year_last, '<=');
       $or->condition($and);
 
       $query->condition($or);
