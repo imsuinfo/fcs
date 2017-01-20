@@ -1621,6 +1621,14 @@ function mfcs_request_unavailability_0_edit_form($form, &$form_state, $year, $ro
   // class rooms are never directly assigned/copied, but are instead handled via banner.
   unset($unavailability_types[MFCS_UNAVAILABILITY_TYPE_CLASS]);
 
+
+  // load the custom javascript associated with this form.
+  $module_path = drupal_get_path('module', 'mfcs');
+  libraries_load('jquery.timepicker');
+
+  drupal_add_js($module_path . '/js/request_unavailability-edit.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => FALSE));
+
+
   // a year offset is necessary to create the date field for a specific year.
   // the date field needs to be limited to a certain year and it works based off the offset to the current year.
   $instance = mfcs_instance();
