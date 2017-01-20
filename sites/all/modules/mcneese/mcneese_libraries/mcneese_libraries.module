@@ -143,6 +143,23 @@ function mcneese_libraries_libraries_info() {
     'jquery.qtip.css',
   );
 
+  // jquery.timepicker
+  $libraries['jquery.timepicker'] = array();
+  $libraries['jquery.timepicker']['name'] = "jquery.timepicker";
+  $libraries['jquery.timepicker']['vendor url '] = 'https://github.com/jonthornton/jquery-timepicker';
+  $libraries['jquery.timepicker']['download url'] = 'https://github.com/jonthornton/jquery-timepicker/releases';
+
+  // hard-code the version number.
+  $libraries['jquery.timepicker']['version'] = 1;
+
+  $libraries['jquery.timepicker']['files'] = array();
+  $libraries['jquery.timepicker']['files']['js'] = array(
+    'jquery.timepicker.js',
+  );
+  $libraries['jquery.timepicker']['files']['css'] = array(
+    'jquery.timepicker.css',
+  );
+
   return $libraries;
 }
 
