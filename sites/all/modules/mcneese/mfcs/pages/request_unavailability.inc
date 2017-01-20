@@ -1953,7 +1953,7 @@ function mfcs_request_unavailability_0_edit_form_validate($form, &$form_state) {
     form_set_error('unavailable][date_start][day', 'The specified start date day is not valid.');
   }
   elseif (isset($form_state['values']['unavailable']['date_start']['time']) && strlen($form_state['values']['unavailable']['date_start']['time']) > 0) {
-    $date_start = strtotime($form['form']['year']['#value'] . '-' . $form_state['values']['unavailable']['date_start']['day'] . ' ' . $form_state['values']['unavailable']['date_start']['time']);
+    $date_start = strtotime($form_state['values']['unavailable']['date_start']['day'] . ' ' . $form_state['values']['unavailable']['date_start']['time']);
     if ($date_start === FALSE || !mfcs_validate_time_12hour($form_state['values']['unavailable']['date_start']['time'])) {
       form_set_error('unavailable][date_start][time', 'The specified start date time is not valid.');
     }
@@ -1970,14 +1970,14 @@ function mfcs_request_unavailability_0_edit_form_validate($form, &$form_state) {
       form_set_error('unavailable][date_stop][day', 'The specified stop date day is not valid.');
     }
     elseif (isset($form_state['values']['unavailable']['date_stop']['time']) && strlen($form_state['values']['unavailable']['date_stop']['time']) > 0) {
-      $date_stop = strtotime($form['form']['year']['#value'] . '-' . $form_state['values']['unavailable']['date_stop']['day'] . ' ' . $form_state['values']['unavailable']['date_stop']['time']);
+      $date_stop = strtotime($form_state['values']['unavailable']['date_stop']['day'] . ' ' . $form_state['values']['unavailable']['date_stop']['time']);
       if ($date_stop === FALSE || !mfcs_validate_time_12hour($form_state['values']['unavailable']['date_stop']['time'])) {
         form_set_error('unavailable][date_stop][time', 'The specified stop date time is not valid.');
       }
     }
 
     if ($date_stop == $date_start) {
-        form_set_error('unavailable][date_stop][day', 'The specified stop date day (and time) cannot be the same as the start date (and time).');
+      form_set_error('unavailable][date_stop][day', 'The specified stop date day (and time) cannot be the same as the start date (and time).');
     }
 
     if ($date_stop < $date_start) {
