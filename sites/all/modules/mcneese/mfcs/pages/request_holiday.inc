@@ -1478,7 +1478,7 @@ function mfcs_request_holiday_0_delete_form($form, &$form_state, $year, $holiday
     drupal_exit();
   }
 
-  if ($year != date('Y', $holiday->date)) {
+  if ($year != $holiday->year) {
     cf_error::invalid_integer('year');
 
     drupal_not_found();
