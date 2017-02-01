@@ -8019,6 +8019,7 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
     $query->addField('mer', 'id', 'request_id');
     $query->addField('mer', 'status', 'status');
     $query->addField('mer', 'step', 'step');
+    $query->addField('mer', 'title', 'title');
     $query->addField('mfdd', 'value', 'date');
     $query->addField('mc', 'dates_date', 'date_revision');
     $query->addField('mc', 'dates_time_start', 'time_start_revision');
@@ -8239,20 +8240,24 @@ function mfcs_build_room_unavailable_message($availability_issues, $blank_target
       if (isset($request_using_room->date)) {
         if (isset($request_using_room->time_start)) {
           $problematic_date_key =  '' . $request_using_room->date . '-' . $request_using_room->time_start . '-' . $request_using_room->time_stop;
-          $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->date) . '</strong> from <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->time_start) . '</strong> to <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->time_stop) . '</strong> because of a ';
-          $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '" title="View conflicting request."' . $unavailable_target . '>scheduling conflict</a></strong>.';
+          $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->date) . '</strong> from <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->time_start) . '</strong> to <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->time_stop) . '</strong> ';
+          $problematic_date .= '<a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '">'  . $request_using_room->title . '</a>';
+          $problematic_date .= ' because of a <strong>scheduling conflict</strong>.';
           $problematic_dates[$problematic_date_key] = $problematic_date;
         }
         else {
           $problematic_date_key =  '' . $request_using_room->date;
-          $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->date) . '</strong> (all day) because of a ';
-          $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '" title="View conflicting request."' . $unavailable_target . '>scheduling conflict</a></strong>.';
+          $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->date) . '</strong> (all day) ';
+          $problematic_date .= '<a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '">'  . $request_using_room->title . '</a>';
+          $problematic_date .= ' because of a <strong>scheduling conflict</strong>.';
           $problematic_dates[$problematic_date_key] = $problematic_date;
         }
       }
       elseif (isset($request_using_room->reserved_day)) {
         $problematic_date_key =  '' . $request_using_room->reserved_day . '-' . $request_using_room->reserved_time_start . '-' . $request_using_room->reserved_time_stop;
-        $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->reserved_day) . '</strong> from <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->reserved_time_start) . '</strong> to <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->reserved_time_stop) . '</strong> because of a scheduling conflict.';
+        $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->reserved_day) . '</strong> from <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->reserved_time_start) . '</strong> to <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->reserved_time_stop) . '</strong> ';
+        $problematic_date .= '<a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '">'  . $request_using_room->title . '</a>';
+        $problematic_date .= ' because of a <strong>scheduling conflict</strong>.';
         $problematic_dates[$problematic_date_key] = $problematic_date;
       }
     }
