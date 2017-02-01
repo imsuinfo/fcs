@@ -2859,6 +2859,37 @@ function mfcs_hook_user_cancel($account) {
 }
 
 /**
+ * Pre-process the user login form for validation.
+ */
+function mfcs_hook_user_login_name_validate($form, &$form_state) {
+  if (!empty($form_state['values']['name'])) {
+    try {
+      $query = db_select('users', 'u');
+      $query->condition('u.name', db_like($form_state['values']['name']), 'ilike');
+      $query->addField('u', 'status', 'status');
+      $query->addField('u', 'uid', 'user_id');
+
+
+      $user = $query->execute()->fetchObject();
+      if (is_object($user)) {
+        if ($user->status == 0) {
+          mfcs_synchronize_user_settings((int) $user->user_id);
+        }
+      }
+
+      unset($user);
+      unset($query);
+    }
+    catch (Error $e) {
+      cf_error::on_query_execution($e);
+    }
+    catch (Exception $e) {
+      cf_error::on_query_execution($e);
+    }
+  }
+}
+
+/**
  * Given a user object, the user settings will be updated.
  *
  * Process bannerless exception before calling this and if bannerless exception is enabled, then do not call this.
