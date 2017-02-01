@@ -2967,5 +2967,241 @@ function mfcs_miscellaneous_reset_request_problems() {
 }
 
 /**
+ * Checks to see if the there are any overlapping dates and times for a given room with unlocked requests.
+ *
+ * This is similar to mfcs_check_room_availability() except it only checks for requests that are Queued (unlocked).
+ *
+ * For the dates and times to work properly, it is expected that:
+ * - unix timestamps are used.
+ * - date values have their time reset to 0 (aka: 12:00:00am).
+ * - time values have their dates set to the same day as the date value.
+ *
+ * @param int $room
+ *   The room id.
+ * @param array $dates
+ *   An array containing the date values.
+ * @param array $time_start
+ *   An array containing the time start values.
+ * @param array $time_stop
+ *   An array containing the time stop values.
+ * @param int|null $request_id
+ *   (optional) When not NULL, this represents the request_id to ignore.
+ *   Use this so that when editing an existing request, it does not report
+ *   itself as the request using the room.
+ *
+ * @return array|false
+ *   An array with the following keys;
+ *   - conflicts: an array containing any requests currently using the room at the specified date and time.
+ *   - unavailable: an array containing any room unavailability.
+ *   FALSE on error.
+ *
+ * @see: mfcs_check_room_availability()
+ */
+function mfcs_miscellaneous_check_overlapping_unlocked_requests($room, $dates, $time_start, $time_stop, $request_id = NULL) {
+  if (!is_int($room)) {
+    cf_error::invalid_integer('room');
+    return FALSE;
+  }
+
+  if (!is_array($dates) || empty($dates)) {
+    cf_error::invalid_array('dates');
+    return FALSE;
+  }
+
+  if (!is_array($time_start) || empty($time_start)) {
+    cf_error::invalid_array('time_start');
+    return FALSE;
+  }
+
+  if (!is_array($time_stop) || empty($time_stop)) {
+    cf_error::invalid_array('time_stop');
+    return FALSE;
+  }
+
+  if (!is_null($request_id) && !cf_is_integer($request_id)) {
+    cf_error::invalid_integer('request_id');
+    return FALSE;
+  }
+
+  $matched_requests = array(
+    'conflicts' => array(),
+    'unavailable' => array(),
+  );
+
+  try {
+    $query = db_select('mfcs_requests', 'mer');
+
+    $query->innerJoin('mfcs_current', 'mc', 'mer.id = mc.request_id');
+    $query->innerJoin('mfcs_field_dates_date', 'mfdd', 'mc.request_id = mfdd.request_id AND mc.dates_date = mfdd.revision');
+
+    $query->addField('mer', 'id', 'request_id');
+    $query->addField('mer', 'status', 'status');
+    $query->addField('mer', 'step', 'step');
+    $query->addField('mer', 'title', 'title');
+    $query->addField('mfdd', 'value', 'date');
+    $query->addField('mc', 'dates_date', 'date_revision');
+    $query->addField('mc', 'dates_time_start', 'time_start_revision');
+    $query->addField('mc', 'dates_time_stop', 'time_stop_revision');
+
+    $query->distinct();
+
+    $statuses = array(
+      MFCS_REQUEST_STATUS_UNLOCKED,
+    );
+
+    $query->condition('mer.status', $statuses, 'IN');
+    $query->condition('mer.room', $room);
+    $query->condition('mfdd.value', $dates, 'IN');
+    $query->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
+
+    if (!is_null($request_id)) {
+      $query->condition('mer.id', $request_id, '<>');
+    }
+
+    $results = $query->execute()->fetchAll();
+
+
+    // when rooms are in use, check the individual times.
+    if (!empty($results)) {
+      // the results contain all locked requests that have something in the given room during the given date.
+      // however, this does not mention the time, so loop through the times and see if they are all valid.
+      foreach ($results as $result) {
+        $query = db_select('mfcs_field_dates_date', 'mfdd');
+
+        $query->innerJoin('mfcs_field_dates_time_start', 'mfdts', 'mfdd.request_id = mfdts.request_id AND mfdd.delta = mfdts.delta');
+        $query->innerJoin('mfcs_field_dates_time_stop', 'mfdtsp', 'mfdd.request_id = mfdtsp.request_id AND mfdd.delta = mfdtsp.delta');
+
+        $query->addField('mfdd', 'request_id', 'request_id');
+        $query->addField('mfdd', 'revision', 'revision');
+        $query->addField('mfdd', 'delta', 'delta');
+        $query->addField('mfdd', 'value', 'date');
+        $query->addField('mfdts', 'value', 'time_start');
+        $query->addField('mfdtsp', 'value', 'time_stop');
+
+        $query->condition('mfdd.request_id', $result->request_id);
+        $query->condition('mfdts.request_id', $result->request_id);
+        $query->condition('mfdtsp.request_id', $result->request_id);
+
+        $query->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
+
+        $query->condition('mfdd.revision', $result->date_revision);
+        $query->condition('mfdts.revision', $result->time_start_revision);
+        $query->condition('mfdtsp.revision', $result->time_stop_revision);
+
+        if (!is_null($request_id)) {
+          $query->condition('mfdd.request_id', $request_id, '<>');
+        }
+
+        $or = db_or();
+
+        // all day requests match, they have NULL for start and stop time values.
+        $and = db_and();
+        $and->condition('mfdd.value', $dates, 'IN');
+        $and->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
+        $and->isNull('mfdts.value');
+        $and->isNull('mfdtsp.value');
+
+        $or->condition($and);
+
+        foreach ($dates as $key => $value) {
+          // prevent errors due to undefined start/stop times.
+          if (!array_key_exists($key, $time_start)) {
+            $time_start[$key] = NULL;
+          }
+
+          if (!array_key_exists($key, $time_stop)) {
+            $time_stop[$key] = NULL;
+          }
+
+          // all day requests match, they have NULL for start and stop time values.
+          if (is_null($time_start[$key]) && is_null($time_stop[$key])) {
+            $and = db_and();
+            $and->condition('mfdd.value', $value);
+            $and->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
+            $and->isNotNull('mfdts.value');
+            $and->isNotNull('mfdtsp.value');
+            $or->condition($and);
+            continue;
+          }
+
+          $and = db_and();
+          $and->condition('mfdd.value', $value);
+          $and->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
+          $and->condition('mfdts.value', $time_start[$key], '<=');
+          $and->condition('mfdtsp.value', $time_start[$key], '>');
+          $or->condition($and);
+
+          $and = db_and();
+          $and->condition('mfdd.value', $value);
+          $and->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
+          $and->condition('mfdts.value', $time_stop[$key], '<');
+          $and->condition('mfdtsp.value', $time_stop[$key], '>=');
+          $or->condition($and);
+
+          $and = db_and();
+          $and->condition('mfdd.value', $value);
+          $and->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
+          $and->condition('mfdts.value', $time_start[$key], '>');
+          $and->condition('mfdtsp.value', $time_start[$key], '>');
+          $and->condition('mfdts.value', $time_stop[$key], '<');
+          $and->condition('mfdtsp.value', $time_stop[$key], '<');
+          $or->condition($and);
+        }
+
+        $query->condition($or);
+
+        $matches = $query->execute()->fetchAll();
+        foreach ($matches as $match) {
+          $result->time_start = $match->time_start;
+          $result->time_stop = $match->time_stop;
+          $matched_requests['conflicts'][] = $result;
+        }
+      }
+    }
+  }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
+    return FALSE;
+  }
+
+  // process explicit/non-conflict unavailabilities.
+  foreach ($dates as $key => $date) {
+    $year = date('Y', $date);
+
+    if (is_null($time_start[$key])) {
+      $start_time = strtotime('midnight today', $date);
+      $stop_time = strtotime('midnight tomorrow', $date);
+    }
+    else {
+      $start_time = $time_start[$key];
+      $stop_time = $time_stop[$key];
+    }
+
+    // times that are identical are invalid and cannot be checked, so skip them.
+    if (!is_null($start_time) && $start_time == $stop_time) {
+      continue;
+    }
+
+    $unavailabilities = mfcs_get_unavailabilities($year, $room, NULL, $start_time, $stop_time);
+    if (is_array($unavailabilities)) {
+      foreach ($unavailabilities as $unavailability) {
+        $matched_requests['unavailable'][$unavailability->id] = $unavailability;
+      }
+    }
+    unset($unavailability);
+    unset($unavailabilities);
+
+    unset($start_time);
+    unset($stop_time);
+  }
+
+  return $matched_requests;
+}
+
+/**
  * @} End of '@addtogroup mfcs'.
  */

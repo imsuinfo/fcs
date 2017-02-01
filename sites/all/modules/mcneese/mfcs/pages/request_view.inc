@@ -445,6 +445,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     $request_type = (int) $request_type;
   }
 
+
   if ($show_display) {
     mfcs_include(MFCS_INCLUDE_VIEW);
 
@@ -1558,10 +1559,56 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           $conflict_message .= mfcs_build_room_unavailable_message($room_unavailability);
           $conflict_message .= '</div>';
         }
-        unset($all_dates);
-        unset($all_time_start);
-        unset($all_time_stop);
         unset($room_unavailability);
+
+        // if there are more than one pending requests that have overlapping rooms, dates, and times, then display a warning for venue coordinators and managers.
+        if ($is_venue_coordinator || $is_manager) {
+          mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
+          $overlapping_unlocked = mfcs_miscellaneous_check_overlapping_unlocked_requests($room, $all_dates, $all_time_start, $all_time_stop, $request_id);
+
+          if (!empty($overlapping_unlocked) && !empty($overlapping_unlocked['conflicts'])) {
+            $problematic_dates = array();
+            $conflicting_message = '';
+            if (!empty($overlapping_unlocked['conflicts'])) {
+              foreach ($overlapping_unlocked['conflicts'] as $request_using_room) {
+                if (isset($request_using_room->date)) {
+                  if (isset($request_using_room->time_start)) {
+                    $problematic_date_key =  '' . $request_using_room->date . '-' . $request_using_room->time_start . '-' . $request_using_room->time_stop;
+                    $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->date) . '</strong> from <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->time_start) . '</strong> to <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->time_stop) . '</strong>  ';
+                    $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '">' . $request_using_room->title . '</a></strong>.';
+                    $problematic_dates[$problematic_date_key] = $problematic_date;
+                  }
+                  else {
+                    $problematic_date_key =  '' . $request_using_room->date;
+                    $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->date) . '</strong> (all day) ';
+                    $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '">' . $request_using_room->title . '</a></strong>.';
+                    $problematic_dates[$problematic_date_key] = $problematic_date;
+                  }
+                }
+                elseif (isset($request_using_room->reserved_day)) {
+                  $problematic_date_key =  '' . $request_using_room->reserved_day . '-' . $request_using_room->reserved_time_start . '-' . $request_using_room->reserved_time_stop;
+                  $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->reserved_day) . '</strong> from <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->reserved_time_start) . '</strong> to <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->reserved_time_stop) . '</strong> ' . $request_using_room->title . '.';
+                  $problematic_dates[$problematic_date_key] = $problematic_date;
+                }
+              }
+              unset($problematic_date_key);
+              unset($request_using_room);
+
+              ksort($problematic_dates);
+              foreach ($problematic_dates as $date) {
+                $conflicting_message .= '<li>' . $date . '</li>';
+              }
+              unset($date);
+            }
+            unset($problematic_dates);
+
+            $conflict_message .= '<div class="warning-unavailabilities">';
+            $conflict_message .= '<div class="warning-unavailabilities-title">The following (unlocked) requests are in conflict:</div>';
+            $conflict_message .= '<ul class="warning-unavailabilities-list">' . $conflicting_message . '</ul>';
+            $conflict_message .= '</div>';
+            unset($conflicting_message);
+          }
+        }
 
         if (($status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED || $status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED) && $step == MFCS_REVIEW_STEP_COMPLETED) {
           drupal_set_message($conflict_message, 'warning');
@@ -1569,8 +1616,11 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         else {
           $form['review']['operations']['warnings']['#markup']  .= $conflict_message;
         }
-
         unset($conflict_message);
+        unset($all_dates);
+        unset($all_time_start);
+        unset($all_time_stop);
+        unset($room);
       }
 
       if (array_key_exists(MFCS_REVIEW_DECISION_ISSUES, $decision_options) && array_key_exists(MFCS_REVIEW_DECISION_ISSUES_NONE, $decision_options)) {
