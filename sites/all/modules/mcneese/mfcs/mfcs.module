@@ -4281,7 +4281,7 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     }
 
     $mfcs_settings = NULL;
-    $mfc_settings_users = mfcs_load_users($user_information['user_id']);
+    $mfc_settings_users = mfcs_load_users($user_information['user_id'], FALSE, TRUE);
     if (is_array($mfc_settings_users) && array_key_exists($user_information['user_id'], $mfc_settings_users)) {
       $mfcs_settings = $mfc_settings_users[$user_information['user_id']];
     }
