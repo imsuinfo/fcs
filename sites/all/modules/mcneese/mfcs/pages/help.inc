@@ -8836,7 +8836,9 @@ function mfcs_help_user_guide_using_the_calendar($as, $allowed_topics, $section_
   $markup .= '<div class="paragraph">';
   $markup .= 'On the day calendars, there may be multiple pages for displaying <dfn class="term">Requests</dfn> when there are more than 4 <dfn class="term">Requests</dfn> per hour slot per day. ';
   $markup .= 'You can find the links to these extra pages by selecting the page number on the top-left of each calendar day or by selecting the appropriate <strong class="bold">Next</strong> or <strong class="bold">Previous</strong> link found on each time slot with more than 4 <dfn class="term">Requests</dfn> per day. ';
+  $markup .= 'With the full calendar theme, this is not the case and all requests for a given day are displayed. ';
   $markup .= '<div class="image-wrapper image-wrapper-center"><img id="image-using_the_calendar-3" src="' . $base_path . $module_path . '/images/user_guide/using_the_calendar-3.png" alt="Screenshot pointing out the page links." class="image-user_guide" width="251" height="189"><img id="image-using_the_calendar-4" src="' . $base_path . $module_path . '/images/user_guide/using_the_calendar-4.png" alt="Screenshot pointing out the Next page links." class="image-user_guide" width="523" height="251"></div> ';
+
   $markup .= '<br>';
   $markup .= '</div>';
 
