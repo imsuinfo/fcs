@@ -6594,27 +6594,17 @@ function mfcs_help_topic_calendar($allowed_topics, $section_information, $as_inl
   $markup .= mfcs_help_render_headers('topic-calendar', $section_information['header_attributes'], $section_information['headers'], $start_count);
 
   $markup .= '<div class="paragraph">';
-  $markup .= 'The <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> provides a calendar containing only <dfn class="term">Accepted</dfn> <dfn class="term">Requests</dfn> and holidays. ';
-  $markup .= 'No other <dfn class="term">Requests</dfn> or <dfn class="term">Room</dfn> unavailabilities are displayed. ';
-  $markup .= 'The calendars are designed to be printer-friendly with minimal inconsistencies. ';
+  $markup .= 'The <dfn class="term"><abbr class="abbreviation" title="Facilities Use System">FCS</abbr></dfn> provides a calendar containing only <dfn class="term">Accepted</dfn> <dfn class="term">Requests</dfn>, holidays, and <dfn class="term">Room</dfn> unavailabilities. ';
+  $markup .= 'The calendars are designed to be reasonably printer-friendly with minimal inconsistencies. ';
   $markup .= 'There are two main types of calendars on this system: monthly calendars and daily calendars. ';
+  $markup .= 'There are two differenty calendar themes to select from: default and full calendar.';
   $markup .= '<br>';
   $markup .= '</div>';
 
   $markup .= '<div class="paragraph">';
-  $markup .= 'Monthly calendars present only the <dfn class="term">Request</dfn> name for the sake of space. ';
-  $markup .= 'All other information must be view on the <dfn class="term">Request</dfn> itself. ';
+  $markup .= 'Monthly and daily calendars present basic request information on view and with defails on hover.';
   $markup .= 'Holidays are also presented in name only but are not presented as links. ';
-  $markup .= 'Holidays can be viewed in detail using the holidays link usually found on the top of the screen in the navigation panel. ';
-  $markup .= '<br>';
-  $markup .= '</div>';
-
-  $markup .= '<div class="paragraph">';
-  $markup .= 'Daily calendars present the most common information associated with a given <dfn class="term">Request</dfn>, such as the name, <dfn class="term">Building</dfn>, <dfn class="term">Room</dfn>, time, <dfn class="term">Request ID</dfn>, and the <dfn class="term">Request Type</dfn>. ';
-  $markup .= 'For the sake of space when view and when printing, only four <dfn class="term">Requests</dfn> are presented per hour slot per day. ';
-  $markup .= 'There is a <em class="emphasis">next</em> link on each hour slot for when there are more than four <dfn class="term">Requests</dfn> for that given slot. ';
-  $markup .= 'Holidays are also presented by the holiday name only but are not presented as links. ';
-  $markup .= 'Holidays can be viewed in detail using the holidays link usually found on the top of the screen in the navigation panel. ';
+  $markup .= 'Unavailabilities are also presented in name only and may link to the unavailability. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
@@ -6622,18 +6612,6 @@ function mfcs_help_topic_calendar($allowed_topics, $section_information, $as_inl
   $markup .= 'At the bottom of each calendar page, there should be a collection of links for filtering the calendar. ';
   $markup .= 'This type of filter alters the <dfn class="term"><abbr class="abbreviation" title="Universal Resource Locator">URL</abbr></dfn> with the options so that you can customize the filter and then bookmark that filter. ';
   $markup .= 'The filter settings are preserved so long as the information is still present in the <dfn class="term"><abbr class="abbreviation" title="Universal Resource Locator">URL</abbr></dfn>. ';
-  $markup .= '<br>';
-  $markup .= '</div>';
-
-  $markup .= '<div class="note"> ';
-  $markup .= 'Many browsers hide or obscure the additional information in the <dfn class="term"><abbr class="abbreviation" title="Universal Resource Locator">URL</abbr></dfn> making it difficult to view and use. ';
-  $markup .= 'If you think the calendar is not showing enough information or showing too much, be sure to scroll to the bottom of the page to determine if any filter is currently in use. ';
-  $markup .= '<br>';
-  $markup .= '</div>';
-
-  $markup .= '<div class="paragraph">';
-  $markup .= 'In the same area as the filters are the <dfn class="term">iCalendar</dfn> download options. ';
-  $markup .= 'These options provide an easy way to export the <dfn class="term">Requests</dfn> for the given calendar (including any active filters) and then import the <dfn class="term">Requests</dfn> into your own personal calendar. ';
   $markup .= '<br>';
   $markup .= '</div>';
 
