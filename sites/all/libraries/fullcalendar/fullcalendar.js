@@ -14161,6 +14161,9 @@ var ListViewGrid = Grid.extend({
 				'<a' + (url ? ' href="' + htmlEscape(url) + '"' : '') + '>' +
 					htmlEscape(seg.event.title || '') +
 				'</a>' +
+				(event.displayEventTimeExtra ?
+				'<div class="fc-list-item-extra">' + event.displayEventTimeExtra +
+				'</div>' : '') +
 			'</td>' +
 		'</tr>';
 	}
