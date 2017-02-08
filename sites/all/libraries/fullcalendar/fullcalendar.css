@@ -1197,13 +1197,6 @@ be a descendant of the grid when it is being dragged.
 	white-space: nowrap;
 }
 
-.fc-time-grid-event.fc-short .fc-time,
-.fc-time-grid-event.fc-short .fc-title {
-	/* put the time and title on the same line */
-	display: inline-block;
-	vertical-align: top;
-}
-
 /* resizer (cursor device) */
 
 .fc-time-grid-event.fc-allow-mouse-resize .fc-resizer {
