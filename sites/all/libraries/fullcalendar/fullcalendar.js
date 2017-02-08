@@ -7721,10 +7721,16 @@ TimeGrid.mixin({
 						' data-full="' + htmlEscape(fullTimeText) + '"' +
 						'>' +
 							'<span>' + htmlEscape(timeText) + '</span>' +
+							(event.multidayTitleInTime && event.title ?
+							' <span class="fc-title">' +
+								htmlEscape(event.title) +
+							'</span>' :
+							''
+							) +
 						'</div>' :
 						''
 						) +
-					(event.title ?
+					(!event.multidayTitleInTime && event.title ?
 						'<div class="fc-title">' +
 							htmlEscape(event.title) +
 						'</div>' :
