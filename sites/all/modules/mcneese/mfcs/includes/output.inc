@@ -561,6 +561,7 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
         $tooltip_text_suffix = '';
         $tooltip_text_suffix_alt = '';
         $tooltip_class = 'tooltip-calendar-monthly tooltip-calendar-item';
+        $extra_text = '';
 
         // fullcalendar performs sanitization, so send it raw title text.
         $processed_title_for_fullcalendar = str_replace('\'', '\\\'', $item['title-raw']);
@@ -597,6 +598,10 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
             $tooltip_text .= '<span class="tooltip-item-text">' . $item['tooltip'] . '</span>';
             $tooltip_text .= '</div>';
             $tooltip_text .= '<br>';
+
+            $extra_text .= '<div class="tooltip-item tooltip-item-holiday_text">';
+            $extra_text .= '<span class="tooltip-item-text">' . $item['tooltip'] . '</span>';
+            $extra_text .= '</div>';
           }
 
           $tooltip_text_suffix .= '<div class="tooltip-item tooltip-item-footer">';
@@ -659,6 +664,10 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
           }
 
           $extra_text .= $building_text . $room_text;
+
+            $extra_text .= '<div class="tooltip-item tooltip-item-unavailable_text">';
+            $extra_text .= '<span class="tooltip-item-text">' . $item['tooltip'] . '</span>';
+            $extra_text .= '</div>';
 
           if (!empty($item['description'])) {
             if (!empty($tooltip_text)) {
@@ -724,7 +733,7 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
           $tooltip_text_suffix .= '</div>';
 
           $tooltip_text_suffix_alt .= '<div class="tooltip-item tooltip-item-footer">';
-          $tooltip_text_suffix_alt .= '<span class="tooltip-item-request_id">' . (int) $item_id . '</span> ';
+          $tooltip_text_suffix_alt .= '<span class="tooltip-item-request_id">Request ID: ' . (int) $item_id . '</span> ';
           $tooltip_text_suffix_alt .= '<span class="tooltip-item-request_type">' . check_plain($type_options[$item['type']]) . '</span>';
           $tooltip_text_suffix_alt .= '</div>';
 
@@ -1978,7 +1987,6 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
         $tooltip_text_suffix = '';
         $tooltip_text_suffix_alt = '';
         $tooltip_class = 'tooltip-calendar-daily tooltip-calendar-item';
-
         $extra_text = '';
 
         // fullcalendar performs sanitization, so send it raw title text.
@@ -2064,6 +2072,10 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
           }
 
           $extra_text .= $building_text . $room_text;
+
+          $extra_text .= '<div class="tooltip-item tooltip-item-unavailable_text">';
+          $extra_text .= '<span class="tooltip-item-text">' . $item['tooltip'] . '</span>';
+          $extra_text .= '</div>';
 
           if (!empty($item['description'])) {
             if (!empty($tooltip_text)) {
@@ -2295,6 +2307,10 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
             }
 
             $extra_text .= $building_text . $room_text;
+
+            $extra_text .= '<div class="tooltip-item tooltip-item-unavailable_text">';
+            $extra_text .= '<span class="tooltip-item-text">' . $item['tooltip'] . '</span>';
+            $extra_text .= '</div>';
 
             if (!empty($item['description'])) {
               if (!empty($tooltip_text)) {
