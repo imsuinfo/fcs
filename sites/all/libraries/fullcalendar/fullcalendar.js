@@ -7730,6 +7730,12 @@ TimeGrid.mixin({
 						'</div>' :
 						''
 						) +
+					(event.multidayBody ?
+						'<div class="fc-body">' +
+							event.multidayBody +
+						'</div>' :
+						''
+						) +
 				'</div>' +
 				'<div class="fc-bg"/>' +
 				/* TODO: write CSS for this
