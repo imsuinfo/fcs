@@ -771,6 +771,8 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
           $javascript_items .= $space . 'tooltipTitle: \'<strong>' . $item['title'] . '</strong>\',' . "\n";
           $javascript_items .= $space . 'tooltipText: \'' . $tooltip_text . $tooltip_text_suffix . '\',' . "\n";
           $javascript_items .= $space . 'tooltipClass: \'' . $tooltip_class . '\',' . "\n";
+          $javascript_items .= $space . 'multidayBody: \'' . $tooltip_text . '\',' . "\n";
+          $javascript_items .= $space . 'multidayTitleInTime: true,' . "\n";
           $javascript_items .= $javascript_item_common;
           $javascript_items .= '    }';
 
@@ -801,6 +803,8 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
             $javascript_items .= $space . 'tooltipTitle: \'<strong>' . $item['title'] . '</strong>\',' . "\n";
             $javascript_items .= $space . 'tooltipText: \'' . $tooltip_text . $tooltip_text_suffix . '\',' . "\n";
             $javascript_items .= $space . 'tooltipClass: \'' . $tooltip_class . '\',' . "\n";
+            $javascript_items .= $space . 'multidayBody: \'' . $tooltip_text . '\',' . "\n";
+            $javascript_items .= $space . 'multidayTitleInTime: true,' . "\n";
             $javascript_items .= $javascript_item_common;
             $javascript_items .= '    }';
           }
@@ -839,6 +843,8 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
               $javascript_items .= $space . 'tooltipTitle: \'<strong>' . $item['title'] . '</strong>\',' . "\n";
               $javascript_items .= $space . 'tooltipText: \'' . $tooltip_text . $tooltip_text_suffix . '\',' . "\n";
               $javascript_items .= $space . 'tooltipClass: \'' . $tooltip_class . '\',' . "\n";
+              $javascript_items .= $space . 'multidayBody: \'' . $tooltip_text . '\',' . "\n";
+              $javascript_items .= $space . 'multidayTitleInTime: true,' . "\n";
               $javascript_items .= $javascript_item_common;
               $javascript_items .= '    }';
             }
@@ -2118,6 +2124,8 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
         $javascript_items .= $space . 'tooltipTitle: \'<strong>' . $item['title'] . '</strong>\',' . "\n";
         $javascript_items .= $space . 'tooltipText: \'' . $tooltip_text . $tooltip_text_suffix . '\',' . "\n";
         $javascript_items .= $space . 'tooltipClass: \'' . $tooltip_class . '\',' . "\n";
+        $javascript_items .= $space . 'multidayBody: \'' . $tooltip_text . '\',' . "\n";
+        $javascript_items .= $space . 'multidayTitleInTime: true,' . "\n";
         $javascript_items .= $javascript_item_common;
         $javascript_items .= '    }';
 
@@ -2315,6 +2323,8 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
           $javascript_items .= $space . 'tooltipTitle: \'<strong>' . $item['title'] . '</strong>\',' . "\n";
           $javascript_items .= $space . 'tooltipText: \'' . $tooltip_text . $tooltip_text_suffix . '\',' . "\n";
           $javascript_items .= $space . 'tooltipClass: \'' . $tooltip_class . '\',' . "\n";
+          $javascript_items .= $space . 'multidayBody: \'' . $tooltip_text . '\',' . "\n";
+          $javascript_items .= $space . 'multidayTitleInTime: true,' . "\n";
           $javascript_items .= $javascript_item_common;
           $javascript_items .= '    }';
 
