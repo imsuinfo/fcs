@@ -4920,6 +4920,8 @@ function mfcs_get_request_field_presentation_technical_equipment_microphone($for
       ),
     );
 
+    mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
     foreach ($values as $key => $value) {
       $fields['presentation']['technical_equipment_microphone'][$key] = array(
         '#id' => 'field-request-presentation-technical_equipment_microphone-' . $key,
@@ -4930,12 +4932,12 @@ function mfcs_get_request_field_presentation_technical_equipment_microphone($for
         '#states' => array(
           'visible' => array(
             ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment]' . '[' . $key . ']'  . '"]' => array('value' => 1),
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment_details]' . '[' . $key . ']' . '[76]' . '"]' => array('checked' => TRUE),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment_details]' . '[' . $key . ']' . '[' . MFCS_REQUEST_TECHNICAL_EQUIPMENT_MICROPHONE . ']' . '"]' => array('checked' => TRUE),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment_details]' . '[' . $key . ']' . '[76]' . '"]' => array('checked' => FALSE),
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment_details]' . '[' . $key . ']' . '[76]' . '"]' => array('value' => NULL),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment_details]' . '[' . $key . ']' . '[' . MFCS_REQUEST_TECHNICAL_EQUIPMENT_MICROPHONE . ']' . '"]' => array('checked' => FALSE),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment_details]' . '[' . $key . ']' . '[' . MFCS_REQUEST_TECHNICAL_EQUIPMENT_MICROPHONE . ']' . '"]' => array('value' => NULL),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[technical_equipment]' . '[' . $key . ']' . '"]' => array('value' => NULL),
             ),
@@ -6081,6 +6083,8 @@ function mfcs_get_request_field_presentation_designing_material_name($form, &$fo
       ),
     );
 
+    mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
     foreach ($values as $key => $value) {
       $fields['presentation']['designing_material_name'][$key] = array(
         '#id' => 'field-request-presentation-designing_material_name-' . $key,
@@ -6093,11 +6097,11 @@ function mfcs_get_request_field_presentation_designing_material_name($form, &$fo
           'visible' => array(
             ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 1),
             ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 1),
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[97]' . '"]' => array('checked' => TRUE),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[' . MFCS_REQUEST_DESIGNING_MATERIALS_OTHER . ']' . '"]' => array('checked' => TRUE),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[97]' . '"]' => array('checked' => FALSE),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[' . MFCS_REQUEST_DESIGNING_MATERIALS_OTHER . ']' . '"]' => array('checked' => FALSE),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => NULL),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 0),
@@ -6173,6 +6177,8 @@ function mfcs_get_request_field_presentation_designing_material_email($form, &$f
       ),
     );
 
+    mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
     foreach ($values as $key => $value) {
       $fields['presentation']['designing_material_email'][$key] = array(
         '#id' => 'field-request-presentation-designing_material_email-' . $key,
@@ -6185,11 +6191,11 @@ function mfcs_get_request_field_presentation_designing_material_email($form, &$f
           'visible' => array(
             ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 1),
             ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 1),
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[97]' . '"]' => array('checked' => TRUE),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[' . MFCS_REQUEST_DESIGNING_MATERIALS_OTHER . ']' . '"]' => array('checked' => TRUE),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[97]' . '"]' => array('checked' => FALSE),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[' . MFCS_REQUEST_DESIGNING_MATERIALS_OTHER . ']' . '"]' => array('checked' => FALSE),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => NULL),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 0),
@@ -6265,6 +6271,8 @@ function mfcs_get_request_field_presentation_designing_material_phone($form, &$f
       ),
     );
 
+    mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
+
     foreach ($values as $key => $value) {
       $fields['presentation']['designing_material_phone'][$key] = array(
         '#id' => 'field-request-presentation-designing_material_phone-' . $key,
@@ -6275,11 +6283,11 @@ function mfcs_get_request_field_presentation_designing_material_phone($form, &$f
           'visible' => array(
             ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 1),
             ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 1),
-            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[97]' . '"]' => array('checked' => TRUE),
+            ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[' . MFCS_REQUEST_DESIGNING_MATERIALS_OTHER . ']' . '"]' => array('checked' => TRUE),
           ),
           'invisible' => array(
             'or' => array(
-              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[97]' . '"]' => array('checked' => FALSE),
+              ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[designing_material]' . '[' . $key . ']' . '[' . MFCS_REQUEST_DESIGNING_MATERIALS_OTHER . ']' . '"]' => array('checked' => FALSE),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => 0),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[printed_material]' . '[' . $key . ']' . '"]' => array('value' => NULL),
               ':input[name="' . $form['form']['parents']['#value']['path'] . $ps . '[university_logo]' . '[' . $key . ']' . '"]' => array('value' => 0),
