@@ -270,8 +270,8 @@ function mcneese_management_group_leader_operation_form_submit($form, &$form_sta
  *   Generated wiki text wrapped inside of a div and pre tag.
  */
 function mcneese_management_group_leader_wiki_export() {
-  $pre = '<noautolink>';
-  $pre .= '| *Access ID* | *Menu ID* | *Group Name* | *Group Path* | *Group Leader(s)* |';
+  $pre = '<noautolink>' . "\n";
+  $pre .= '| *Access ID* | *Menu ID* | *Group Name* | *Group Path* | *Group Leader(s)* |' . "\n";
 
   $leaders = variable_get('mcneese_management_group_leaders', array());
   $fallback_uid = variable_get('mcneese_management_group_leader_unassigned', 1);
@@ -337,10 +337,10 @@ function mcneese_management_group_leader_wiki_export() {
 
     $line .= $users[$target_uid]->name . ' |';
 
-    $pre .= $line;
+    $pre .= $line . "\n";
   }
 
-  $pre .= '</noautolink>';
+  $pre .= '</noautolink>' . "\n";
 
   $output = '<div><pre>' . check_plain($pre) . '</pre></div>';
   return $output;

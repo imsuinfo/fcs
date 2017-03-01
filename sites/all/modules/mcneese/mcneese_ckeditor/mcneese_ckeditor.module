@@ -23,7 +23,7 @@ function mcneese_ckeditor_wysiwyg_editor_settings_alter(&$settings, $context) {
     $full_toolbar[] = array('Source', 'Maximize',  'ShowBlocks');
     $full_toolbar[] = array('Templates', 'Preview', 'drupal_accessibility');
     $full_toolbar[] = '/';
-    $full_toolbar[] = array('Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord');
+    $full_toolbar[] = array('Cut', 'Copy', 'CopyFormatting', 'Paste', 'PasteText', 'PasteFromWord');
     $full_toolbar[] = array('Undo', 'Redo', 'Find', 'Replace', '-', 'SelectAll', 'RemoveFormat');
     $full_toolbar[] = array('media', 'Image', 'Table', 'HorizontalRule', 'SpecialChar', 'CreateDiv');
     $full_toolbar[] = array('Iframe');
