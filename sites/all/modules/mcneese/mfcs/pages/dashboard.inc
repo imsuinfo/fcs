@@ -40,6 +40,7 @@ function mfcs_dashboard_page() {
   $can_list = mfcs_page_request_access('list', NULL, $user);
   $can_search = mfcs_page_request_access('search', NULL, $user);
   $can_review = mfcs_page_request_access('review', NULL, $user);
+  $can_rss = mfcs_page_generic_access('rss'); // @todo: find a way to handle RSS feeds without implementing apaches HTTP login access (perhaps do it via PHP?).
 
   $items_1 = array();
   $items_2 = array();

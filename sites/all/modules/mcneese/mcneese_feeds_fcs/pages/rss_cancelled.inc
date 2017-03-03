@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Defines rss feed listing room functions.
+ * Defines rss feed listing approved requests that have been cancelled functions.
  *
  */
 
@@ -12,18 +12,16 @@
  */
 
 /**
- * Output the RSS Feed "Room".
+ * Output the RSS Feed "Cancelled Requests".
  *
- * @param string $rooms
- *   A string containing comma separated numeric room ids.
  * @param string|null $date
  *   (optional) A string containing one of the following:
  *     'all', 'past', 'present', 'future', 'Y-m-d', 'y-m', 'y'.
  * @param string|int|null $limit
- *   (optional) A string or number representing the limits.
+ *  (optional)  A string or number representing the limits.
  *   The string 'all' represents no limit.
  */
-function mcneese_feeds_fcs_rss_room($rooms, $date = 'all', $limit = 25) {
+function mcneese_feeds_fcs_rss_cancelled($date = NULL, $limit = NULL) {
   if (is_null($date)) {
     $date = 'all';
     $date_path = NULL;
@@ -40,16 +38,14 @@ function mcneese_feeds_fcs_rss_room($rooms, $date = 'all', $limit = 25) {
     $limit_path .= '/' . $limit;
   }
 
-  if (!is_string($rooms) || empty($rooms)) {
-    cf_error::invalid_string('rooms');
-    drupal_not_found();
-    drupal_exit();
-  }
-
   if (!is_string($date) || empty($date)) {
     cf_error::invalid_string('date');
     drupal_not_found();
     drupal_exit();
+  }
+
+  if (is_null($limit)) {
+    $limit = 25;
   }
 
   if (is_string($limit) && is_numeric($limit)) {
@@ -61,15 +57,6 @@ function mcneese_feeds_fcs_rss_room($rooms, $date = 'all', $limit = 25) {
     drupal_not_found();
     drupal_exit();
   }
-
-  $parts_rooms = explode(',', $rooms);
-  $all_rooms = array();
-  foreach ($parts_rooms as $part_room) {
-    if (is_numeric($part_room)) {
-      $all_rooms[(int) $part_room] = (int) $part_room;
-    }
-  }
-  unset($parts_rooms);
 
   $date_year = NULL;
   $date_month = NULL;
@@ -168,7 +155,6 @@ function mcneese_feeds_fcs_rss_room($rooms, $date = 'all', $limit = 25) {
   $type_options = mfcs_get_request_type_list_options();
   $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
   $building_options = mfcs_get_request_building_list_options(NULL, NULL, TRUE);
-  $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
   $request_classifications = mfcs_get_request_classification_list_options();
 
 
@@ -178,28 +164,22 @@ function mcneese_feeds_fcs_rss_room($rooms, $date = 'all', $limit = 25) {
   $output = '';
   $rows = array();
   $categories = array();
-  $feed_url = 'rss/feed/room/' . $rooms . $date_path . $limit_path;
+  $feed_url = 'rss/feed/approved' . $date_path . $limit_path;
 
-  $feed_description = 'A listing of reserved rooms based on the requested url arguments.';
+  $feed_description = 'A listing of reserved rooms or locations whose requests have been approved.';
 
   $channel = new McNeeseFeedsRssChannel();
-  $channel->assign_common_required(MCNEESE_FEEDS_FCS_TITLE . ' - Room Feed', $base_url, $feed_description);
+  $channel->assign_common_required(MCNEESE_FEEDS_FCS_TITLE . ' - Approved Requests Feed', $base_url, $feed_description);
   $channel->assign_common_optional(NULL, REQUEST_TIME, date('Y', REQUEST_TIME) . '© McNeese State University');
 
   // The date of the most recent item on the feed should be used here.
   $original_timezone = date_default_timezone_get();
 
   try {
-    $conditions = mfcs_miscellaneous_generate_requests_by_date_search($date_start, $date_stop);
+    $conditions = mfcs_miscellaneous_generate_requests_by_date_search($date_start, $date_stop, MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED);
     if (!is_array($conditions)) {
       $conditions = array();
     }
-
-    $conditions['and_1']['value_room'] = array(
-        'field' => 'mer.room',
-        'operator' => MFCS_OPERATOR_IS_IN,
-        'search' => $all_rooms,
-    );
 
     $options = array(
       'sort' => array('date' => 'ASC'),
@@ -223,7 +203,7 @@ function mcneese_feeds_fcs_rss_room($rooms, $date = 'all', $limit = 25) {
       'event',
     );
 
-    $channel->set_title(MCNEESE_FEEDS_FCS_TITLE . ' - Room Feed');
+    $channel->set_title(MCNEESE_FEEDS_FCS_TITLE . ' - Approved Requests Feed');
     $channel->set_description($feed_description);
 
     if (!empty($items)) {
@@ -232,13 +212,6 @@ function mcneese_feeds_fcs_rss_room($rooms, $date = 'all', $limit = 25) {
 
         date_default_timezone_set('UTC');
         date_default_timezone_set($original_timezone);
-
-        $location = "";
-        if (!empty($item->location)) {
-          if (isset($location_options[$item->location])) {
-            $location = check_plain($location_options[$item->location]);
-          }
-        }
 
         $building = '';
         if (!empty($item->building)) {
@@ -270,7 +243,6 @@ function mcneese_feeds_fcs_rss_room($rooms, $date = 'all', $limit = 25) {
         $markup = '';
         $markup .= '<strong>Request ID:</strong><ul><li>' . $item->id .'</li></ul>' . "<br>\n";
         $markup .= '<strong>Request Name:</strong><ul><li>' . check_plain($item->title) . '</li></ul>' . "<br>\n";
-        $markup .= '<strong>Location:</strong><ul><li>' . $location . '</li></ul>' . "<br>\n";
         $markup .= '<strong>Building:</strong><ul><li>' . $building . '</li></ul>' . "<br>\n";
         $markup .= '<strong>Room:</strong><ul><li>' . $room . '</li></ul>' . "<br>\n";
         $markup .= '<strong>Dates:</strong><ul>' . $dates . '</ul>' . "<br>\n";

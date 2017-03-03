@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Defines rss feed listing location functions.
+ * Defines rss feed listing approved requests functions.
  *
  */
 
@@ -12,22 +12,30 @@
  */
 
 /**
- * Output the RSS Feed "Room".
+ * Output the RSS Feed "Approved Requests".
  *
- * @param string $locations
- *   A string containing comma separated numeric location ids.
- * @param string $date
- *   A string containing one of the following:
+ * @param string|null $date
+ *   (optional) A string containing one of the following:
  *     'all', 'past', 'present', 'future', 'Y-m-d', 'y-m', 'y'.
- * @param string $limit
- *   A string or number representing the limits.
+ * @param string|int|null $limit
+ *  (optional)  A string or number representing the limits.
  *   The string 'all' represents no limit.
  */
-function mcneese_feeds_fcs_rss_location($locations, $date, $limit) {
-  if (!is_string($locations) || empty($locations)) {
-    cf_error::invalid_string('locations');
-    drupal_not_found();
-    drupal_exit();
+function mcneese_feeds_fcs_rss_approved($date = NULL, $limit = NULL) {
+  if (is_null($date)) {
+    $date = 'all';
+    $date_path = NULL;
+  }
+  else {
+    $date_path .= '/' . $date;
+  }
+
+  if (is_null($limit)) {
+    $limit = 25;
+    $limit_path = NULL;
+  }
+  else {
+    $limit_path .= '/' . $limit;
   }
 
   if (!is_string($date) || empty($date)) {
@@ -36,20 +44,19 @@ function mcneese_feeds_fcs_rss_location($locations, $date, $limit) {
     drupal_exit();
   }
 
-  if (!is_string($limit) || is_numeric($limit) && $limit < 1 || empty($limit)) {
+  if (is_null($limit)) {
+    $limit = 25;
+  }
+
+  if (is_string($limit) && is_numeric($limit)) {
+    $limit = (int) $limit;
+  }
+
+  if ($limit < 1 || empty($limit) || (is_string($limit) && $string != 'all')) {
     cf_error::invalid_string('limit');
     drupal_not_found();
     drupal_exit();
   }
-
-  $parts_locations = explode(',', $locations);
-  $all_locations = array();
-  foreach ($parts_locations as $part_location) {
-    if (is_numeric($part_location)) {
-      $all_locations[(int) $part_location] = (int) $part_location;
-    }
-  }
-  unset($parts_locations);
 
   $date_year = NULL;
   $date_month = NULL;
@@ -148,7 +155,6 @@ function mcneese_feeds_fcs_rss_location($locations, $date, $limit) {
   $type_options = mfcs_get_request_type_list_options();
   $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE);
   $building_options = mfcs_get_request_building_list_options(NULL, NULL, TRUE);
-  $location_options = mfcs_get_request_location_list_options(NULL, FALSE, TRUE);
   $request_classifications = mfcs_get_request_classification_list_options();
 
 
@@ -158,23 +164,22 @@ function mcneese_feeds_fcs_rss_location($locations, $date, $limit) {
   $output = '';
   $rows = array();
   $categories = array();
-  $feed_url = 'rss/feed/location/' . $locations . '/' . $date . '/' . $limit;
+  $feed_url = 'rss/feed/approved' . $date_path . $limit_path;
+
+  $feed_description = 'A listing of reserved rooms or locations whose requests have been approved.';
 
   $channel = new McNeeseFeedsRssChannel();
-  $channel->assign_common_required(MCNEESE_FEEDS_FCS_TITLE . " - Location Feed", $base_url, "A listing of reserved locations based on the requested url arguments.");
-  $channel->assign_common_optional(NULL, REQUEST_TIME, date("Y", REQUEST_TIME) . "© McNeese State University");
+  $channel->assign_common_required(MCNEESE_FEEDS_FCS_TITLE . ' - Approved Requests Feed', $base_url, $feed_description);
+  $channel->assign_common_optional(NULL, REQUEST_TIME, date('Y', REQUEST_TIME) . '© McNeese State University');
 
   // The date of the most recent item on the feed should be used here.
   $original_timezone = date_default_timezone_get();
 
   try {
     $conditions = mfcs_miscellaneous_generate_requests_by_date_search($date_start, $date_stop);
-
-    $conditions['and_1']['value_location'] = array(
-        'field' => 'mer.location',
-        'operator' => MFCS_OPERATOR_IS_IN,
-        'search' => $all_locations,
-    );
+    if (!is_array($conditions)) {
+      $conditions = array();
+    }
 
     $options = array(
       'sort' => array('date' => 'ASC'),
@@ -198,8 +203,8 @@ function mcneese_feeds_fcs_rss_location($locations, $date, $limit) {
       'event',
     );
 
-    $channel->set_title(MCNEESE_FEEDS_FCS_TITLE . " - Location Feed");
-    $channel->set_description("A listing of reserved locations based on the requested url arguments.");
+    $channel->set_title(MCNEESE_FEEDS_FCS_TITLE . ' - Approved Requests Feed');
+    $channel->set_description($feed_description);
 
     if (!empty($items)) {
       foreach ($items as $key => $item) {
@@ -208,21 +213,14 @@ function mcneese_feeds_fcs_rss_location($locations, $date, $limit) {
         date_default_timezone_set('UTC');
         date_default_timezone_set($original_timezone);
 
-        $location = "";
-        if (!empty($item->location)) {
-          if (isset($location_options[$item->location])) {
-            $location = check_plain($location_options[$item->location]);
-          }
-        }
-
-        $building = "";
+        $building = '';
         if (!empty($item->building)) {
           if (isset($building_options[$item->building])) {
             $building = check_plain($building_options[$item->building]);
           }
         }
 
-        $room = "";
+        $room = '';
         if (!empty($item->room)) {
           if (isset($room_options[$item->room])) {
             $room = check_plain($room_options[$item->room]);
@@ -233,7 +231,7 @@ function mcneese_feeds_fcs_rss_location($locations, $date, $limit) {
         if (isset($item->date) && is_array($item->date)) {
           foreach ($item->date as $delta => $date) {
             $dates .= '<li>';
-            $dates .= check_plain(date("Y/m/d", $date));
+            $dates .= check_plain(date('Y/m/d', $date));
             if (array_key_exists($delta, $item->time_start) && !is_null($item->time_start[$delta]) && array_key_exists($delta, $item->time_stop) && !is_null($item->time_stop[$delta])) {
               $dates .= ' ' . check_plain(date("h:i a", $item->time_start[$delta]));
               $dates .= ' to ' . check_plain(date("h:i a", $item->time_stop[$delta]));
@@ -245,14 +243,13 @@ function mcneese_feeds_fcs_rss_location($locations, $date, $limit) {
         $markup = '';
         $markup .= '<strong>Request ID:</strong><ul><li>' . $item->id .'</li></ul>' . "<br>\n";
         $markup .= '<strong>Request Name:</strong><ul><li>' . check_plain($item->title) . '</li></ul>' . "<br>\n";
-        $markup .= '<strong>Location:</strong><ul><li>' . $location . '</li></ul>' . "<br>\n";
         $markup .= '<strong>Building:</strong><ul><li>' . $building . '</li></ul>' . "<br>\n";
         $markup .= '<strong>Room:</strong><ul><li>' . $room . '</li></ul>' . "<br>\n";
         $markup .= '<strong>Dates:</strong><ul>' . $dates . '</ul>' . "<br>\n";
         $markup .= '<strong>Request URL:</strong><ul><li><a href="' . $base_url . '/requests/view-0/' . $item->id .'">' . $base_url . '/requests/view-0/' . $item->id . '</a></li></ul>' . "<br>\n";
 
         $feed_item->assign_common_required($item->title, $base_url . '/requests/view-0/' . $item->id, $markup);
-        $feed_item->assign_common_optional($markup, $item->created, date("Y", $item->updated) . "© McNeese State University", $categories);
+        $feed_item->assign_common_optional($markup, $item->created, date('Y', $item->updated) . '© McNeese State University', $categories);
         $feed_item->assign_optional('request:' . $item->id, FALSE);
 
         $channel->append_item($feed_item);
@@ -262,24 +259,24 @@ function mcneese_feeds_fcs_rss_location($locations, $date, $limit) {
   catch (Error $e) {
     cf_error::on_exception($e);
 
-    watchdog('mcneese_feeds_fcs', "Failed to generate RSS Feed Channel", array(), WATCHDOG_ERROR);
+    watchdog('mcneese_feeds_fcs', 'Failed to generate RSS Feed Channel', array(), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
   }
   catch (Exception $e) {
     cf_error::on_exception($e);
 
-    watchdog('mcneese_feeds_fcs', "Failed to generate RSS Feed Channel", array(), WATCHDOG_ERROR);
+    watchdog('mcneese_feeds_fcs', 'Failed to generate RSS Feed Channel', array(), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
   }
 
   $channel->assign_required($base_url . '/');
-  $channel->assign_optional('en-US', $base_url . '/' . $feed_url, TRUE, REQUEST_TIME, array('url' => $base_url . '/sites/all/themes/mcneese/images/logo-blue.png', 'title' => "McNeese State University", 'link' => $base_url . '/'));
+  $channel->assign_optional('en-US', $base_url . '/' . $feed_url, TRUE, REQUEST_TIME, array('url' => $base_url . '/sites/all/themes/mcneese/images/logo-blue.png', 'title' => 'McNeese State University', 'link' => $base_url . '/'));
 
   $output = $channel->get_feed();
   if ($output === FALSE) {
-    watchdog('mcneese_feeds_fcs', "Failed to generate RSS Feed Channel", array(), WATCHDOG_ERROR);
+    watchdog('mcneese_feeds_fcs', 'Failed to generate RSS Feed Channel', array(), WATCHDOG_ERROR);
     drupal_not_found();
     drupal_exit();
   }

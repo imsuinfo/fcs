@@ -127,12 +127,12 @@ function mfcs_miscellaneous_determine_current_date($year, $month, $day) {
  * @see: mfcs_request_load_listing()
  */
 function mfcs_miscellaneous_generate_requests_by_date_search($start = NULL, $stop = NULL, $status = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED, $step = MFCS_REVIEW_STEP_COMPLETED) {
-  if (!is_null($start) && !cf_is_integer($start)) {
+  if (!is_null($start) || !cf_is_integer($start)) {
     cf_error::invalid_integer('start');
     return FALSE;
   }
 
-  if (!is_null($stop) && !cf_is_integer($stop)) {
+  if (!is_null($stop) || !cf_is_integer($stop)) {
     cf_error::invalid_integer('stop');
     return FALSE;
   }

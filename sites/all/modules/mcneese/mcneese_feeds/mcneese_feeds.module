@@ -20,8 +20,8 @@ function mcneese_feeds_permission() {
   $permissions = array();
 
   $permissions['mcneese feeds access listings'] = array(
-    'title' => t("McNeese Feed - Access Listing"),
-    'description' => t("Grants access to view the McNeese RSS feed listing."),
+    'title' => 'McNeese Feed - Access Listing',
+    'description' => 'Grants access to view the McNeese RSS feed listing.',
   );
 
   return $permissions;
@@ -35,8 +35,8 @@ function mcneese_feeds_menu() {
   $items = array();
 
   $items['rss/feed'] = array(
-    'title' => "RSS Feeds",
-    'description' => "A listing of RSS feeds available on this website.",
+    'title' => 'RSS Feeds',
+    'description' => 'A listing of RSS feeds available on this website.',
     'page callback' => 'mcneese_feeds_rss_listing',
     'file' => 'rss_listing.inc',
     'file path' => drupal_get_path('module', 'mcneese_feeds') . '/pages',

@@ -37,37 +37,139 @@ function mcneese_feeds_fcs_menu() {
   global $conf;
   $items = array();
 
+  $module_path = drupal_get_path('module', 'mcneese_feeds_fcs');
+
+  $items['rss/feed/approved'] = array(
+    'title' => MCNEESE_FEEDS_FCS_TITLE . ' - RSS Feed - Approved Requests',
+    'description' => 'An RSS feed for all approved requests.',
+    'page callback' => 'mcneese_feeds_fcs_rss_approved',
+    'file' => 'rss_approved.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_generic_access',
+    'access arguments' => array('rss'),
+  );
+
+  $items['rss/feed/approved/%'] = array(
+    'title' => MCNEESE_FEEDS_FCS_TITLE . ' - RSS Feed - Approved Requests',
+    'description' => 'An RSS feed for all approved requests.',
+    'page callback' => 'mcneese_feeds_fcs_rss_approved',
+    'page arguments' => array(3),
+    'file' => 'rss_approved.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_generic_access',
+    'access arguments' => array('rss'),
+  );
+
+  $items['rss/feed/approved/%/%'] = array(
+    'title' => MCNEESE_FEEDS_FCS_TITLE . ' - RSS Feed - Approved Requests',
+    'description' => 'An RSS feed for all approved requests.',
+    'page callback' => 'mcneese_feeds_fcs_rss_approved',
+    'page arguments' => array(3, 4),
+    'file' => 'rss_approved.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_generic_access',
+    'access arguments' => array('rss'),
+  );
+
+  $items['rss/feed/cancelled'] = array(
+    'title' => MCNEESE_FEEDS_FCS_TITLE . ' - RSS Feed - Cancelled Requests',
+    'description' => 'An RSS feed for all approved requests that have been cancelled.',
+    'page callback' => 'mcneese_feeds_fcs_rss_cancelled',
+    'file' => 'rss_cancelled.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_generic_access',
+    'access arguments' => array('rss'),
+  );
+
+  $items['rss/feed/cancelled/%'] = array(
+    'title' => MCNEESE_FEEDS_FCS_TITLE . ' - RSS Feed - Cancelled Requests',
+    'description' => 'An RSS feed for all approved requests that have been cancelled.',
+    'page callback' => 'mcneese_feeds_fcs_rss_cancelled',
+    'page arguments' => array(3),
+    'file' => 'rss_cancelled.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_generic_access',
+    'access arguments' => array('rss'),
+  );
+
+  $items['rss/feed/cancelled/%/%'] = array(
+    'title' => MCNEESE_FEEDS_FCS_TITLE . ' - RSS Feed - Cancelled Requests',
+    'description' => 'An RSS feed for all approved requests that have been cancelled.',
+    'page callback' => 'mcneese_feeds_fcs_rss_cancelled',
+    'page arguments' => array(3, 4),
+    'file' => 'rss_cancelled.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_page_generic_access',
+    'access arguments' => array('rss'),
+  );
+
+  $items['rss/feed/room/%'] = array(
+    'title' => MCNEESE_FEEDS_FCS_TITLE . ' - RSS Feed - Approved Requests for Room',
+    'description' => 'An RSS feed for all approved requests for the specified rooms or locations.',
+    'page callback' => 'mcneese_feeds_fcs_rss_room',
+    'page arguments' => array(3),
+    'file' => 'rss_room.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'user_access',
+    'access arguments' => array('mcneese feeds fcs access'),
+    'tab_parent' => 'rss/feed',
+  );
+
+  $items['rss/feed/room/%/%'] = array(
+    'title' => MCNEESE_FEEDS_FCS_TITLE . ' - RSS Feed - Approved Requests for Room',
+    'description' => 'An RSS feed for all approved requests for the specified rooms or locations.',
+    'page callback' => 'mcneese_feeds_fcs_rss_room',
+    'page arguments' => array(3, 4),
+    'file' => 'rss_room.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'user_access',
+    'access arguments' => array('mcneese feeds fcs access'),
+    'tab_parent' => 'rss/feed',
+  );
+
   $items['rss/feed/room/%/%/%'] = array(
-    'title' => MCNEESE_FEEDS_FCS_TITLE . " - RSS Feed - Room",
-    'description' => "An RSS feed for all approved requests for the specified rooms.",
+    'title' => MCNEESE_FEEDS_FCS_TITLE . ' - RSS Feed - Approved Requests for Room',
+    'description' => 'An RSS feed for all approved requests for the specified rooms or locations.',
     'page callback' => 'mcneese_feeds_fcs_rss_room',
     'page arguments' => array(3, 4, 5),
     'file' => 'rss_room.inc',
-    'file path' => drupal_get_path('module', 'mcneese_feeds_fcs') . '/pages',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'user_access',
+    'access arguments' => array('mcneese feeds fcs access'),
+    'tab_parent' => 'rss/feed',
+  );
+
+  $items['rss/feed/building/%'] = array(
+    'title' => MCNEESE_FEEDS_FCS_TITLE . ' - RSS Feed - Approved Requests for Building Rooms',
+    'description' => 'An RSS feed for all approved requests for the specified building rooms or locations.',
+    'page callback' => 'mcneese_feeds_fcs_rss_building',
+    'page arguments' => array(3),
+    'file' => 'rss_building.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'user_access',
+    'access arguments' => array('mcneese feeds fcs access'),
+    'tab_parent' => 'rss/feed',
+  );
+
+  $items['rss/feed/building/%/%'] = array(
+    'title' => MCNEESE_FEEDS_FCS_TITLE . ' - RSS Feed - Approved Requests for Building Rooms',
+    'description' => 'An RSS feed for all approved requests for the specified building rooms or locations.',
+    'page callback' => 'mcneese_feeds_fcs_rss_building',
+    'page arguments' => array(3, 4),
+    'file' => 'rss_building.inc',
+    'file path' => $module_path . '/pages',
     'access callback' => 'user_access',
     'access arguments' => array('mcneese feeds fcs access'),
     'tab_parent' => 'rss/feed',
   );
 
   $items['rss/feed/building/%/%/%'] = array(
-    'title' => MCNEESE_FEEDS_FCS_TITLE . " - RSS Feed - Building",
-    'description' => "An RSS feed for all approved requests for the specified building.",
+    'title' => MCNEESE_FEEDS_FCS_TITLE . ' - RSS Feed - Approved Requests for Building Rooms',
+    'description' => 'An RSS feed for all approved requests for the specified building rooms or locations.',
     'page callback' => 'mcneese_feeds_fcs_rss_building',
     'page arguments' => array(3, 4, 5),
     'file' => 'rss_building.inc',
-    'file path' => drupal_get_path('module', 'mcneese_feeds_fcs') . '/pages',
-    'access callback' => 'user_access',
-    'access arguments' => array('mcneese feeds fcs access'),
-    'tab_parent' => 'rss/feed',
-  );
-
-  $items['rss/feed/location/%/%/%'] = array(
-    'title' => MCNEESE_FEEDS_FCS_TITLE . " - RSS Feed - Location",
-    'description' => "An RSS feed for all approved requests for the specified location.",
-    'page callback' => 'mcneese_feeds_fcs_rss_location',
-    'page arguments' => array(3, 4, 5),
-    'file' => 'rss_location.inc',
-    'file path' => drupal_get_path('module', 'mcneese_feeds_fcs') . '/pages',
+    'file path' => $module_path . '/pages',
     'access callback' => 'user_access',
     'access arguments' => array('mcneese feeds fcs access'),
     'tab_parent' => 'rss/feed',
@@ -80,24 +182,31 @@ function mcneese_feeds_fcs_menu() {
  * Implements hook_mcneese_feeds_rss_listing().
  */
 function mcneese_feeds_fcs_mcneese_feeds_rss_listing_alter(&$rss_feeds) {
+  $rss_feeds['mcneese_feeds_fcs-approved'] = array(
+    'name' => MCNEESE_FEEDS_FCS_TITLE . ' - RSS Feed - Approved Requests',
+    'path' => 'rss/feed/approved',
+    'description' => 'An RSS feed for all approved requests. A first argument allows for one of: \'all\', \'past\', \'present\', \'future\', or a date, such as YYYY-mm-dd, or YYYY-mm. A second argument may be a number or all representing a limit on the number of entries to load.',
+    'no_link' => FALSE,
+  );
+
+  $rss_feeds['mcneese_feeds_fcs-cancelled'] = array(
+    'name' => MCNEESE_FEEDS_FCS_TITLE . ' - RSS Feed - Cancelled Requests',
+    'path' => 'rss/feed/cancelled',
+    'description' => 'An RSS feed for all approved requests that have been cancelled. A first argument allows for one of: \'all\', \'past\', \'present\', \'future\', or a date, such as YYYY-mm-dd, or YYYY-mm. A second argument may be a number or all representing a limit on the number of entries to load.',
+    'no_link' => FALSE,
+  );
+
   $rss_feeds['mcneese_feeds_fcs-room'] = array(
-    'name' => MCNEESE_FEEDS_FCS_TITLE . " - RSS Feed - Room",
+    'name' => MCNEESE_FEEDS_FCS_TITLE . ' - RSS Feed - Approved Requests for Room',
     'path' => 'rss/feed/room',
-    'description' => "An RSS feed for all approved requests for the specified rooms.<br><br>Multiple rooms may be provided using a comma (,) as a separator. A second argument allows for one of: 'all', 'past', 'present', 'future', or a date, such as YYYY-mm-dd, or YYYY-mm. A third argument may be a number or all representing a limit on the number of entries to load.",
+    'description' => 'An RSS feed for all approved requests for the specified rooms.<br><br>Multiple rooms may be provided using a comma (,) as a separator. A second argument allows for one of: \'all\', \'past\', \'present\', \'future\', or a date, such as YYYY-mm-dd, or YYYY-mm. A third argument may be a number or all representing a limit on the number of entries to load.',
     'no_link' => TRUE,
   );
 
   $rss_feeds['mcneese_feeds_fcs-building'] = array(
-    'name' => MCNEESE_FEEDS_FCS_TITLE . " - RSS Feed - Building",
+    'name' => MCNEESE_FEEDS_FCS_TITLE . ' - RSS Feed - Approved Requests for Building',
     'path' => 'rss/feed/building',
-    'description' => "An RSS feed for all approved requests for the specified buildings.<br><br>Multiple buildings may be provided using a comma (,) as a separator. A second argument allows for one of: 'all', 'past', 'present', 'future', or a date, such as YYYY-mm-dd, or YYYY-mm. A third argument may be a number or all representing a limit on the number of entries to load.",
-    'no_link' => TRUE,
-  );
-
-  $rss_feeds['mcneese_feeds_fcs-location'] = array(
-    'name' => MCNEESE_FEEDS_FCS_TITLE . " - RSS Feed - Location",
-    'path' => 'rss/feed/location',
-    'description' => "An RSS feed for all approved requests for the specified locations.<br><br>Multiple locations may be provided using a comma (,) as a separator. A second argument allows for one of: 'all', 'past', 'present', 'future', or a date, such as YYYY-mm-dd, or YYYY-mm. A third argument may be a number or all representing a limit on the number of entries to load.",
+    'description' => 'An RSS feed for all approved requests for the specified buildings.<br><br>Multiple buildings may be provided using a comma (,) as a separator. A second argument allows for one of: \'all\', \'past\', \'present\', \'future\', or a date, such as YYYY-mm-dd, or YYYY-mm. A third argument may be a number or all representing a limit on the number of entries to load.',
     'no_link' => TRUE,
   );
 }
