@@ -499,7 +499,7 @@ function mfcs_user_cancel($account) {
 /**
  * Implements hook_user_login_name_validate().
  */
-function mfcs_user_login_name_validate(&$form, $form_state) {
+function mfcs_user_login_name_validate($form, &$form_state) {
   mfcs_include(MFCS_INCLUDE_HOOKS);
 
   return mfcs_hook_user_login_name_validate($form, $form_state);
