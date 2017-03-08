@@ -4785,10 +4785,12 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     }
   }
 
+  $roles_changed = FALSE;
   if (count($original_roles) == count($user_roles)) {
     foreach ($user_roles as $user_role_key => $user_role_value) {
       if (!array_key_exists($user_role_key, $original_roles)) {
         $changes_detected = TRUE;
+        $roles_changed = TRUE;
         break;
       }
     }
@@ -4797,6 +4799,7 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
   }
   else {
     $changes_detected = TRUE;
+    $roles_changed = TRUE;
   }
 
   if ($banner_invalid && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0) {
@@ -4885,7 +4888,10 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
   }
 
   if ($changes_detected) {
-    $edit['roles'] = $user_roles;
+    // only update roles if changes have been made to prevent tricking user save functions into thinking some roles are not set..
+    if ($roles_changed) {
+      $edit['roles'] = $user_roles;
+    }
 
     // create this so that mfcs_save_user() has something to pass.
     $edit['mfcs']['updated'] = mfcs_instance();
@@ -14324,7 +14330,7 @@ function mfcs_get_banner_roles_for_banner_id($banner_id) {
  *
  * @return array|bool
  *   An array of ldap information is returned.
- *   TRUE is returned when there is not ldap information.
+ *   TRUE is returned when there is no ldap information.
  *   FALSE is returned on error.
  */
 function mfcs_get_ldap_information($user_object_or_id) {
@@ -14360,6 +14366,9 @@ function mfcs_get_ldap_information($user_object_or_id) {
   }
 
   $ldap_user = ldap_servers_get_user_ldap_data($account_name, $ldap_user_conf->drupalAcctProvisionServer);
+  if ($ldap_user === FALSE) {
+    return TRUE;
+  }
 
   $information = array(
     'name' => $account_name,

@@ -2564,9 +2564,16 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
   // drupal sometimes sets values to 0 to designate that they are to be removed.
   $bannerless_exception = FALSE;
   $bannerless_exception_role_id = user_role_load_by_name('bannerless exception');
-  if (isset($account->roles) && is_array($account->roles) && array_key_exists($bannerless_exception_role_id->rid, $account->roles)) {
-    if ($account->roles[$bannerless_exception_role_id->rid] != 0) {
-      $bannerless_exception = TRUE;
+  if (isset($account->roles) && is_array($account->roles)) {
+    if (array_key_exists($bannerless_exception_role_id->rid, $account->roles)) {
+      // drupal inconsistently stores the roles as either a string of text or a number with 0 representing role not available.
+      // detect this before assigning bannerless exception based on array key alone.
+      if (is_numeric($account->roles[$bannerless_exception_role_id->rid]) && $account->roles[$bannerless_exception_role_id->rid] != 0) {
+        $bannerless_exception = TRUE;
+      }
+      else {
+        $bannerless_exception = TRUE;
+      }
     }
   }
 
@@ -2657,24 +2664,6 @@ function mfcs_hook_user_presave(&$edit, $account, $category) {
       }
     }
   }
-
-  $roles = array();
-  if (isset($edit['roles']) && is_array($edit['roles'])) {
-    foreach ($edit['roles'] as $role_id => $role_value) {
-      if ($role_value == 0) {
-        continue;
-      }
-
-      $roles[$role_id] = (int) $role_id;
-    }
-  }
-  elseif (isset($account->roles)) {
-    foreach ($account->roles as $role_id => $role_value) {
-      $roles[$role_id] = (int) $role_id;
-    }
-  }
-  unset($role_id);
-  unset($role_value);
 
   $problems = MFCS_USER_PROBLEM_NONE;
   if (isset($account->mfcs['problems']) && is_numeric($account->mfcs['problems'])) {
