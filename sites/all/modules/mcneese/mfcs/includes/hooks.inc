@@ -2850,7 +2850,7 @@ function mfcs_hook_user_cancel($account) {
 /**
  * Pre-process the user login form for validation.
  */
-function mfcs_hook_user_login_name_validate($form, &$form_state) {
+function mfcs_hook_user_login_name_validate($form, $form_state) {
   if (!empty($form_state['values']['name'])) {
     try {
       $query = db_select('users', 'u');
