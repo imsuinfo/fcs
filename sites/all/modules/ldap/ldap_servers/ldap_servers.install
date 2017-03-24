@@ -28,6 +28,7 @@ function ldap_servers_uninstall() {
  */
 function ldap_servers_requirements($phase) {
   $requirements = array();
+  $t = get_t();
 
   if ($phase == 'install') {
     $requirements['ldap_extension_loaded']['title'] = t('LDAP Extension Loaded');
@@ -55,6 +56,7 @@ function ldap_servers_requirements($phase) {
       See http://drupal.org/node/1023016. This message will go away when the ldapauth database table is removed.');
   }
   // check that ldapauth not installed.
+
   return $requirements;
 }
 
