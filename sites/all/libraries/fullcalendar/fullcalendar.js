@@ -6407,16 +6407,8 @@ DayGrid.mixin({
 
 					emptyCellsUntil(seg.leftCol);
 
-					date = this.getCellDate(row, col);
-					classes = this.getDayClasses(date);
-					classes.unshift('fc-event-container');
-
-					if (j == levelSegs.length - 1) {
-						classes.unshift('fc-event-container-last');
-					}
-
 					// create a container that occupies or more columns. append the event element.
-					td = $('<td class="' + classes.join(' ') + '"/>').append(seg.el);
+					td = $('<td class="fc-event-container"/>').append(seg.el);
 					if (seg.leftCol != seg.rightCol) {
 						td.attr('colspan', seg.rightCol - seg.leftCol + 1);
 					}
