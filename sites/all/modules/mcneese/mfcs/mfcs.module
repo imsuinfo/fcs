@@ -373,6 +373,8 @@ define('MFCS_DATE_FORMAT_DATE_SQUEEZE_NO_YEAR', 'D, M j');
 define('MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE_NO_YEAR', 'D, M j h:ia');
 define('MFCS_DATE_FORMAT_DATE_HUMAN', 'l, F jS, Y');
 define('MFCS_DATE_FORMAT_DATE_TIME_HUMAN', 'h:ia l, F jS, Y');
+define('MFCS_DATE_FORMAT_DATE_JS_WEEKDAY', 'dddd'); // @see: https://momentjs.com/docs/#/displaying/format/
+define('MFCS_DATE_FORMAT_DATE_JS_SIMPLE', 'MMMM DD, YYYY'); // @see: https://momentjs.com/docs/#/displaying/format/
 
 /**
  * Insurance Settings

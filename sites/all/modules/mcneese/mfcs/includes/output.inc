@@ -502,6 +502,8 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
   $javascript .= '  allDaySlot: true,' . "\n";
   $javascript .= '  slotDuration: \'01:00:00\',' . "\n";
   $javascript .= '  slotEventOverlap: true,' . "\n";
+  $javascript .= '  listDayFormat: \'' . MFCS_DATE_FORMAT_DATE_JS_WEEKDAY . '\',' . "\n";
+  $javascript .= '  listDayAltFormat: \'' . MFCS_DATE_FORMAT_DATE_JS_SIMPLE . '\',' . "\n";
 
   if (is_null($max_items)) {
     $javascript .= '  eventLimit: false,' . "\n";
@@ -1955,6 +1957,8 @@ function mfcs_build_calendar_day_markup_full($items, $day_start, $day_stop, $tit
   $javascript .= '  slotDuration: \'01:00:00\',' . "\n";
   $javascript .= '  slotEventOverlap: true,' . "\n";
   $javascript .= '  eventLimit: false,' . "\n";
+  $javascript .= '  listDayFormat: \'' . MFCS_DATE_FORMAT_DATE_JS_WEEKDAY . '\',' . "\n";
+  $javascript .= '  listDayAltFormat: \'' . MFCS_DATE_FORMAT_DATE_JS_SIMPLE . '\',' . "\n";
 
   // add qtip support.
   $javascript .= '  eventRender: function(event, element) {' . "\n";
