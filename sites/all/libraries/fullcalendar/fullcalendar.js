@@ -7019,7 +7019,7 @@ var TimeGrid = FC.TimeGrid = Grid.extend(DayTableMixin, {
 		var axisHtml;
 
 		// Calculate the time for each slot
-		while (slotTime < this.maxTime) {
+		while (slotTime <= this.maxTime) {
 			slotDate = this.start.clone().time(slotTime);
 			isLabeled = isInt(divideDurationByDuration(slotTime, this.labelInterval));
 
