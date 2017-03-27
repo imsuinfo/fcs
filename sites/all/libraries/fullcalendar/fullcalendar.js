@@ -5838,7 +5838,7 @@ var DayGrid = FC.DayGrid = Grid.extend(DayTableMixin, {
 					'</table>' +
 				'</div>' +
 				'<div class="fc-content-skeleton">' +
-					'<table>' +
+					'<table class="fc-table-row fc-table-row-' + row + '">' +
 						(this.numbersVisible ?
 							'<thead>' +
 								this.renderNumberTrHtml(row) +
@@ -6368,6 +6368,9 @@ DayGrid.mixin({
 		var tr;
 		var j, seg;
 		var td;
+		var today = this.view.calendar.getNow();
+		var first_row = [];
+		var last_row = [];
 
 		// populates empty cells from the current column (`col`) to `endCol`
 		function emptyCellsUntil(endCol) {
@@ -6390,6 +6393,23 @@ DayGrid.mixin({
 			}
 		}
 
+		// pre-process to determine the first and last row for the current day.
+		for (i = 0; i < levelCnt; i++) {
+			levelSegs = segLevels[i];
+			if (levelSegs) {
+				for (j = 0; j < levelSegs.length; j++) {
+					seg = levelSegs[j];
+					date = this.getCellDate(row, seg.rightCol);
+
+					if (first_row[date.format('DD')] === undefined) {
+						first_row[date.format('DD')] = [i, j, seg.rightCol];
+					}
+
+					last_row[date.format('DD')] = [i, j, seg.rightCol];
+				}
+			}
+		}
+
 		for (i = 0; i < levelCnt; i++) { // iterate through all levels
 			levelSegs = segLevels[i];
 			col = 0;
@@ -6407,8 +6427,21 @@ DayGrid.mixin({
 
 					emptyCellsUntil(seg.leftCol);
 
+					date = this.getCellDate(row, seg.rightCol);
+					classes = this.getDayClasses(date);
+					classes.unshift('fc-event-container');
+
+					if (first_row[date.format('DD')] !== undefined  && first_row[date.format('DD')][0] == i && first_row[date.format('DD')][1] == j) {
+						classes.unshift('fc-event-container-first');
+					}
+
+					if (last_row[date.format('DD')] !== undefined  && last_row[date.format('DD')][0] == i && last_row[date.format('DD')][1] == j) {
+						// @fixme: levelLimit needs to be processed somehow because last should be 'last display' instead of absolute last in this case.
+						classes.unshift('fc-event-container-last');
+					}
+
 					// create a container that occupies or more columns. append the event element.
-					td = $('<td class="fc-event-container"/>').append(seg.el);
+					td = $('<td class="' + classes.join(' ') + '"/>').append(seg.el);
 					if (seg.leftCol != seg.rightCol) {
 						td.attr('colspan', seg.rightCol - seg.leftCol + 1);
 					}
