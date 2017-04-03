@@ -4604,6 +4604,11 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
       $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES;
     }
 
+    // Remove any invalid banner errors when the bannerless exception is set and the banner id is undefined.
+    if ($bannerless_exception && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
+      $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+    }
+
     // save any changes to to the problems flags.
     if ($problems_new !== $problems_original) {
       mfcs_save_user($user_information['user_id'], array('problems' => $problems_new));
@@ -4811,6 +4816,9 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     if ($user_information['status'] == 0 && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
       $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
     }
+    elseif ($bannerless_exception) {
+      $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+    }
     else {
       $changes_detected = TRUE;
     }
@@ -4820,6 +4828,9 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     $user_information['mfcs']['banner_id'] = NULL;
     $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
     $changes_detected = TRUE;
+  }
+  elseif ($bannerless_exception && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
+    $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
   }
 
   $update_ldap_duplicate = FALSE;

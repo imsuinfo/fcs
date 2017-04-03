@@ -3033,7 +3033,6 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
   unset($role_id);
   unset($role_name);
 
-
   // handle exceptional cases.
   if (isset($bannerless_exception_role->rid) && array_key_exists($bannerless_exception_role->rid, $processed_roles)) {
     // if the user is defined as being an exception to operate as if it is bannerless, then do so.
