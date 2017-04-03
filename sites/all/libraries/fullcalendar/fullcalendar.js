@@ -6689,6 +6689,10 @@ DayGrid.mixin({
 					col++;
 				}
 
+				date = this.getCellDate(row, seg.rightCol);
+				classes = this.getDayClasses(date);
+				classes.unshift('fc-more-cell');
+
 				if (totalSegsBelow) { // do we need to replace this segment with one or many "more" links?
 					td = cellMatrix[levelLimit - 1][seg.leftCol]; // the segment's parent cell
 					rowspan = td.attr('rowspan') || 1;
@@ -6696,7 +6700,7 @@ DayGrid.mixin({
 
 					// make a replacement <td> for each column the segment occupies. will be one for each colspan
 					for (j = 0; j < colSegsBelow.length; j++) {
-						moreTd = $('<td class="fc-more-cell"/>').attr('rowspan', rowspan);
+						moreTd = $('<td class="' + classes.join(' ') + '"/>').attr('rowspan', rowspan);
 						segsBelow = colSegsBelow[j];
 						moreLink = this.renderMoreLink(
 							row,
