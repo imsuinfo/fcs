@@ -84,12 +84,13 @@ function mcneese_front_page_embed_featured() {
     $query->innerJoin('field_revision_field_featured_image', 'frffi', '(wmnh.published = 1 AND wmnh.nid = frffi.entity_id AND wmnh.vid = frffi.revision_id)');
     $query->innerJoin('field_revision_field_headline', 'frfh', '(wmnh.published = 1 AND wmnh.nid = frfh.entity_id AND wmnh.vid = frfh.revision_id)');
 
-    $query->leftJoin('field_revision_field_frontpage_title_hide', 'frffth', '(wmnh.published = 1 AND wmnh.nid = frffth.entity_id AND wmnh.vid = frffth.revision_id)');
+    $query->leftJoin('field_revision_field_dont_link_frontpage_title', 'frffth', '(wmnh.published = 1 AND wmnh.nid = frffth.entity_id AND wmnh.vid = frffth.revision_id)');
     $query->leftJoin('field_revision_field_featured_thumbnail', 'frfft', '(wmnh.published = 1 AND wmnh.nid = frfft.entity_id AND wmnh.vid = frfft.revision_id)');
     $query->leftJoin('node_revision', 'nr', '(wmnh.published = 1 AND wmnh.nid = nr.nid AND wmnh.vid = nr.vid)');
 
     $query->fields('wmnh', array('nid', 'vid'));
     $query->fields('nr', array('title'));
+    $query->fields('frffth', array('field_dont_link_frontpage_title_value'));
     $query->fields('frfod', array('field_order_date_value'));
     $query->fields('frfh', array('field_headline_value', 'field_headline_format'));
     $query->fields('frffi', array('field_featured_image_fid', 'field_featured_image_alt'));
@@ -155,8 +156,8 @@ function mcneese_front_page_embed_featured() {
     }
 
     $title_link = TRUE;
-    if (property_exists($result, 'field_frontpage_title_hide_value')) {
-      if (is_numeric($result->field_frontpage_title_hide_value) && $result->field_frontpage_title_hide_value == 1) {
+    if (property_exists($result, 'field_dont_link_frontpage_title_value')) {
+      if (is_numeric($result->field_dont_link_frontpage_title_value) && $result->field_dont_link_frontpage_title_value == 1) {
         $title_link = FALSE;
       }
     }
@@ -334,7 +335,7 @@ function mcneese_front_page_embed_highlight() {
       $result->field_hightlight_image_fid = NULL;
       $result->field_hightlight_image_alt = NULL;
       $result->field_hightlight_image_title = NULL;
-      $result->field_frontpage_title_hide_value = FALSE;
+      $result->field_dont_link_frontpage_title_value = FALSE;
 
       if (isset($node->field_title_short['und'][0]['value'])) {
         $result->field_title_short_value = $node->field_title_short['und'][0]['value'];
@@ -368,8 +369,8 @@ function mcneese_front_page_embed_highlight() {
         $result->field_hightlight_image_title = $node->field_hightlight_image['und'][0]['field_file_image_title_text']['und'][0]['value'];
       }
 
-      if (isset($node->field_frontpage_title_hide_value['und'][0]['value'])) {
-        $result->field_frontpage_title_hide_value = $node->field_frontpage_title_hide_value['und'][0]['value'];
+      if (isset($node->field_dont_link_frontpage_title_value['und'][0]['value'])) {
+        $result->field_dont_link_frontpage_title_value = $node->field_dont_link_frontpage_title_value['und'][0]['value'];
       }
     }
   }
@@ -397,7 +398,7 @@ function mcneese_front_page_embed_highlight() {
       $query->leftJoin('field_revision_field_highlight', 'frfh', '(wmnh.published = 1 AND frfh.field_highlight_value = 1 AND wmnh.nid = frfh.entity_id AND wmnh.vid = frfh.revision_id)');
       $query->leftJoin('field_revision_field_hightlight_image', 'frfhi', '(wmnh.published = 1 AND wmnh.nid = frfhi.entity_id AND wmnh.vid = frfhi.revision_id)');
       $query->leftJoin('field_revision_field_title_short', 'frfts', '(wmnh.published = 1 AND wmnh.nid = frfts.entity_id AND wmnh.vid = frfts.revision_id)');
-      $query->leftJoin('field_revision_field_frontpage_title_hide', 'frffth', '(wmnh.published = 1 AND wmnh.nid = frffth.entity_id AND wmnh.vid = frffth.revision_id)');
+      $query->leftJoin('field_revision_field_dont_link_frontpage_title', 'frffth', '(wmnh.published = 1 AND wmnh.nid = frffth.entity_id AND wmnh.vid = frffth.revision_id)');
       $query->leftJoin('field_revision_body', 'frb', '(wmnh.published = 1 AND wmnh.nid = frb.entity_id AND wmnh.vid = frb.revision_id)');
       //$query->leftJoin('field_revision_field_event_datetime', 'frfed', '(wmnh.published = 1 AND wmnh.nid = frfed.entity_id AND wmnh.vid = frfed.revision_id)');
 
@@ -406,7 +407,7 @@ function mcneese_front_page_embed_highlight() {
       $query->fields('wmnh', array('nid', 'vid'));
       $query->fields('nr', array('title'));
       $query->fields('frfts', array('field_title_short_value'));
-      $query->fields('frffth', array('field_frontpage_title_hide_value'));
+      $query->fields('frffth', array('field_dont_link_frontpage_title_value'));
       $query->fields('frb', array('body_value', 'body_format', 'body_summary'));
       //$query->fields('frfed', array('field_event_datetime_value', 'field_event_datetime_value2', 'field_event_datetime_rrule'));
       $query->fields('frfod', array('field_order_date_value'));
@@ -443,8 +444,8 @@ function mcneese_front_page_embed_highlight() {
 
   if (is_object($result)) {
     $title_link = TRUE;
-    if (property_exists($result, 'field_frontpage_title_hide_value')) {
-      if (is_numeric($result->field_frontpage_title_hide_value) && $result->field_frontpage_title_hide_value == 1) {
+    if (property_exists($result, 'field_dont_link_frontpage_title_value')) {
+      if (is_numeric($result->field_dont_link_frontpage_title_value) && $result->field_dont_link_frontpage_title_value == 1) {
         $title_link = FALSE;
       }
     }
@@ -548,7 +549,7 @@ function mcneese_front_page_embed_events($highlight) {
     $query->leftJoin('field_revision_field_event', 'frfe', '(wmnh.published = 1 AND frfe.field_event_value = 1 AND wmnh.nid = frfe.entity_id AND wmnh.vid = frfe.revision_id)');
     $query->leftJoin('field_revision_field_event_image', 'frfei', '(wmnh.published = 1 AND wmnh.nid = frfei.entity_id AND wmnh.vid = frfei.revision_id)');
     $query->leftJoin('field_revision_field_title_short', 'frfts', '(wmnh.published = 1 AND wmnh.nid = frfts.entity_id AND wmnh.vid = frfts.revision_id)');
-    $query->leftJoin('field_revision_field_frontpage_title_hide', 'frffth', '(wmnh.published = 1 AND wmnh.nid = frffth.entity_id AND wmnh.vid = frffth.revision_id)');
+    $query->leftJoin('field_revision_field_dont_link_frontpage_title', 'frffth', '(wmnh.published = 1 AND wmnh.nid = frffth.entity_id AND wmnh.vid = frffth.revision_id)');
     $query->leftJoin('field_revision_body', 'frb', '(wmnh.published = 1 AND wmnh.nid = frb.entity_id AND wmnh.vid = frb.revision_id)');
     //$query->leftJoin('field_revision_field_event_datetime', 'frfed', '(wmnh.published = 1 AND wmnh.nid = frfed.entity_id AND wmnh.vid = frfed.revision_id)');
 
@@ -558,7 +559,7 @@ function mcneese_front_page_embed_events($highlight) {
     $query->fields('wmnh', array('nid', 'vid'));
     $query->fields('nr', array('title'));
     $query->fields('frfts', array('field_title_short_value'));
-    $query->fields('frffth', array('field_frontpage_title_hide_value'));
+    $query->fields('frffth', array('field_dont_link_frontpage_title_value'));
     $query->fields('frb', array('body_value', 'body_format', 'body_summary'));
     //$query->fields('frfed', array('field_event_datetime_value', 'field_event_datetime_value2', 'field_event_datetime_rrule'));
     $query->fields('frfod', array('field_order_date_value'));
@@ -644,8 +645,8 @@ function mcneese_front_page_embed_events($highlight) {
     $nid = NULL;
     $title_link = TRUE;
 
-    if (property_exists($result, 'field_frontpage_title_hide_value')) {
-      if (is_numeric($result->field_frontpage_title_hide_value) && $result->field_frontpage_title_hide_value == 1) {
+    if (property_exists($result, 'field_dont_link_frontpage_title_value')) {
+      if (is_numeric($result->field_dont_link_frontpage_title_value) && $result->field_dont_link_frontpage_title_value == 1) {
         $title_link = FALSE;
       }
     }
@@ -815,7 +816,7 @@ function mcneese_front_page_embed_spotlight() {
     $query->leftJoin('field_revision_field_spotlight', 'frfs', '(wmnh.published = 1 AND frfs.field_spotlight_value = 1 AND wmnh.nid = frfs.entity_id AND wmnh.vid = frfs.revision_id)');
     $query->leftJoin('field_revision_field_spotlight_image', 'frfsi', '(wmnh.published = 1 AND wmnh.nid = frfsi.entity_id AND wmnh.vid = frfsi.revision_id)');
     $query->leftJoin('field_revision_field_title_short', 'frfts', '(wmnh.published = 1 AND wmnh.nid = frfts.entity_id AND wmnh.vid = frfts.revision_id)');
-    $query->leftJoin('field_revision_field_frontpage_title_hide', 'frffth', '(wmnh.published = 1 AND wmnh.nid = frffth.entity_id AND wmnh.vid = frffth.revision_id)');
+    $query->leftJoin('field_revision_field_dont_link_frontpage_title', 'frffth', '(wmnh.published = 1 AND wmnh.nid = frffth.entity_id AND wmnh.vid = frffth.revision_id)');
     $query->leftJoin('field_revision_body', 'frb', '(wmnh.published = 1 AND wmnh.nid = frb.entity_id AND wmnh.vid = frb.revision_id)');
     //$query->leftJoin('field_revision_field_event_datetime', 'frfed', '(wmnh.published = 1 AND wmnh.nid = frfed.entity_id AND wmnh.vid = frfed.revision_id)');
 
@@ -824,7 +825,7 @@ function mcneese_front_page_embed_spotlight() {
     $query->fields('wmnh', array('nid', 'vid'));
     $query->fields('nr', array('title'));
     $query->fields('frfts', array('field_title_short_value'));
-    $query->fields('frffth', array('field_frontpage_title_hide_value'));
+    $query->fields('frffth', array('field_dont_link_frontpage_title_value'));
     $query->fields('frb', array('body_value', 'body_format', 'body_summary'));
     //$query->fields('frfed', array('field_event_datetime_value', 'field_event_datetime_value2', 'field_event_datetime_rrule'));
     $query->fields('frfod', array('field_order_date_value'));
@@ -890,8 +891,8 @@ function mcneese_front_page_embed_spotlight() {
     $nid = NULL;
     $title_link = TRUE;
 
-    if (property_exists($result, 'field_frontpage_title_hide_value')) {
-      if (is_numeric($result->field_frontpage_title_hide_value) && $result->field_frontpage_title_hide_value == 1) {
+    if (property_exists($result, 'field_dont_link_frontpage_title_value')) {
+      if (is_numeric($result->field_dont_link_frontpage_title_value) && $result->field_dont_link_frontpage_title_value == 1) {
         $title_link = FALSE;
       }
     }

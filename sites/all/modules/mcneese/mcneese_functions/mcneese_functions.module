@@ -461,6 +461,27 @@ function mcneese_functions_embed_ntas_widget($cache_id = NULL, $cache_expire = '
       $document['dom']->remove_elements('link', TRUE, FALSE);
       $document['dom']->remove_elements('meta', TRUE, FALSE);
 
+      // remove data gathering javascript, such as googleanalytics.
+      $remove_scripts = array();
+      $script_tags = $body->getElementsByTagName('script');
+      foreach ($script_tags as $script_tag) {
+        if (preg_match('/www.google-analytics.com/i', $script_tag->nodeValue)) {
+          $remove_scripts[] = $script_tag;
+        }
+      }
+      unset($script_tag);
+      unset($script_tags);
+
+      if (!empty($remove_scripts)) {
+        foreach ($remove_scripts as $script_tag) {
+          $parent_tag = $script_tag->parentNode;
+          $parent_tag->removeChild($script_tag);
+        }
+        unset($script_tag);
+        unset($parent_tag);
+      }
+      unset($remove_scripts);
+
       // reduce all other header tags.
       cf_http_reduce_html_headers($document['dom']);
 
