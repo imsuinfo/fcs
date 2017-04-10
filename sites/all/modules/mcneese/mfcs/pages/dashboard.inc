@@ -269,11 +269,23 @@ function mfcs_dashboard_page() {
     }
 
 
+    // load the default calendar
+    $default_calendar = (int) variable_get('mfcs_user_calendar_default', MFCS_USER_CALENDAR_FULL);
+
     // dashboard assigns a separate theme for the original theme, however the full calander can and should display all unavailabilities.
     // a separate structure is used for holidays for both original and full calendar.
-    $calendar = MFCS_USER_CALENDAR_ORIGINAL;
+    $calendar = $default_calendar;
     if (isset($user->mfcs['calendar']) && is_numeric($user->mfcs['calendar'])) {
       $calendar = (int) $user->mfcs['calendar'];
+    }
+
+    if ($calendar === MFCS_USER_CALENDAR_NONE) {
+      if ($default_calendar === MFCS_USER_CALENDAR_FULL) {
+        $calendar = $default_calendar;
+      }
+      else {
+        $calendar = $default_calendar;
+      }
     }
 
 
@@ -367,7 +379,7 @@ function mfcs_dashboard_page() {
 
     $rows = array();
     foreach ($holidays as $holiday) {
-      if ($calendar == MFCS_USER_CALENDAR_ORIGINAL || $calendar == MFCS_USER_CALENDAR_NONE) {
+      if ($calendar == MFCS_USER_CALENDAR_ORIGINAL || ($calendar == MFCS_USER_CALENDAR_NONE && $default_calendar === MFCS_USER_CALENDAR_ORIGINAL)) {
         $date_current = $holiday->date_start;
         while ($date_current < $holiday->date_stop) {
           $day = date('j', $date_current);
@@ -428,7 +440,7 @@ function mfcs_dashboard_page() {
     unset($holiday);
     unset($holidays);
 
-    if ($calendar == MFCS_USER_CALENDAR_ORIGINAL || $calendar == MFCS_USER_CALENDAR_NONE) {
+    if ($calendar == MFCS_USER_CALENDAR_ORIGINAL || ($calendar == MFCS_USER_CALENDAR_NONE && $default_calendar === MFCS_USER_CALENDAR_NONE)) {
       foreach ($unavailabilities as $unavailability) {
         $date_current = $unavailability->date_start;
         while ($date_current < $unavailability->date_stop) {
@@ -633,7 +645,7 @@ function mfcs_dashboard_page() {
     mfcs_include(MFCS_INCLUDE_OUTPUT);
 
     $title = '<h3><a href="' . $base_path . 'requests/calendar-0/month' . $url_arguments . '">Requests for ' . date('F, Y', $month_start) . '</a></h3>';
-    $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, 'mfcs-calendar-0-month', 3);
+    $result = mfcs_build_calendar_month_markup($calendar, $rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, 'mfcs-calendar-0-month', 3);
     if ($result !== FALSE) {
       $markup .= $result;
     }

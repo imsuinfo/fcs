@@ -884,3 +884,7 @@ ini_set('display_startup_errors', TRUE);
 // turn off opcache for this site.
 #ini_set('opcache.enable', FALSE);
 #ini_set('opcache.enable_cli', FALSE);
+
+
+// optionally provide a default calendar.
+$conf['mfcs_user_calendar_default'] = 2; // 1 = MFCS_USER_CALENDAR_ORIGINAL, 2 = MFCS_USER_CALENDAR_FULL

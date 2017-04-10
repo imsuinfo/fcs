@@ -197,10 +197,23 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   }
 
 
+  // load the default calendar
+  $default_calendar = (int) variable_get('mfcs_user_calendar_default', MFCS_USER_CALENDAR_FULL);
+
+
   // a separate structure is used for holidays for both original and full calendar.
-  $calendar = MFCS_USER_CALENDAR_ORIGINAL;
+  $calendar = $default_calendar;
   if (isset($user->mfcs['calendar']) && is_numeric($user->mfcs['calendar'])) {
     $calendar = (int) $user->mfcs['calendar'];
+  }
+
+  if ($calendar === MFCS_USER_CALENDAR_NONE) {
+    if ($default_calendar === MFCS_USER_CALENDAR_FULL) {
+      $calendar = $default_calendar;
+    }
+    else {
+      $calendar = $default_calendar;
+    }
   }
 
 
@@ -510,7 +523,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
 
   $markup = '';
   $title = '<h3>' . 'Requests for ' . date('F, Y', $month_start) . '</h3>';
-  $result = mfcs_build_calendar_month_markup($rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, 'mfcs-calendar-0-month');
+  $result = mfcs_build_calendar_month_markup($calendar, $rows, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, 'mfcs-calendar-0-month');
   if ($result !== FALSE) {
     $markup .= $result;
   }
@@ -766,6 +779,26 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   $show_unavailabilities = TRUE;
   if (isset($user->mfcs) && is_array($user->mfcs) && array_key_exists('calendar_unavailabilities', $user->mfcs) && $user->mfcs['calendar_unavailabilities'] === FALSE) {
     $show_unavailabilities = FALSE;
+  }
+
+
+  // load the default calendar
+  $default_calendar = (int) variable_get('mfcs_user_calendar_default', MFCS_USER_CALENDAR_FULL);
+
+
+  // a separate structure is used for holidays for both original and full calendar.
+  $calendar = $default_calendar;
+  if (isset($user->mfcs['calendar']) && is_numeric($user->mfcs['calendar'])) {
+    $calendar = (int) $user->mfcs['calendar'];
+  }
+
+  if ($calendar === MFCS_USER_CALENDAR_NONE) {
+    if ($default_calendar === MFCS_USER_CALENDAR_FULL) {
+      $calendar = $default_calendar;
+    }
+    else {
+      $calendar = $default_calendar;
+    }
   }
 
 
@@ -1225,7 +1258,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   $markup = '';
   $title = '<h3>' . 'Requests for ' . date('l', $day_start) . ', <a href="' . $base_path . 'requests/calendar-0/month/' . date('Y/F', $day_start) . $url_arguments . '" title="Requests for ' . date('F, Y', $day_start) . '">' . date('F', $day_start) . '</a> ' . date('j, Y', $day_start) . ' (Page #' . ($page_number + 1) . ')</h3>';
 
-  $result = mfcs_build_calendar_day_markup($rows, $day_start, $day_stop, $title, $page_number, 'mfcs-calendar-0-day');
+  $result = mfcs_build_calendar_day_markup($calendar, $rows, $day_start, $day_stop, $title, $page_number, 'mfcs-calendar-0-day');
   if ($result !== FALSE) {
     $markup .= $result;
   }

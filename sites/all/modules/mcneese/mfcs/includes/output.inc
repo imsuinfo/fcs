@@ -17,6 +17,8 @@
  * This is a wrapper used to determine which calendar theme to use.
  * The specific calendar theme is based on each individual users settings.
  *
+ * @param int $calendar
+ *   The calendar theme to use.
  * @param array $items
  *   An array of request items to link to.
  * @param int $month_start
@@ -40,13 +42,8 @@
  * @return string|bool
  *   The generate HTML markup or FALSE on error.
  */
-function mfcs_build_calendar_month_markup($items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id = NULL, $max_items = NULL) {
+function mfcs_build_calendar_month_markup($calendar, $items, $month_start, $month_stop, $absolute_start, $absolute_stop, $title, $id = NULL, $max_items = NULL) {
   $user = cf_current_user();
-
-  $calendar = MFCS_USER_CALENDAR_ORIGINAL;
-  if (isset($user->mfcs['calendar']) && is_numeric($user->mfcs['calendar'])) {
-    $calendar = (int) $user->mfcs['calendar'];
-  }
 
   if ($calendar === MFCS_USER_CALENDAR_FULL) {
     $success = TRUE;
@@ -944,6 +941,8 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
  * This is a wrapper used to determine which calendar theme to use.
  * The specific calendar theme is based on each individual users settings.
  *
+ * @param int $calendar
+ *   The calendar theme to use.
  * @param array $items
  *   An array of request items to link to.
  * @param int $day_start
@@ -962,14 +961,7 @@ function mfcs_build_calendar_month_markup_full($items, $month_start, $month_stop
  * @return string|bool
  *   The generate HTML markup or FALSE on error.
  */
-function mfcs_build_calendar_day_markup($items, $day_start, $day_stop, $title, $page_number, $id = NULL) {
-  $user = cf_current_user();
-
-  $calendar = MFCS_USER_CALENDAR_ORIGINAL;
-  if (isset($user->mfcs['calendar']) && is_numeric($user->mfcs['calendar'])) {
-    $calendar = (int) $user->mfcs['calendar'];
-  }
-
+function mfcs_build_calendar_day_markup($calendar, $items, $day_start, $day_stop, $title, $page_number, $id = NULL) {
   if ($calendar === MFCS_USER_CALENDAR_FULL) {
     $success = TRUE;
 
