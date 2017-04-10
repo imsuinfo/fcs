@@ -58,3 +58,13 @@
     width: auto;
     margin: 0 0 0 -130px;
 }
+
+.jGrowl {
+  box-sizing: border-box;
+  max-width: 85%;
+}
+.jGrowl .jGrowl-notification {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 200px;
+}
