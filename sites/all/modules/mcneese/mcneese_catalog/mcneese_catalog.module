@@ -1,0 +1,773 @@
+<?php
+
+/**
+ * @file
+ * McNeese State University Catalog module.
+ *
+ * json stored in the database are not validated.
+ * text fields must have their appropriate check_markup() and check_plain() called on output.
+ */
+
+/**
+ * @defgroup mcneese_catalog McNeese Catalog
+ * @{
+ * Provides functionality for loading, processing, and rendering mcneeese catalog content.
+ */
+
+/**
+ * Loads and returns the current catalog string markup.
+ *
+ * @param mcneese_catalog_class_catalogs|null &$catalog
+ *   The catalog object, may be a NULL variable for auto-load.
+ *
+ * @return string|bool
+ *   The catalog current string setup markup on success.
+ *   FALSE otherwise.
+ */
+function mcneese_catalog_get_catalog(&$catalog) {
+  try {
+    if (!($catalog instanceof mcneese_catalog_class_catalogs)) {
+      $catalog = new mcneese_catalog_class_catalogs();
+    }
+
+    if ($catalog->is_loaded() || $catalog->load()) {
+      return '<h3>' . $catalog->get_markup(FALSE) . '</h3>';
+    }
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+
+  return FALSE;
+}
+
+/**
+ * Loads and returns the current catalog string markup.
+ *
+ * @param mcneese_catalog_class_catalogs|null &$catalog
+ *   The catalog object, may be a NULL variable for auto-load.
+ *
+ * @return string|bool
+ *   The catalog title on success, FALSE otherwise.
+ */
+function mcneese_catalog_get_catalog_as_title(&$catalog) {
+  try {
+    if (!($catalog instanceof mcneese_catalog_class_catalogs)) {
+      $catalog = new mcneese_catalog_class_catalogs();
+    }
+
+    if ($catalog->is_loaded() || $catalog->load()) {
+      return $catalog->get_name();
+    }
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+
+  return FALSE;
+}
+
+/**
+ * Load a markup for the specified number of courses.
+ *
+ * @param mcneese_catalog_class_catalogs|null &$catalog
+ *   The catalog object, may be a NULL variable for auto-load.
+ * @param mcneese_catalog_class_courses|null &$courses
+ *   The courses object, may be a NULL variable for auto-load.
+ * @param int $per_page
+ *   (optional) Number of items per page.
+ *
+ * @return string|bool
+ *   The catalog current string setup markup on success.
+ *   FALSE otherwise.
+ */
+function mcneese_catalog_get_courses(&$catalog, &$courses, $per_page = 100, $use_query = TRUE) {
+  // provide a failsafe for per page settings.
+  if (!is_int($per_page) || $per_page < 1) {
+    $per_page = 100;
+  }
+
+  if (!is_bool($use_query)) {
+    $use_query = TRUE;
+  }
+
+  $page = 0;
+  if ($use_query) {
+    $query = drupal_get_query_parameters();
+
+    if (isset($query['page']) && is_numeric($query['page'])) {
+      $page = (int) $query['page'];
+
+      if ($page < 0) {
+        $page = 0;
+      }
+    }
+  }
+
+  try {
+    if (!($catalog instanceof mcneese_catalog_class_catalogs)) {
+      $catalog = new mcneese_catalog_class_catalogs();
+    }
+
+    if ($catalog->is_loaded() || $catalog->load()) {
+      if (!($courses instanceof mcneese_catalog_class_courses)) {
+        $catalog_id = $catalog->get_catalog_id();
+        $legacy_id = $catalog->get_legacy_id();
+
+        $courses = new mcneese_catalog_class_courses($catalog_id, $legacy_id);
+      }
+
+      if ($courses->is_loaded() || $courses->load(TRUE, FALSE, FALSE, $page, $per_page)) {
+        return $courses->get_markup($page, $per_page);
+      }
+    }
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+
+  return FALSE;
+}
+
+/**
+ * Load a markup for the specified number of filters.
+ *
+ * @param mcneese_catalog_class_catalogs|null &$catalog
+ *   The catalog object, may be a NULL variable for auto-load.
+ * @param mcneese_catalog_class_filters|null &$filters
+ *   The filters object, may be a NULL variable for auto-load.
+ * @param int $per_page
+ *   (optional) Number of items per page.
+ *
+ * @return string|bool
+ *   The catalog current string setup markup on success.
+ *   FALSE otherwise.
+ */
+function mcneese_catalog_get_filters(&$catalog, &$filters, $per_page = 100, $use_query = TRUE) {
+  // provide a failsafe for per page settings.
+  if (!is_int($per_page) || $per_page < 1) {
+    $per_page = 100;
+  }
+
+  if (!is_bool($use_query)) {
+    $use_query = TRUE;
+  }
+
+  $page = 0;
+  if ($use_query) {
+    $query = drupal_get_query_parameters();
+
+    if (isset($query['page']) && is_numeric($query['page'])) {
+      $page = (int) $query['page'];
+
+      if ($page < 0) {
+        $page = 0;
+      }
+    }
+  }
+
+  try {
+    if (!($catalog instanceof mcneese_catalog_class_catalogs)) {
+      $catalog = new mcneese_catalog_class_catalogs();
+    }
+
+    if ($catalog->is_loaded() || $catalog->load()) {
+      if (!($filters instanceof mcneese_catalog_class_filters)) {
+        $catalog_id = $catalog->get_catalog_id();
+        $legacy_id = $catalog->get_legacy_id();
+
+        $filters = new mcneese_catalog_class_filters($catalog_id, $legacy_id);
+      }
+
+      if ($filters->is_loaded() || $filters->load(TRUE, FALSE, FALSE, $page, $per_page)) {
+        return $filters->get_markup($page, $per_page);
+      }
+    }
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+
+  return FALSE;
+}
+
+/**
+ * Load a markup for the specified number of programs.
+ *
+ * @param mcneese_catalog_class_catalogs|null &$catalog
+ *   The catalog object, may be a NULL variable for auto-load.
+ * @param mcneese_catalog_class_programs|null &$programs
+ *   The programs object, may be a NULL variable for auto-load.
+ * @param int $per_page
+ *   (optional) Number of items per page.
+ *
+ * @return string|bool
+ *   The catalog current string setup markup on success.
+ *   FALSE otherwise.
+ */
+function mcneese_catalog_get_programs(&$catalog, &$programs, $per_page = 100, $use_query = TRUE) {
+  // provide a failsafe for per page settings.
+  if (!is_int($per_page) || $per_page < 1) {
+    $per_page = 100;
+  }
+
+  if (!is_bool($use_query)) {
+    $use_query = TRUE;
+  }
+
+  $page = 0;
+  if ($use_query) {
+    $query = drupal_get_query_parameters();
+
+    if (isset($query['page']) && is_numeric($query['page'])) {
+      $page = (int) $query['page'];
+
+      if ($page < 0) {
+        $page = 0;
+      }
+    }
+  }
+
+  try {
+    if (!($catalog instanceof mcneese_catalog_class_catalogs)) {
+      $catalog = new mcneese_catalog_class_catalogs();
+    }
+
+    if ($catalog->is_loaded() || $catalog->load()) {
+      if (!($programs instanceof mcneese_catalog_class_programs)) {
+        $catalog_id = $catalog->get_catalog_id();
+        $legacy_id = $catalog->get_legacy_id();
+
+        $programs = new mcneese_catalog_class_programs($catalog_id, $legacy_id);
+      }
+
+      if ($programs->is_loaded() || $programs->load(TRUE, FALSE, FALSE, $page, $per_page)) {
+        return $programs->get_markup($page, $per_page);
+      }
+    }
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+
+  return FALSE;
+}
+
+/**
+ * Load a markup for the specified number of hierarchies.
+ *
+ * @param mcneese_catalog_class_catalogs|null &$catalog
+ *   The catalog object, may be a NULL variable for auto-load.
+ * @param mcneese_catalog_class_hierarchies|null &$hierarchies
+ *   The hierarchies object, may be a NULL variable for auto-load.
+ * @param int $per_page
+ *   (optional) Number of items per page.
+ *
+ * @return string|bool
+ *   The catalog current string setup markup on success.
+ *   FALSE otherwise.
+ */
+function mcneese_catalog_get_hierarchies(&$catalog, &$hierarchies, $per_page = 100, $use_query = TRUE) {
+  // provide a failsafe for per page settings.
+  if (!is_int($per_page) || $per_page < 1) {
+    $per_page = 100;
+  }
+
+  if (!is_bool($use_query)) {
+    $use_query = TRUE;
+  }
+
+  $page = 0;
+  if ($use_query) {
+    $query = drupal_get_query_parameters();
+
+    if (isset($query['page']) && is_numeric($query['page'])) {
+      $page = (int) $query['page'];
+
+      if ($page < 0) {
+        $page = 0;
+      }
+    }
+  }
+
+  try {
+    if (!($catalog instanceof mcneese_catalog_class_catalogs)) {
+      $catalog = new mcneese_catalog_class_catalogs();
+    }
+
+    if ($catalog->is_loaded() || $catalog->load()) {
+      if (!($hierarchies instanceof mcneese_catalog_class_hierarchies)) {
+        $catalog_id = $catalog->get_catalog_id();
+        $legacy_id = $catalog->get_legacy_id();
+
+        $hierarchies = new mcneese_catalog_class_hierarchies($catalog_id, $legacy_id);
+      }
+
+      if ($hierarchies->is_loaded() || $hierarchies->load(TRUE, FALSE, FALSE, $page, $per_page)) {
+        return $hierarchies->get_markup($page, $per_page);
+      }
+    }
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+
+  return FALSE;
+}
+
+/**
+ * Load a markup for the specified number of pages.
+ *
+ * @param mcneese_catalog_class_catalogs|null &$catalog
+ *   The catalog object, may be a NULL variable for auto-load.
+ * @param mcneese_catalog_class_pages|null &$pages
+ *   The pages object, may be a NULL variable for auto-load.
+ * @param int $per_page
+ *   (optional) Number of items per page.
+ *
+ * @return string|bool
+ *   The catalog current string setup markup on success.
+ *   FALSE otherwise.
+ */
+function mcneese_catalog_get_pages(&$catalog, &$pages, $per_page = 100, $use_query = TRUE) {
+  // provide a failsafe for per page settings.
+  if (!is_int($per_page) || $per_page < 1) {
+    $per_page = 100;
+  }
+
+  if (!is_bool($use_query)) {
+    $use_query = TRUE;
+  }
+
+  $page = 0;
+  if ($use_query) {
+    $query = drupal_get_query_parameters();
+
+    if (isset($query['page']) && is_numeric($query['page'])) {
+      $page = (int) $query['page'];
+
+      if ($page < 0) {
+        $page = 0;
+      }
+    }
+  }
+
+  try {
+    if (!($catalog instanceof mcneese_catalog_class_catalogs)) {
+      $catalog = new mcneese_catalog_class_catalogs();
+    }
+
+    if ($catalog->is_loaded() || $catalog->load()) {
+      if (!($pages instanceof mcneese_catalog_class_pages)) {
+        $catalog_id = $catalog->get_catalog_id();
+        $legacy_id = $catalog->get_legacy_id();
+
+        $pages = new mcneese_catalog_class_pages($catalog_id, $legacy_id);
+      }
+
+      if ($pages->is_loaded() || $pages->load(TRUE, FALSE, FALSE, $page, $per_page)) {
+        return $pages->get_markup($page, $per_page);
+      }
+    }
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+
+  return FALSE;
+}
+
+/**
+ * A simple way to initialize the courses class from the specified catalog.
+ *
+ * @param mcneese_catalog_class_catalogs|null &$catalog
+ *   The catalog object, may be a NULL variable for auto-load.
+ * @param mcneese_catalog_class_courses|null &$courses
+ *   The courses object, may be a NULL variable for auto-load.
+ *
+ * @return mcneese_catalog_class_courses|bool
+ *   Courses class on success, FALSE otherwise.
+ */
+function mcneese_catalog_initialize_courses(&$catalog) {
+  try {
+    if (!($catalog instanceof mcneese_catalog_class_catalogs)) {
+      $catalog = new mcneese_catalog_class_catalogs();
+    }
+
+    if ($catalog->is_loaded() || $catalog->load()) {
+      $catalog_id = $catalog->get_catalog_id();
+      $legacy_id = $catalog->get_legacy_id();
+
+      $courses = new mcneese_catalog_class_courses($catalog_id, $legacy_id);
+
+      return $courses;
+    }
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+
+  return FALSE;
+}
+
+/**
+ * A simple way to initialize the filters class from the specified catalog.
+ *
+ * @param mcneese_catalog_class_catalogs|null &$catalog
+ *   The catalog object, may be a NULL variable for auto-load.
+ * @param mcneese_catalog_class_filters|null &$filters
+ *   The filters object, may be a NULL variable for auto-load.
+ *
+ * @return mcneese_catalog_class_filters|bool
+ *   Courses class on success, FALSE otherwise.
+ */
+function mcneese_catalog_initialize_filters(&$catalog) {
+  try {
+    if (!($catalog instanceof mcneese_catalog_class_catalogs)) {
+      $catalog = new mcneese_catalog_class_catalogs();
+    }
+
+    if ($catalog->is_loaded() || $catalog->load()) {
+      $catalog_id = $catalog->get_catalog_id();
+      $legacy_id = $catalog->get_legacy_id();
+
+      $filters = new mcneese_catalog_class_filters($catalog_id, $legacy_id);
+
+      return $filters;
+    }
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+
+  return FALSE;
+}
+
+/**
+ * A simple way to initialize the programs class from the specified catalog.
+ *
+ * @param mcneese_catalog_class_catalogs|null &$catalog
+ *   The catalog object, may be a NULL variable for auto-load.
+ * @param mcneese_catalog_class_programs|null &$programs
+ *   The programs object, may be a NULL variable for auto-load.
+ *
+ * @return mcneese_catalog_class_programs|bool
+ *   Courses class on success, FALSE otherwise.
+ */
+function mcneese_catalog_initialize_programs(&$catalog) {
+  try {
+    if (!($catalog instanceof mcneese_catalog_class_catalogs)) {
+      $catalog = new mcneese_catalog_class_catalogs();
+    }
+
+    if ($catalog->is_loaded() || $catalog->load()) {
+      $catalog_id = $catalog->get_catalog_id();
+      $legacy_id = $catalog->get_legacy_id();
+
+      $programs = new mcneese_catalog_class_programs($catalog_id, $legacy_id);
+
+      return $programs;
+    }
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+
+  return FALSE;
+}
+
+/**
+ * A simple way to initialize the hierarchies class from the specified catalog.
+ *
+ * @param mcneese_catalog_class_catalogs|null &$catalog
+ *   The catalog object, may be a NULL variable for auto-load.
+ * @param mcneese_catalog_class_hierarchies|null &$hierarchies
+ *   The hierarchies object, may be a NULL variable for auto-load.
+ *
+ * @return mcneese_catalog_class_hierarchies|bool
+ *   Courses class on success, FALSE otherwise.
+ */
+function mcneese_catalog_initialize_hierarchies(&$catalog) {
+  try {
+    if (!($catalog instanceof mcneese_catalog_class_catalogs)) {
+      $catalog = new mcneese_catalog_class_catalogs();
+    }
+
+    if ($catalog->is_loaded() || $catalog->load()) {
+      $catalog_id = $catalog->get_catalog_id();
+      $legacy_id = $catalog->get_legacy_id();
+
+      $hierarchies = new mcneese_catalog_class_hierarchies($catalog_id, $legacy_id);
+
+      return $hierarchies;
+    }
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+
+  return FALSE;
+}
+
+/**
+ * A simple way to initialize the pages class from the specified catalog.
+ *
+ * @param mcneese_catalog_class_catalogs|null &$catalog
+ *   The catalog object, may be a NULL variable for auto-load.
+ * @param mcneese_catalog_class_pages|null &$pages
+ *   The pages object, may be a NULL variable for auto-load.
+ *
+ * @return mcneese_catalog_class_pages|bool
+ *   Courses class on success, FALSE otherwise.
+ */
+function mcneese_catalog_initialize_pages(&$catalog) {
+  try {
+    if (!($catalog instanceof mcneese_catalog_class_catalogs)) {
+      $catalog = new mcneese_catalog_class_catalogs();
+    }
+
+    if ($catalog->is_loaded() || $catalog->load()) {
+      $catalog_id = $catalog->get_catalog_id();
+      $legacy_id = $catalog->get_legacy_id();
+
+      $pages = new mcneese_catalog_class_pages($catalog_id, $legacy_id);
+
+      return $pages;
+    }
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+  catch (Exception $e) {
+    // @todo: add watchdog report
+  }
+
+  return FALSE;
+}
+
+/**
+ * A simple way to auto-generate and print a course listing.
+ *
+ * @param bool $use_description
+ *   (optional) Enabled/Disable displaying the course description.
+ */
+function mcneese_catalog_render_courses($use_descrition = FALSE) {
+  $success = FALSE;
+  $catalog = NULL;
+  $courses = NULL;
+  $markup = '';
+
+  $title = mcneese_catalog_get_catalog_as_title($catalog);
+  if (is_string($title)) {
+    drupal_set_title($title . ' - Courses');
+    $success = TRUE;
+  }
+
+  if ($success) {
+    $courses = mcneese_catalog_initialize_courses($catalog);
+    if (is_object($courses)) {
+      $courses->set_use_description($use_descrition);
+      $markup = mcneese_catalog_get_courses($catalog, $courses);
+    }
+
+    if (is_string($markup)) {
+      $success = TRUE;
+    }
+  }
+
+  if ($success) {
+    print($markup);
+  }
+  else {
+    print('<div class="catalog_load_error">An error occurred while loading the data.</div>');
+  }
+}
+
+/**
+ * A simple way to auto-generate and print a course listing.
+ *
+ * @param bool $use_description
+ *   (optional) Enabled/Disable displaying the course description.
+ */
+function mcneese_catalog_render_filters($use_descrition = FALSE) {
+  $success = FALSE;
+  $catalog = NULL;
+  $filters = NULL;
+  $markup = '';
+
+  $title = mcneese_catalog_get_catalog_as_title($catalog);
+  if (is_string($title)) {
+    drupal_set_title($title . ' - Filters');
+    $success = TRUE;
+  }
+
+  if ($success) {
+    $filters = mcneese_catalog_initialize_filters($catalog);
+    if (is_object($filters)) {
+      $filters->set_use_description($use_descrition);
+      $markup = mcneese_catalog_get_filters($catalog, $filters);
+    }
+
+    if (is_string($markup)) {
+      $success = TRUE;
+    }
+  }
+
+  if ($success) {
+    print($markup);
+  }
+  else {
+    print('<div class="catalog_load_error">An error occurred while loading the data.</div>');
+  }
+}
+
+/**
+ * A simple way to auto-generate and print a course listing.
+ *
+ * @param bool $use_description
+ *   (optional) Enabled/Disable displaying the course description.
+ */
+function mcneese_catalog_render_programs($use_descrition = FALSE) {
+  $success = FALSE;
+  $catalog = NULL;
+  $programs = NULL;
+  $markup = '';
+
+  $title = mcneese_catalog_get_catalog_as_title($catalog);
+  if (is_string($title)) {
+    drupal_set_title($title . ' - Programs');
+    $success = TRUE;
+  }
+
+  if ($success) {
+    $programs = mcneese_catalog_initialize_programs($catalog);
+    if (is_object($programs)) {
+      $programs->set_use_description($use_descrition);
+      $markup = mcneese_catalog_get_programs($catalog, $programs);
+    }
+
+    if (is_string($markup)) {
+      $success = TRUE;
+    }
+  }
+
+  if ($success) {
+    print($markup);
+  }
+  else {
+    print('<div class="catalog_load_error">An error occurred while loading the data.</div>');
+  }
+}
+
+/**
+ * A simple way to auto-generate and print a course listing.
+ *
+ * @param bool $use_description
+ *   (optional) Enabled/Disable displaying the course description.
+ */
+function mcneese_catalog_render_hierachies($use_descrition = FALSE) {
+  $success = FALSE;
+  $catalog = NULL;
+  $hierachies = NULL;
+  $markup = '';
+
+  $title = mcneese_catalog_get_catalog_as_title($catalog);
+  if (is_string($title)) {
+    drupal_set_title($title . ' - Hierarchies');
+    $success = TRUE;
+  }
+
+  if ($success) {
+    $hierachies = mcneese_catalog_initialize_hierarchies($catalog);
+    if (is_object($hierachies)) {
+      $hierachies->set_use_description($use_descrition);
+      $markup = mcneese_catalog_get_hierarchies($catalog, $hierachies);
+    }
+
+    if (is_string($markup)) {
+      $success = TRUE;
+    }
+  }
+
+  if ($success) {
+    print($markup);
+  }
+  else {
+    print('<div class="catalog_load_error">An error occurred while loading the data.</div>');
+  }
+}
+
+/**
+ * A simple way to auto-generate and print a course listing.
+ *
+ * @param bool $use_description
+ *   (optional) Enabled/Disable displaying the course description.
+ */
+function mcneese_catalog_render_pages($use_descrition = FALSE) {
+  $success = FALSE;
+  $catalog = NULL;
+  $pages = NULL;
+  $markup = '';
+
+  $title = mcneese_catalog_get_catalog_as_title($catalog);
+  if (is_string($title)) {
+    drupal_set_title($title . ' - Pages');
+    $success = TRUE;
+  }
+
+  if ($success) {
+    $pages = mcneese_catalog_initialize_pages($catalog);
+    if (is_object($pages)) {
+      $pages->set_use_description($use_descrition);
+      $markup = mcneese_catalog_get_pages($catalog, $pages);
+    }
+
+    if (is_string($markup)) {
+      $success = TRUE;
+    }
+  }
+
+  if ($success) {
+    print($markup);
+  }
+  else {
+    print('<div class="catalog_load_error">An error occurred while loading the data.</div>');
+  }
+}
+
+/**
+ * @} End of '@defgroup mcneese_catalog McNeese Catalog'.
+ */

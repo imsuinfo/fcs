@@ -127,6 +127,7 @@ function mcneese_content_formats_node_presave($node) {
   $operations['fix_links'] = variable_get('mcneese_content_formats_fix_links_' . $node->type, FALSE);
   $operations['fix_markup'] = variable_get('mcneese_content_formats_fix_markup_' . $node->type, FALSE);
   $operations['denied_tags'] = $denied_tags;
+  $operations['strip_p_tags'] = FALSE; // not enabled for compatibility reasons.
 
   $abused_codes = array();
   $abused_codes['&#34;'] = '"';
@@ -204,6 +205,7 @@ function mcneese_content_formats_webform_component_presave(&$component) {
   $operations['fix_links'] = variable_get('mcneese_content_formats_fix_links_' . $node->type, FALSE);
   $operations['fix_markup'] = variable_get('mcneese_content_formats_fix_markup_' . $node->type, FALSE);
   $operations['denied_tags'] = $denied_tags;
+  $operations['strip_p_tags'] = FALSE;
 
   $abused_codes = array();
   $abused_codes['&#34;'] = '"';
@@ -281,6 +283,11 @@ function mcneese_content_formats_alter_dom(&$text, $operations, $text_format = N
   $body = $dom->get_body();
   if (is_null($body)) {
     return $text;
+  }
+
+  $strip_p_tags = FALSE;
+  if (array_key_exists('strip_p_tags', $operations) && $operations['strip_p_tags']) {
+    $strip_p_tags = TRUE;
   }
 
   $unsupported_tags = array();
@@ -537,6 +544,17 @@ function mcneese_content_formats_alter_dom(&$text, $operations, $text_format = N
           $tag_text = drupal_html_to_text($tag_markup, array());
           if (preg_match('@\s*&(nbsp|nbsp;)\s*$@i', $tag_text)) {
             $change_tags[] = array('tag' => $tag, 'type' => 'br');
+          }
+          else {
+            $class = 'paragraph';
+            if ($tag->hasAttribute('class')) {
+              $class = $tag->getAttribute('class') . ' paragraph';
+            }
+
+            $tag->setAttribute('class', $class);
+
+            // if p tags are disabled, then replace them with span tags.
+            $change_tags[] = array('tag' => $tag, 'type' => 'span');
           }
           unset($tag_markup);
           unset($tag_text);

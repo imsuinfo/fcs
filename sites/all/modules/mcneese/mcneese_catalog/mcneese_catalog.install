@@ -1,0 +1,482 @@
+<?php
+
+/**
+ * @file
+ * Install file for mcneese_catalog module.
+ *
+ * This deviates from the usual drupal schema to take advantage of postgresql's specific types.
+ */
+
+/**
+ * @addtogroup mcneese_catalog
+ * @{
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function mcneese_catalog_install() {
+  $transaction = db_transaction();
+  try {
+    // create the table for managing the cache using unix timestamps.
+    db_query('create table mcneese_catalog_cache (
+      name varchar(256) not null primary key,
+      catalog_id bigint,
+      legacy_id bigint,
+      updated bigint
+    )');
+
+    db_query('insert into mcneese_catalog_cache (name) values (\'catalogs\')');
+    db_query('insert into mcneese_catalog_cache (name) values (\'courses\')');
+    db_query('insert into mcneese_catalog_cache (name) values (\'programs\')');
+    db_query('insert into mcneese_catalog_cache (name) values (\'degree_types\')');
+    db_query('insert into mcneese_catalog_cache (name) values (\'program_types\')');
+    db_query('insert into mcneese_catalog_cache (name) values (\'hierarchies\')');
+    db_query('insert into mcneese_catalog_cache (name) values (\'filters\')');
+    db_query('insert into mcneese_catalog_cache (name) values (\'pages\')');
+
+
+    // catalogs have the following structure:
+    //[0] => stdClass Object
+    //  (
+    //      [description] =>
+    //      [catalog-type] => stdClass Object
+    //          (
+    //              [name] => Academic
+    //              [created] => 2015-07-13 16:19:03
+    //              [modified] => 2016-11-22 15:05:58
+    //              [legacy-id] => 1
+    //              [organization-id] => 1
+    //              [id] => 2
+    //          )
+    //      [organization-id] => 1
+    //      [id] => 3
+    //      [archived] => 1
+    //      [locked] => 1
+    //      [name] => 2008-2009 Academic Catalog
+    //      [created] => 2008-03-03 09:37:58
+    //      [modified] => 2017-04-03 16:28:28
+    //      [legacy-id] => 1
+    //      [copying] =>
+    //      [published] => 1
+    //      [import-locked] =>
+    //  )
+    db_query('create table mcneese_catalog_catalogs (
+      id bigint not null primary key,
+      legacy_id bigint not null,
+
+      name text not null,
+      description text not null,
+
+      created timestamp,
+      modified timestamp,
+
+      archived boolean not null,
+      locked boolean not null,
+      copying boolean not null,
+      published boolean not null,
+      import_locked boolean not null,
+
+      catalog_type_id bigint,
+      catalog_type_name text,
+      catalog_type_organization_id bigint,
+      catalog_type_created timestamp,
+      catalog_type_modified timestamp,
+      catalog_type_legacy_id bigint
+    )');
+
+    // courses have the following structure:
+    // "status": {
+    //     "active": true,
+    //     "visible": true,
+    //     "catalog-id": 31,
+    //     "searchable": true
+    // },
+    // "body": "<hr><strong>LCCN:</strong> CACC 2113, Introduction to Financial Accounting<br><br><p>Basic accounting and financial reporting concepts and the significance of accounting information in financial analysis and business decision-making. </p><br><br><br><br><strong>Notes</strong><br> <p>No duplicate credit for ACCT 208 and ACCT 206.</p><br><br><p>Prerequisites: ENGL 101 (C or higher) and Sophomore standing. </p><br><br>Lec. 3 Cr. 3<br><br><br><br><br><br><br><br><hr><hr>",
+    // "code": "208",
+    // "name": "Accounting Principles (Lec. 3, Cr. 3)",
+    // "created": "2017-01-02 17:17:33",
+    // "url": "/api/mcneese/catalog/31/course/80141/",
+    // "fields": [
+    //     {
+    //         "content": "",
+    //         "custom_field": {
+    //             "category": "course",
+    //             "name-history": [],
+    //             "name": "Field Experience",
+    //             "created": "2017-01-02 17:17:33",
+    //             "required": false,
+    //             "display-settings": {
+    //                 "name_after_data": 0,
+    //                 "data_bold": 0,
+    //                 "name_bold": 1,
+    //                 "name_linebreak": 0,
+    //                 "data_italic": 0,
+    //                 "name_always_show": 0,
+    //                 "name_show": 1,
+    //                 "name_italic": 0
+    //             },
+    //             "system": false,
+    //             "modified": "2017-01-02 17:17:33",
+    //             "legacy-id": 1152,
+    //             "sort_orders": [
+    //                 {
+    //                     "custom-field-id": 927,
+    //                     "created": "2017-01-02 22:18:39",
+    //                     "catalog-id": 31,
+    //                     "modified": "2017-01-02 22:18:39",
+    //                     "sort-order": 22
+    //                 }
+    //             ],
+    //             "display": true,
+    //             "active": true,
+    //             "catalog-id": 31,
+    //             "type": "large",
+    //             "id": 927
+    //         },
+    //         "modified": "2017-01-02 22:18:45",
+    //         "created": "2017-01-02 22:18:45"
+    //     },
+    // ],
+    // "prefix": "ACCT",
+    // "catalog-id": 31,
+    // "id": 80141
+
+    // note: fields looks like it might be dynamic, so use json.
+    db_query('create table mcneese_catalog_courses (
+      id bigint not null,
+      catalog_id bigint not null,
+      legacy_id bigint not null,
+
+      name text not null,
+      prefix varchar(32) not null,
+      code varchar(64) not null,
+      url varchar(256) not null,
+      description text not null,
+
+      created timestamp not null,
+      modified timestamp not null,
+
+      active boolean not null,
+      visible boolean not null,
+      searchable boolean not null,
+
+      fields json,
+
+      constraint mcneese_catalog_courses_pkey primary key (id, catalog_id)
+    )');
+
+    // programs have the following structure:
+    //"status": {
+    //    "active": true,
+    //    "visible": true,
+    //    "catalog-id": 31,
+    //    "searchable": true
+    //},
+    //"code": "MSCI-MTED",
+    //"description": "<p>Total Hours Required for Degree: Â 120</p>\r\n\r\n<p>The Bachelor of Science degree program in Mathematical Sciences with a concentration in Mathematics Education Grades 6-12 leads to initial teacher certification.</p>\r\n\r\n<p><em>Curriculum pending approval by the Louisiana Department of Education. Â All Teacher Education Preparation requirements must be satisfied for this degree. </em></p>\r\n",
+    //"created": "2017-01-02 17:17:45",
+    //"url": "/api/mcneese/catalog/31/program/7033/",
+    //"degree_types": [
+    //    {
+    //        "status": {
+    //            "active": true,
+    //            "visible": true,
+    //            "catalog-id": 31,
+    //            "searchable": true
+    //        },
+    //        "category": "degree",
+    //        "description": "",
+    //        "created": "2017-01-02 17:17:33",
+    //        "modified": "2017-01-02 17:17:33",
+    //        "display": true,
+    //        "legacy-id": 777,
+    //        "catalog-id": 31,
+    //        "order": 8,
+    //        "id": 4300,
+    //        "name": "Bachelor of Science"
+    //    }
+    //],
+    //"modified": "2017-02-14 16:50:46",
+    //"legacy-id": 11264,
+    //"catalog-id": 31,
+    //"program_types": [
+    //    {
+    //        "status": {
+    //            "active": true,
+    //            "visible": true,
+    //            "catalog-id": 31,
+    //            "searchable": true
+    //        },
+    //        "category": "program",
+    //        "description": "",
+    //        "created": "2017-01-02 17:17:33",
+    //        "modified": "2017-01-02 17:17:33",
+    //        "display": false,
+    //        "legacy-id": 335,
+    //        "catalog-id": 31,
+    //        "order": 2,
+    //        "id": 4284,
+    //        "name": "Bachelor Degree Programs"
+    //    }
+    //],
+    //"id": 7033,
+    //"name": "Mathematical Sciences-Mathematics Education Grades 6-12 Concentration"
+
+    // note: degree types and program types are part of 'program', but appear to be useful if pulled out in a separate table.
+    db_query('create table mcneese_catalog_degree_types (
+      id bigint not null,
+      catalog_id bigint not null,
+      legacy_id bigint not null,
+      order_id bigint not null,
+
+      name text not null,
+      category varchar(64) not null,
+      description text not null,
+
+      created timestamp not null,
+      modified timestamp not null,
+
+      active boolean not null,
+      visible boolean not null,
+      searchable boolean not null,
+      display boolean not null,
+
+      constraint mcneese_catalog_degree_types_pkey primary key (id, catalog_id)
+    )');
+
+    db_query('create table mcneese_catalog_program_types (
+      id bigint not null,
+      catalog_id bigint not null,
+      legacy_id bigint not null,
+      order_id bigint not null,
+
+      name text not null,
+      category varchar(64) not null,
+      description text not null,
+
+      created timestamp not null,
+      modified timestamp not null,
+
+      active boolean not null,
+      visible boolean not null,
+      searchable boolean not null,
+      display boolean not null,
+
+      constraint mcneese_catalog_program_types_pkey primary key (id, catalog_id)
+    )');
+
+    db_query('create table mcneese_catalog_programs (
+      id bigint not null,
+      catalog_id bigint not null,
+      legacy_id bigint not null,
+
+      name text not null,
+      code varchar(64) not null,
+      url varchar(256) not null,
+      description text not null,
+
+      created timestamp not null,
+      modified timestamp not null,
+
+      active boolean not null,
+      visible boolean not null,
+      searchable boolean not null,
+
+      degree_types json,
+      program_types json,
+
+      constraint mcneese_catalog_programs_pkey primary key (id, catalog_id)
+    )');
+
+    // hierarchies have the following structure:
+    // "status": {
+    //     "active": true,
+    //     "visible": true,
+    //     "catalog-id": 31,
+    //     "searchable": true
+    // },
+    // "description": "<p>More information about McNeese State University can be found on theÂ <a href=\"#\" class=\"permalink\" data-permalink_id=\"28358\" data-legacy_id=\"115\" data-signature=\"4ee20b98c566eca6b5f0e9a524aebf4d\" data-display_type=\"same\" data-link_text=\"\" data-anchor_text=\"\" data-from_id=\"894\" data-from_type=\"hierarchy\" data-to_id=\"1329\" data-to_type=\"content\" data-show_title=\"1\" data-to_legacy_id=\"1751\" data-to_url=\"/api/mcneese/catalog/31/page/1329/\">General Information</a>Â page.</p>\r\n",
+    // "created": "2017-01-02 17:17:33",
+    // "url": "/api/mcneese/catalog/31/hierarchy/894/",
+    // "college-types": [],
+    // "modified": "2017-02-23 01:32:20",
+    // "options": "{\"searchable\":1}",
+    // "legacy-id": 986,
+    // "department-types": [],
+    // "catalog-id": 31,
+    // "hierarchy_type": "Institution",
+    // "id": 894,
+    // "name": "McNeese State University"
+
+    db_query('create table mcneese_catalog_hierarchies (
+      id bigint not null,
+      catalog_id bigint not null,
+      legacy_id bigint not null,
+
+      name text not null,
+      hierarchy_type varchar(128) not null,
+      url varchar(256) not null,
+      description text not null,
+
+      created timestamp not null,
+      modified timestamp not null,
+
+      active boolean not null,
+      visible boolean not null,
+      searchable boolean not null,
+
+      options text,
+      college_types json,
+      department_types json,
+
+      constraint mcneese_catalog_hierarchies_pkey primary key (id, catalog_id)
+    )');
+
+    // filters have the following structure:
+    //"status": {
+    //    "active": true,
+    //    "visible": false,
+    //    "catalog-id": 31,
+    //    "searchable": true
+    //},
+    //"legacy-id": 1710,
+    //"name": "Course Ownership Review Link",
+    //"created": "2017-01-02 17:17:47",
+    //"url": "/api/mcneese/catalog/31/filter/1296/",
+    //"modified": "2017-01-02 17:17:47",
+    //"options": "{u'course_sort_code': 1, u'keyword': 0, u'course_group': 1, u'catalog_group': 0, u'course_show_toggle': 1, u'college_show_desc': 0, u'catalog_order': 0, u'course_sort_name': 1, u'show_institutional_departments_link': 1, u'program_show_toggle': 0, u'department_show_desc': 0, u'course_sort_prefix': 1}",
+    //"content": "",
+    //"header": "",
+    //"catalog-id": 31,
+    //"link": "",
+    //"content-type": "filter",
+    //"id": 1296
+
+    db_query('create table mcneese_catalog_filters (
+      id bigint not null,
+      catalog_id bigint not null,
+      legacy_id bigint not null,
+
+      name text not null,
+      content_type varchar(128) not null,
+      description text not null,
+      options text not null,
+      header text not null,
+      url varchar(256) not null,
+      link varchar(256) not null,
+
+      created timestamp not null,
+      modified timestamp not null,
+
+      active boolean not null,
+      visible boolean not null,
+      searchable boolean not null,
+
+      constraint mcneese_catalog_filters_pkey primary key (id, catalog_id)
+    )');
+
+
+    // pages have the following structure:
+    //"status": {
+    //    "active": true,
+    //    "visible": false,
+    //    "catalog-id": 31,
+    //    "searchable": true
+    //},
+    //"legacy-id": 1727,
+    //"name": "HHP Activity Courses",
+    //"created": "2017-01-02 17:17:47",
+    //"url": "/api/mcneese/catalog/31/page/1313/",
+    //"modified": "2017-01-02 22:20:10",
+    //"options": "{u'searchable': 1}",
+    //"content": "<p>The following courses are considered HHP Activity courses and may not be applied to all degree programs.</p>\r\n\r\n<ul>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23063\" data-legacy_id=\"498\" data-signature=\"9308f277e972d2a900169952ea7ff39b\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81091\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127249\" data-to_url=\"/api/mcneese/catalog/31/course/81091/\">HHP 109Â -Â Aqua Exercise and Conditioning (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23072\" data-legacy_id=\"500\" data-signature=\"651ed538926e15ecf61e9d45d3536070\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81092\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127250\" data-to_url=\"/api/mcneese/catalog/31/course/81092/\">HHP 110Â -Â Bench Aerobics (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23079\" data-legacy_id=\"502\" data-signature=\"aff8211dbb9702df3b44b3d2b613d430\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81108\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127266\" data-to_url=\"/api/mcneese/catalog/31/course/81108/\">HHP 151Â -Â Beginning Tennis (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23074\" data-legacy_id=\"214\" data-signature=\"aab82084a2ca6c3362faf659268b68b2\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81109\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127267\" data-to_url=\"/api/mcneese/catalog/31/course/81109/\">HHP 152Â -Â Fitness (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23064\" data-legacy_id=\"503\" data-signature=\"d0e3a3ae185ac68590797b1073ec6b00\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81110\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127268\" data-to_url=\"/api/mcneese/catalog/31/course/81110/\">HHP 153Â -Â Beginning Badminton (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23065\" data-legacy_id=\"504\" data-signature=\"e200c2c6c8b389d4833567161f50213a\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81111\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127269\" data-to_url=\"/api/mcneese/catalog/31/course/81111/\">HHP 156Â -Â Golf (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23054\" data-legacy_id=\"505\" data-signature=\"4f042e89e9787cb26fcbe066ef0a2250\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81112\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127270\" data-to_url=\"/api/mcneese/catalog/31/course/81112/\">HHP 157Â -Â Softball (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23053\" data-legacy_id=\"506\" data-signature=\"de8356a1d6003fbe9af6ae8f4c29ae86\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81113\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127271\" data-to_url=\"/api/mcneese/catalog/31/course/81113/\">HHP 158Â -Â Volleyball (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23075\" data-legacy_id=\"507\" data-signature=\"05738f3aeccafe220597ab042950ddb6\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81114\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127272\" data-to_url=\"/api/mcneese/catalog/31/course/81114/\">HHP 159Â -Â Racquetball (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23058\" data-legacy_id=\"520\" data-signature=\"dc6894dd52f332ec0e30b50c2d5a61de\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81115\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127273\" data-to_url=\"/api/mcneese/catalog/31/course/81115/\">HHP 160Â -Â Aquatics I (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23080\" data-legacy_id=\"521\" data-signature=\"d24e03e9a401f42e21d5d12f61b191ae\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81116\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127274\" data-to_url=\"/api/mcneese/catalog/31/course/81116/\">HHP 161Â -Â Aquatics II (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23078\" data-legacy_id=\"522\" data-signature=\"9f653da950ceacc4a7162e595e33e069\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81117\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127275\" data-to_url=\"/api/mcneese/catalog/31/course/81117/\">HHP 164Â -Â Weight Training (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23066\" data-legacy_id=\"523\" data-signature=\"3fef531f6f59d56db52540343efd2e29\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81118\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127276\" data-to_url=\"/api/mcneese/catalog/31/course/81118/\">HHP 166Â -Â Flag Football (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23057\" data-legacy_id=\"524\" data-signature=\"069ea902813c790fc0f188da0784f197\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81119\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127277\" data-to_url=\"/api/mcneese/catalog/31/course/81119/\">HHP 167Â -Â Basketball (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23071\" data-legacy_id=\"525\" data-signature=\"c3e5923e8730905f79618e127d262919\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81120\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127278\" data-to_url=\"/api/mcneese/catalog/31/course/81120/\">HHP 168Â -Â Conditioning (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23069\" data-legacy_id=\"526\" data-signature=\"58b1200e87f47fe9601f3ca30163328d\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81121\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127279\" data-to_url=\"/api/mcneese/catalog/31/course/81121/\">HHP 173Â -Â Fitness Swimming (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23052\" data-legacy_id=\"527\" data-signature=\"968b060a8a93b37a84ec39cf41663dc1\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81122\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127280\" data-to_url=\"/api/mcneese/catalog/31/course/81122/\">HHP 176Â -Â Water Exercises (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23067\" data-legacy_id=\"528\" data-signature=\"a598354576c20b3f7a37a0d2400b01de\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81123\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127281\" data-to_url=\"/api/mcneese/catalog/31/course/81123/\">HHP 178Â -Â Water Exercises/Walking (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23061\" data-legacy_id=\"529\" data-signature=\"de81cddaf1758b330d71bcb33e1f390b\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81124\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127282\" data-to_url=\"/api/mcneese/catalog/31/course/81124/\">HHP 179Â -Â Scuba Diving (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23073\" data-legacy_id=\"534\" data-signature=\"7c679fc02112bc60427dde1725baca13\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81125\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127283\" data-to_url=\"/api/mcneese/catalog/31/course/81125/\">HHP 181Â -Â Beginning Tae Kwon Do (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23077\" data-legacy_id=\"535\" data-signature=\"0f1fc00230f1f366d77d727b7a62fba8\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81126\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127284\" data-to_url=\"/api/mcneese/catalog/31/course/81126/\">HHP 182Â -Â Intermediate Tae Kwon Do (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23056\" data-legacy_id=\"536\" data-signature=\"e3c012110f1aac3dc932521d15646c1a\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81127\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127285\" data-to_url=\"/api/mcneese/catalog/31/course/81127/\">HHP 183Â -Â Advanced Tae Kwon Do (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23060\" data-legacy_id=\"537\" data-signature=\"62c403410efd2be0b1e48c21bea9c1b0\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"82256\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"128414\" data-to_url=\"/api/mcneese/catalog/31/course/82256/\">HHP 184Â -Â Cardio Kickboxing (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23055\" data-legacy_id=\"542\" data-signature=\"fc358a55528942e4d2e317bca1d44006\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81131\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127289\" data-to_url=\"/api/mcneese/catalog/31/course/81131/\">HHP 208Â -Â Intermediate Aerobic Dance (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23076\" data-legacy_id=\"545\" data-signature=\"caaed672a698384cfe52d04b4a191827\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81133\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127291\" data-to_url=\"/api/mcneese/catalog/31/course/81133/\">HHP 212Â -Â Intermediate Golf (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23062\" data-legacy_id=\"546\" data-signature=\"3fe0669471e025df8d6951bdbad7bee0\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81138\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127296\" data-to_url=\"/api/mcneese/catalog/31/course/81138/\">HHP 252Â -Â Intermediate Tennis (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23070\" data-legacy_id=\"548\" data-signature=\"e15539bd176405be822735d8702b7488\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81139\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127297\" data-to_url=\"/api/mcneese/catalog/31/course/81139/\">HHP 258Â -Â Intermediate Volleyball (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23068\" data-legacy_id=\"550\" data-signature=\"80cef13ab1b1ef3d22d34a7ea577aa16\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81140\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127298\" data-to_url=\"/api/mcneese/catalog/31/course/81140/\">HHP 264Â -Â Intermediate Weight Training (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n\t<li><a href=\"#\" class=\"permalink\" data-permalink_id=\"23059\" data-legacy_id=\"552\" data-signature=\"f59bb5d9144d785d5429bd2034b1f993\" data-display_type=\"dynamic\" data-link_text=\"%title%\" data-anchor_text=\"\" data-from_id=\"1313\" data-from_type=\"content\" data-to_id=\"81141\" data-to_type=\"course\" data-show_title=\"1\" data-to_legacy_id=\"127299\" data-to_url=\"/api/mcneese/catalog/31/course/81141/\">HHP 276Â -Â Intermediate Water Exercise (Lec. 1, Lab. 2, Cr. 2)</a>Â </li>\r\n</ul>\r\n",
+    //"header": "HHP Activity Courses",
+    //"catalog-id": 31,
+    //"link": "hhp_activity_courses.html",
+    //"content-type": "page",
+    //"id": 1313
+
+    db_query('create table mcneese_catalog_pages (
+      id bigint not null,
+      catalog_id bigint not null,
+      legacy_id bigint not null,
+
+      name text not null,
+      content_type varchar(128) not null,
+      description text not null,
+      options text not null,
+      header text not null,
+      url varchar(256) not null,
+      link varchar(256) not null,
+
+      created timestamp not null,
+      modified timestamp not null,
+
+      active boolean not null,
+      visible boolean not null,
+      searchable boolean not null,
+
+      constraint mcneese_catalog_pages_pkey primary key (id, catalog_id)
+    )');
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    throw $e;
+  }
+  catch (Error $e) {
+    $transaction->rollback();
+
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    throw $e;
+  }
+}
+
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function mcneese_catalog_uninstall() {
+  $transaction = db_transaction();
+  try {
+    db_query('drop table mcneese_catalog_cache');
+    db_query('drop table mcneese_catalog_catalogs');
+    db_query('drop table mcneese_catalog_courses');
+    db_query('drop table mcneese_catalog_programs');
+    db_query('drop table mcneese_catalog_degree_types');
+    db_query('drop table mcneese_catalog_program_types');
+    db_query('drop table mcneese_catalog_hierarchies');
+    db_query('drop table mcneese_catalog_filters');
+    db_query('drop table mcneese_catalog_pages');
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    throw $e;
+  }
+  catch (Error $e) {
+    $transaction->rollback();
+
+    if (class_exists('cf_error')) {
+      cf_error::on_query_execution($e);
+    }
+
+    throw $e;
+  }
+}
+
+/**
+ * @} End of '@addtogroup mcneese_catalog'.
+ */

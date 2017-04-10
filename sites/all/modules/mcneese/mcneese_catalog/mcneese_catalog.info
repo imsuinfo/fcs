@@ -1,0 +1,22 @@
+name = McNeese Module - Catalog
+description = "Provides functionality for processing the mcneese catalog information from catalog.mcneese.edu."
+core = 7.x
+php = 5.3
+package = McNeese
+
+dependencies[] = cf (7.x-2.x)
+dependencies[] = cf_error (7.x-2.x)
+dependencies[] = cf_settings (7.x-2.x)
+dependencies[] = cf_dom
+dependencies[] = cf_theme
+dependencies[] = mcneese_filters
+dependencies[] = mcneese_content_formats
+
+files[] = classes/mcneese_catalog-base.inc
+files[] = classes/mcneese_catalog-catalogs.inc
+files[] = classes/mcneese_catalog-courses.inc
+files[] = classes/mcneese_catalog-programs.inc
+files[] = classes/mcneese_catalog-hierarchies.inc
+files[] = classes/mcneese_catalog-filters.inc
+files[] = classes/mcneese_catalog-pages.inc
+files[] = mcneese_catalog.module
