@@ -4,9 +4,46 @@
     padding-left: 34px;
     padding-right: 14px;
 }
+#jGrowl .jGrowl-notification { color: #f0f0f0; background-color: #000000;}
+
 #jGrowl .jGrowl-notification.status { color: #000000; background-color: #62db51; border: 1px solid #306b28;}
+#jGrowl .jGrowl-notification.status a,
+#jGrowl .jGrowl-notification.status a:visited {
+  color: #00355e;
+}
+#jGrowl .jGrowl-notification.status a:active,
+#jGrowl .jGrowl-notification.status a:hover,
+#jGrowl .jGrowl-notification.status a:focus {
+  color: #00355e;
+  font-weight: bolder;
+}
+
 #jGrowl .jGrowl-notification.warning { color: #000000; background-color: #ffb11a; border: 1px solid #8f630f;}
+#jGrowl .jGrowl-notification.warning a,
+#jGrowl .jGrowl-notification.warning a:visited {
+  color: #00345c;
+}
+
+#jGrowl .jGrowl-notification.warning a:active,
+#jGrowl .jGrowl-notification.warning a:hover,
+#jGrowl .jGrowl-notification.warning a:focus {
+  color: #00345c;
+  font-weight: bolder;
+}
+
 #jGrowl .jGrowl-notification.error { color: #000000; background-color: #ff664e; border: 1px solid #7a3125;}
+#jGrowl .jGrowl-notification.error a,
+#jGrowl .jGrowl-notification.error a:visited {
+  color: #000000;
+}
+
+#jGrowl .jGrowl-notification.error a:active,
+#jGrowl .jGrowl-notification.error a:hover,
+#jGrowl .jGrowl-notification.error a:focus {
+  color: #000000;
+  font-weight: bolder;
+}
+
 #jGrowl .jGrowl-notification a { color: #ffffff; border-bottom: 1px dotted #ffffff; }
 #jGrowl .jGrowl-notification .jGrowl-message { word-wrap: break-word; padding-right: 34px; }
 #jGrowl .jGrowl-notification .jGrowl-close { font-size: 1.1em; }
