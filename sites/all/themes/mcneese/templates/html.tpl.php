@@ -4,7 +4,8 @@
  * Html theme implementation.
  */
   $cf = & drupal_static('cf_theme_get_variables', array());
-  global $base_url;
+  global $base_root;
+  $uri = request_uri();
 
   if (function_exists('cf_theme_generate_headers')) {
     $cf['headers'] = cf_theme_generate_headers($cf);
@@ -30,7 +31,7 @@
   print($head_title);
   print('</title>');
 
-  print('<base href="' . $base_url . '">');
+  print('<base href="' . $base_root . $uri . '">');
   print('<meta name="viewport" content="width=device-width, initial-scale=1">');
 
   print($styles);
