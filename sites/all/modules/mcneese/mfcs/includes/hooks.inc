@@ -2988,7 +2988,13 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
     }
   }
 
-  $primary_account_id = (int) $user->uid;
+
+  $primary_account_id = NULL;
+  if (isset($user->uid)) {
+    // uid is not present for new accounts, only assign if it exists.
+    $primary_account_id = (int) $user->uid;
+  }
+
   if (!is_null($mfcs_user_settings['banner_id']) && $mfcs_user_settings['primary_account'] === FALSE) {
     $associated_users = mfcs_users_load_banner_id_to_user_id($mfcs_user_settings['banner_id']);
     if (isset($associated_users['banner'][$mfcs_user_settings['banner_id']]['primary']['user_id'])) {
