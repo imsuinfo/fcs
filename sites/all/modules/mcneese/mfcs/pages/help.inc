@@ -6708,6 +6708,24 @@ function mfcs_help_topic_faq($allowed_topics, $section_information, $as_inline =
   $markup .= '</div>';
   $markup .= '</div>';
 
+  $markup .= '<div id="faq-2" class="paragraph faq-item">';
+  $markup .= '<div class="faq-item-question question"> ';
+  $markup .= '<strong class="bold faq-item-number">2.</strong> Why do I get <strong class="bold">insufficient access</strong> after I login?';
+  $markup .= '</div>';
+  $markup .= '<div class="faq-item-answer answer"> ';
+  $markup .= 'Your access to this system is dependent on your current status as Faculty, Staff, or Student. This access may be determined on a per-semester basis. For Students, they must also be currently registered for classes for the current semester. Between semesters, access could <em class="emphasis">potentially</em> become temporarily unavailable while information is being updated.';
+  $markup .= '</div>';
+  $markup .= '</div>';
+
+  $markup .= '<div id="faq-3" class="paragraph faq-item">';
+  $markup .= '<div class="faq-item-question question"> ';
+  $markup .= '<strong class="bold faq-item-number">3.</strong> How do I find and fix problems for users, <strong class="bold">as a manager</strong>?';
+  $markup .= '</div>';
+  $markup .= '<div class="faq-item-answer answer"> ';
+  $markup .= 'Individual accounts have status information, banner information, proxy information, and role information on their appropriate view user page. You may also <a href="' . $base_path . 'problems-0/users">view the current list of known user problems</a> via the <a href="' . $base_path . 'problems-0">Manage Problems</a> page. The manage problems page may provide tools to assist in solving the problem, such as having the ability to re-synchronize the user account. For cache-related problems, be sure to <a href="' . $base_path . 'troubleshoot-0#field-troubleshoot-code_3">reload the entire Banner cache</a> (or just <a href="' . $base_path . 'troubleshoot-0#field-troubleshoot-code_4">reload the user Banner cache</a>) once before re-synchronizing any user accounts for best results.';
+  $markup .= '</div>';
+  $markup .= '</div>';
+
   if (!$as_inline) {
     $markup .= '<div class="continue_on no-print">';
     $markup .= 'Continue on to <a href="' . $base_path . 'help-0/terminology' . $url_arguments . '" class="item-link">Documentation: Terminology</a>. ';
