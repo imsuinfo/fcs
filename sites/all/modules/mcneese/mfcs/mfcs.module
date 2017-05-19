@@ -287,6 +287,8 @@ define('MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES', 256);
 define('MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE', 512);
 define('MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID', 1024);
 define('MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS', 2048);
+define('MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP', 4096);
+define('MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES', 8192);
 
 /**
  * Defines a series of request problems.
@@ -4117,7 +4119,7 @@ function mfcs_load_request_user_by_user_id($user_id) {
  * @param int $banner_id
  *   The numeric banner id string uniquely representing some user.
  *
- * @return array|bool
+ * @return array|bool|int
  *   An array containing the user information.
  *   TRUE is returned if no banner information exists and no error has been detected.
  *   FALSE is returned on error.
@@ -4150,7 +4152,26 @@ function mfcs_load_request_user_by_banner_id($banner_id) {
 
     $rows = $query->execute()->fetchAll();
 
-    if (!empty($rows)) {
+    if (empty($rows)) {
+      // if banner roles were not found, just load the user information without any banner roles.
+      $query = db_select('mfcs_users', 'mu');
+
+      $query->addField('mu', 'user_id', 'user_id');
+
+      $query->condition('mu.banner_id', $banner_id);
+
+      $rows = $query->execute()->fetchAll();
+      if (!empty($rows)) {
+        $row = reset($rows);
+
+        $user[$banner_id] = array(
+          'id' => $banner_id,
+          'user_id' => $row->user_id,
+          'role' => array(),
+        );
+      }
+    }
+    else {
       $user[$banner_id] = array(
         'id' => $banner_id,
         'user_id' => array(),
@@ -4605,8 +4626,18 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     }
 
     // Remove any invalid banner errors when the bannerless exception is set and the banner id is undefined.
-    if ($bannerless_exception && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
-      $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+    if ($bannerless_exception) {
+      if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
+        $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+      }
+
+      if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP) != 0) {
+        $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP;
+      }
+
+      if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) != 0) {
+        $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
+      }
     }
 
     // save any changes to to the problems flags.
@@ -4654,9 +4685,10 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     $total_primary = 1;
   }
 
-
   // Determine how many accounts (with same banner id) are assigned as primary.
   $banner_invalid = FALSE;
+  $banner_invalid_no_roles = FALSE;
+
   if (is_int($banner_id)) {
     $banner_information = mfcs_load_request_user_by_banner_id($banner_id);
     if (is_bool($banner_information)) {
@@ -4665,6 +4697,15 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
       $banner_invalid = TRUE;
     }
     else {
+      if (empty($banner_information['role'])) {
+        $banner_invalid_no_roles = TRUE;
+      }
+      else {
+        if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) != 0) {
+          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
+        }
+      }
+
       $associated_users = mfcs_users_load_banner_id_to_user_id($banner_id);
       $total_primary = 0;
       $total_primary_enabled = 0;
@@ -4707,6 +4748,21 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
       elseif ($total_accounts > 1) {
         $local_duplicate = TRUE;
       }
+    }
+  }
+  else {
+    // if there is no banner id, then it cannot be invalid.
+    // remove all assocaited invalid banner problems.
+    if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
+      $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+    }
+
+    if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP) != 0) {
+      $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP;
+    }
+
+    if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) != 0) {
+      $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
     }
   }
 
@@ -4809,28 +4865,71 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     $roles_changed = TRUE;
   }
 
-  if ($banner_invalid && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0) {
-    $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+  if ($banner_invalid) {
+    if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0) {
+      $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
 
-    // Do not report banner id as invalid if the account is locked.
-    if ($user_information['status'] == 0 && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
-      $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+      // Do not report banner id as invalid if the account is locked.
+      if ($user_information['status'] == 0 && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
+        $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+      }
+      elseif ($bannerless_exception) {
+        $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+      }
+      else {
+        $changes_detected = TRUE;
+      }
     }
-    elseif ($bannerless_exception) {
-      $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+  }
+  elseif ($banner_invalid_no_roles) {
+    if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) == 0) {
+      $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
+
+      // Do not report banner id as invalid if the account is locked.
+      if ($user_information['status'] == 0 && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) != 0) {
+        $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
+      }
+      elseif ($bannerless_exception) {
+        $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
+      }
+      else {
+        $changes_detected = TRUE;
+      }
     }
-    else {
+  }
+
+  // if the banner id is invalid, the account is locked, then remove the banner id and unset the code.
+  if ($user_information['status'] == 0) {
+    if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
+      $user_information['mfcs']['banner_id'] = NULL;
+      $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+      $changes_detected = TRUE;
+    }
+
+    if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP) != 0) {
+      $user_information['mfcs']['banner_id'] = NULL;
+      $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP;
+      $changes_detected = TRUE;
+    }
+
+    if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) != 0) {
+      $user_information['mfcs']['banner_id'] = NULL;
+      $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
       $changes_detected = TRUE;
     }
   }
-  // if the banner id is invalid, the account is locked, then remove the banner id and unset the code.
-  elseif ($user_information['status'] == 0 && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
-    $user_information['mfcs']['banner_id'] = NULL;
-    $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
-    $changes_detected = TRUE;
-  }
-  elseif ($bannerless_exception && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
-    $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+  elseif ($bannerless_exception) {
+    if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
+      $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+    }
+
+    if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP) != 0) {
+      $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP;
+    }
+
+    if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) != 0) {
+      $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
+    }
   }
 
   $update_ldap_duplicate = FALSE;

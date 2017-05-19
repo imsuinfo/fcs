@@ -170,9 +170,11 @@ function mfcs_dashboard_page() {
       if (!empty($user->mfcs) && is_array($user->mfcs) && array_key_exists('problems', $user->mfcs)) {
 
         // only assign no access problem flag when the user account has not been flagged as unable to sync with banner.
-        if (($user->mfcs['problems'] & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == 0 && ($user->mfcs['problems'] & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0 && ($user->mfcs['problems'] & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0) {
-          $user->mfcs['problems'] = $user->mfcs['problems'] | MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS;
-          mfcs_save_user($user->uid, array('problems' => $user->mfcs['problems']));
+        if (($user->mfcs['problems'] & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == 0 && ($user->mfcs['problems'] & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0) {
+          if (($user->mfcs['problems'] & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0 || ($user->mfcs['problems'] & MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP) == 0 || ($user->mfcs['problems'] & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) == 0) {
+            $user->mfcs['problems'] = $user->mfcs['problems'] | MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS;
+            mfcs_save_user($user->uid, array('problems' => $user->mfcs['problems']));
+          }
         }
       }
       else {

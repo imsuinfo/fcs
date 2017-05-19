@@ -279,7 +279,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     $additional_operations = '';
 
     $problem_account = NULL;
-    foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE, MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED, MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES, MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE, MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID, MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) as $taxonomy_id) {
+    foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE, MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED, MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES, MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE, MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID, MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP, MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES, MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) as $taxonomy_id) {
       if (($item->problems & $taxonomy_id) > 0) {
         if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE || $taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE || $taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) {
           $additional_operations .= ' <a href="' . $base_path . 'problems-0/users/resynchronize/' . $item->user_id . $url_arguments . '" class="operation-link operation-link-resynchronize" title="Re-Synchronize the user\'s settings.">Re-Sync</a>';
@@ -810,6 +810,32 @@ function mfcs_request_problems_0_user_form($form, &$form_state, $problem_user_id
       'custom_action' => TRUE,
       'custom_action-message' => 'Lock the user account.',
     ),
+    MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP => array(
+      'label' => 'Banner ID was not found in LDAP',
+      'explanation' =>
+        'This flag gets set when a user has a banner id that is not in LDAP.<br>' .
+        '<br>' .
+        'The user either needs to have their banner id fixed, removed, or the account should be locked.<br>',
+      'resettable' => FALSE,
+      'custom_action' => TRUE,
+      'custom_action-message' => 'Lock the user account.',
+    ),
+    MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES => array(
+      'label' => 'Banner ID has no associated Banner Roles',
+      'explanation' =>
+        'This flag gets set when a user with the given banner id has no banner roles associated with it.<br>' .
+        '<br>' .
+        'This usually happens for new faculty, staff, or students or for students who are in between semesters and have not yet registered for courses.<br>' .
+        '<br>' .
+        'There may also be a small amount of time between when the student registers for classes and when the banner roles become available in this sytem.<br>' .
+        'In this case, the user may be registered and have the proper roles, but the roles may not yet be available in this system.<br>' .
+        'In may take up to 24 hours for this system to refresh the banner information.<br>' .
+        '<br>' .
+        'Otherwise, the user either needs to have their banner id fixed, removed, or the account should be locked.<br>',
+      'resettable' => TRUE,
+      'custom_action' => TRUE,
+      'custom_action-message' => 'Lock the user account.',
+    ),
     MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS => array(
       'label' => 'Insufficient Banner Access',
       'explanation' =>
@@ -1118,7 +1144,7 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
           }
         }
       }
-      elseif ($custom_action_id == MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) {
+      elseif ($custom_action_id == MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID || $custom_action_id == MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP || $custom_action_id == MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) {
         if (!user_save($form['values']['problem_user']['#value'],  array('status' => 0))) {
           form_set_error('form', 'An error occurred while trying to lock the user account. Please contact the support staff.');
           watchdog(MFCS_WATCHDOG_ID, 'An error occurred while trying to lock the user account, user: @user_id, problems: @problems.', array('@user_id' => $form['values']['mfcs_user']['#value']['user_id'], '@problems' => print_r($problems, TRUE)), WATCHDOG_ERROR);

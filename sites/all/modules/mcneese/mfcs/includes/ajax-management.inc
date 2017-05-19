@@ -1036,13 +1036,13 @@ function mfcs_ajax_problems_0_users_list() {
       $row[3] = check_plain($problem->last_name);
 
       $row[4] = NULL;
-      foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE, MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED, MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES, MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE, MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID, MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) as $taxonomy_id) {
-        if (($problem->problems & $taxonomy_id) > 0) {
-          if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE || $taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE || $taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) {
+      foreach (array(MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE, MFCS_USER_PROBLEM_ACCOUNT_LOGIN_PROBLEMS_MULTIPLE, MFCS_USER_PROBLEM_ACCOUNT_REVIEWER_NOT_ALLOWED, MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES, MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE, MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID, MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP, MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES, MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) as $error_mask) {
+        if (($problem->problems & $error_mask) > 0) {
+          if ($error_mask == MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE || $error_mask == MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE || $error_mask == MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) {
             $additional_operations .= ' <a href="' . $base_path . 'problems-0/users/resynchronize/' . $problem->user_id . $url_arguments . '" class="operation-link operation-link-resynchronize" title="Re-Synchronize the user\'s settings.">Re-Sync</a>';
           }
 
-          if ($taxonomy_id == MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) {
+          if ($error_mask == MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE) {
             $additional_operations .= ' <a href="' . $base_path . 'problems-0/users/disabled_in_use/' . $problem->user_id . '">Requests</a>';
           }
 
@@ -1053,13 +1053,13 @@ function mfcs_ajax_problems_0_users_list() {
             $row[4] .= ', ';
           }
 
-          $row[4] .= $taxonomy_problems[$taxonomy_id];
+          $row[4] .= $taxonomy_problems[$error_mask];
         }
       }
 
       $row[5] = NULL;
-      foreach (array(MFCS_USER_PROBLEM_FORM_ERROR_USER, MFCS_USER_PROBLEM_FORM_ERROR_USER) as $taxonomy_id) {
-        if (($problem->problems & $taxonomy_id) > 0) {
+      foreach (array(MFCS_USER_PROBLEM_FORM_ERROR_USER, MFCS_USER_PROBLEM_FORM_ERROR_USER) as $error_mask) {
+        if (($problem->problems & $error_mask) > 0) {
           if (is_null($row[5])) {
             $row[5] = '';
           }
@@ -1067,13 +1067,13 @@ function mfcs_ajax_problems_0_users_list() {
             $row[5] .= ', ';
           }
 
-          $row[5] .= $taxonomy_problems[$taxonomy_id];
+          $row[5] .= $taxonomy_problems[$error_mask];
         }
       }
 
       $row[6] = NULL;
-      foreach (array(MFCS_USER_PROBLEM_SYSTEM, MFCS_USER_PROBLEM_MFCS) as $taxonomy_id) {
-        if (($problem->problems & $taxonomy_id) > 0) {
+      foreach (array(MFCS_USER_PROBLEM_SYSTEM, MFCS_USER_PROBLEM_MFCS) as $error_mask) {
+        if (($problem->problems & $error_mask) > 0) {
           if (is_null($row[6])) {
             $row[6] = '';
           }
@@ -1081,11 +1081,11 @@ function mfcs_ajax_problems_0_users_list() {
             $row[6] .= ', ';
           }
 
-          $row[6] .= $taxonomy_problems[$taxonomy_id];
+          $row[6] .= $taxonomy_problems[$error_mask];
         }
       }
 
-      unset($taxonomy_id);
+      unset($error_mask);
 
       $row[7] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $problem->updated_problems));
       $row[8] = '<a href="' . $base_path . 'problems-0/users/user/' . $problem->user_id . $url_arguments . '" class="operation-link operation-link-view">View</a>' . $additional_operations;

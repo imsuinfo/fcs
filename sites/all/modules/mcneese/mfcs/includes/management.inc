@@ -770,6 +770,8 @@ function mfcs_management_get_problems_user_taxonomy() {
   $labels[MFCS_USER_PROBLEM_ACCOUNT_DUPLICATES] = 'Old/Duplicate Account';
   $labels[MFCS_USER_PROBLEM_ACCOUNT_DISABLED_IN_USE] = 'Disabled Account in Use';
   $labels[MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID] = 'Invalid Banner ID';
+  $labels[MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP] = 'Banner ID Not in LDAP';
+  $labels[MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES] = 'No Banner Roles Available';
   $labels[MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS] = 'Insufficient Banner Access';
   $labels[MFCS_USER_PROBLEM_FORM_ERROR_USER] = 'Core System Form Errors';
   $labels[MFCS_USER_PROBLEM_FORM_ERROR_USER] = 'Facilities Use Form Errors';

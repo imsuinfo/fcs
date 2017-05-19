@@ -3090,7 +3090,7 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
 
   // validate banner id, if invalid, then strip all user roles.
   $banner_information = mfcs_load_request_user_by_banner_id($mfcs_user_settings['banner_id']);
-  if (is_bool($banner_information)) {
+  if (is_bool($banner_information) || empty($banner_information['roles'])) {
     $user_status = NULL;
     if (isset($user->status)) {
       $user_status = (int) $user->status;
@@ -3105,9 +3105,26 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
       if (($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
         $problems = $problems - MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
       }
+
+      if (($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP) != 0) {
+        $problems = $problems - MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP;
+      }
+
+      if (($problems & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) != 0) {
+        $problems = $problems - MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
+      }
     }
-    elseif (($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0) {
-      $problems = $problems | MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+    else {
+      if (is_bool($banner_information)) {
+        if (($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0) {
+          $problems = $problems | MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+        }
+      }
+      elseif (empty($banner_information['roles'])) {
+        if (($problems & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) == 0) {
+          $problems = $problems | MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
+        }
+      }
     }
 
     if (!$is_manager) {
@@ -3127,8 +3144,18 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
       return $results;
     }
   }
-  elseif (($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
-    $problems = $problems - MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+  else {
+    if (($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
+      $problems = $problems - MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+    }
+
+    if (($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP) != 0) {
+      $problems = $problems - MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP;
+    }
+
+    if (($problems & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) != 0) {
+      $problems = $problems - MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
+    }
   }
   unset($banner_information);
 
@@ -3236,23 +3263,33 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
 
   $results = array();
 
-  // auto-lock or auto-unlock accounts without any banner roles, but only when banner can be refreshed.
-  if (($problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == 0 && ($problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0 && ($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0) {
-    // If the user has banner roles, then make sure MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS is no longer set.
-    if (!empty($banner_roles) && ($problems & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
-      $problems -= MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS;
-    }
+  // auto-lock or auto-unlock accounts without any banner roles (or other banner id related problems), but only when banner can be refreshed.
+  if (($problems & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) == 0 && ($problems & MFCS_USER_PROBLEM_ACCOUNT_SYNC_BANNER_UNAVAILABLE) == 0) {
+    if (($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) == 0 && ($problems & MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP) == 0 && ($problems & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) == 0) {
+      // If the user has banner roles, then make sure MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS is no longer set.
+      if (!empty($banner_roles) && ($problems & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
+        $problems -= MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS;
+      }
 
-    if ($user->status == 0) {
-      if (!empty($banner_roles)) {
-        // auto-unlock account.
-        $results['status'] = 1;
+      if ($user->status == 0) {
+        if (!empty($banner_roles)) {
+          // auto-unlock account.
+          $results['status'] = 1;
 
-        watchdog(MFCS_WATCHDOG_ID, 'The user \'%user_name\' (%user_id, %primary_id) has had the account enabled/unlocked due to regaining sufficient banner roles.', array('%user_name' => $user->name, '%user_id' => isset($user->uid) ? $user->uid : 'undefined', '%primary_id' => $primary_account_id), WATCHDOG_NOTICE);
+          watchdog(MFCS_WATCHDOG_ID, 'The user \'%user_name\' (%user_id, %primary_id) has had the account enabled/unlocked due to regaining sufficient banner roles.', array('%user_name' => $user->name, '%user_id' => isset($user->uid) ? $user->uid : 'undefined', '%primary_id' => $primary_account_id), WATCHDOG_NOTICE);
+        }
+      }
+      else {
+        if (empty($banner_roles)) {
+          // auto-lock account (currently disabled).
+          #$results['status'] = 0;
+
+          #watchdog(MFCS_WATCHDOG_ID, 'The user \'%user_name\' (%user_id, %primary_id) has had the account disabled/locked due to insufficient banner roles.', array('%user_name' => $user->name, '%user_id' => isset($user->uid) ? $user->uid : 'undefined', '%primary_id' => $primary_account_id), WATCHDOG_NOTICE);
+        }
       }
     }
     else {
-      if (empty($banner_roles)) {
+      if ($user->status == 1 && empty($banner_roles)) {
         // auto-lock account (currently disabled).
         #$results['status'] = 0;
 
