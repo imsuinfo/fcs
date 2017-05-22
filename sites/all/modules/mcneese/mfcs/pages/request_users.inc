@@ -1861,6 +1861,29 @@ function mfcs_request_users_0_add_or_edit_form_submit($form, &$form_state, $edit
     }
 
     if (is_object($saved_account)) {
+      // check to see if the users ldap information is valid.
+      if (function_exists('ldap_servers_get_servers')) {
+        $ldap_sid = variable_get('mfcs_ldap_server_id', 'mcneese_ldap');
+        $ldap_server = ldap_servers_get_servers($ldap_sid, 'enabled', TRUE);
+
+        $user_mapping = $ldap_server->userUserNameToExistingLdapEntry($saved_account->name);
+
+        if (!isset($user_mapping['attr']['employeenumber']['count']) || !is_numeric($user_mapping['attr']['employeenumber']['count']) || $user_mapping['attr']['employeenumber']['count'] < 1) {
+          if (($mfcs_settings['problems'] & MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP) == 0) {
+            $mfcs_settings['problems'] = $mfcs_settings['problems'] | MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP;
+
+            mfcs_save_user($saved_account->uid, $mfcs_settings);
+          }
+        }
+        else {
+          if (($mfcs_settings['problems'] & MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP) != 0) {
+            $mfcs_settings['problems'] -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_NOT_IN_LDAP;
+
+            mfcs_save_user($saved_account->uid, $mfcs_settings);
+          }
+        }
+      }
+
       if ($edit) {
         drupal_set_message('Successfully saved user <a href="' . $base_path . 'users-0/view/' . $saved_account->uid . '">' . $saved_account->name . '</a>.');
       }
