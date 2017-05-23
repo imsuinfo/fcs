@@ -7,8 +7,9 @@ package = McNeese
 dependencies[] = cf (7.x-2.x)
 dependencies[] = cf_error (7.x-2.x)
 dependencies[] = cf_settings (7.x-2.x)
-dependencies[] = cf_dom
-dependencies[] = cf_theme
+dependencies[] = cf_db_options (7.x-2.x)
+dependencies[] = cf_dom (7.x-2.x)
+dependencies[] = cf_theme (7.x-2.x)
 dependencies[] = mcneese_filters
 dependencies[] = mcneese_content_formats
 

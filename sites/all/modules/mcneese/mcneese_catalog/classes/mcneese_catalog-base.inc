@@ -11,19 +11,21 @@
  */
 
 abstract class mcneese_catalog_class_base {
-  const BASE_URL     = 'catalog.mcneese.edu';
-  const CACHE_TABLE  = 'mcneese_catalog_cache';
-  const API_PATH     = '/widget-api/';
-  const CATALOG_PATH = '/widget-api/catalog/';
-  const BASE_CLASS   = 'mcneese_catalog-content';
+  const BASE_URL       = 'catalog.mcneese.edu';
+  const CACHE_TABLE    = 'mcneese_catalog_cache';
+  const API_PATH       = '/widget-api/';
+  const CATALOG_PATH   = '/widget-api/catalog/';
+  const BASE_CLASS     = 'mcneese_catalog-content';
+  const CACHE_LIFETIME = '+2 hours';
 
   const AS_RAW       = 0;
   const AS_LIST      = 1;
-  const AS_SPAN      = 2;
-  const AS_DIVIDER   = 3;
-  const AS_ACCORDIAN = 4;
-  const AS_LINK      = 5;
-  const AS_HEADER    = 6;
+  const AS_LIST_ITEM = 2;
+  const AS_SPAN      = 3;
+  const AS_DIVIDER   = 4;
+  const AS_ACCORDIAN = 5;
+  const AS_LINK      = 6;
+  const AS_HEADER    = 7;
 
   protected $table          = NULL;
   protected $path_name      = NULL;
@@ -48,6 +50,8 @@ abstract class mcneese_catalog_class_base {
   protected $use_description = NULL;
   protected $use_search      = NULL;
 
+  protected $show_invisible = NULL;
+
   protected $list_as = NULL;
 
   /**
@@ -57,7 +61,7 @@ abstract class mcneese_catalog_class_base {
     $this->table          = NULL;
     $this->path_name      = NULL;
     $this->cache_name     = NULL;
-    $this->cache_lifetime = '+24 hours';
+    $this->cache_lifetime = self::CACHE_LIFETIME;
 
     $this->select_condition   = NULL;
     $this->on_conflict_fields = array('id', 'catalog_id');
@@ -86,6 +90,8 @@ abstract class mcneese_catalog_class_base {
 
     $this->use_description = TRUE;
     $this->use_search      = FALSE;
+
+    $this->show_invisible = FALSE;
 
     $this->list_as = self::AS_LIST;
   }
@@ -117,6 +123,8 @@ abstract class mcneese_catalog_class_base {
     unset($this->use_description);
     unset($this->use_search);
 
+    unset($this->show_invisible);
+
     unset($this->list_as);
   }
 
@@ -132,6 +140,54 @@ abstract class mcneese_catalog_class_base {
     }
 
     return ($this->loaded === TRUE);
+  }
+
+  /**
+   * Check to see if cache is loaded.
+   *
+   * This will also load the catalog_id and legacy_id, if possible.
+   *
+   * @param bool $autoload
+   *   (optional) When TRUE, if cache is not available, attempt to load the cache.
+   *   When FALSE, if the cache is not available, do nothing.
+   *
+   * @return bool
+   *   TRUE if cache is available and up to date, FALSE otherwise.
+   */
+  public function check_cache($autoload = TRUE) {
+    if (!is_bool($autoload)) {
+      $autoload = TRUE;
+    }
+
+    $up_to_date = TRUE;
+    try {
+      $last_updated = db_query('select updated from {' . self::CACHE_TABLE . '} where name = :cache_name', array(':cache_name' => $this->cache_name))->fetchField();
+
+      if (is_null($last_updated)) {
+        $up_to_date = FALSE;
+      }
+      elseif (REQUEST_TIME >= strtotime($this->cache_lifetime, $last_updated)) {
+        $up_to_date = FALSE;
+      }
+      unset($last_updated);
+    }
+    catch (Exception $e) {
+      // @todo
+      $up_to_date = FALSE;
+    }
+    catch (Error $e) {
+      // @todo
+      $up_to_date = FALSE;
+    }
+
+    if (!$up_to_date && $autoload) {
+      if ($this->load(FALSE, TRUE) === FALSE) {
+        return FALSE;
+      }
+    }
+
+    $this->get_catalog_ids_from_cache();
+    return $up_to_date;
   }
 
   /**
@@ -260,7 +316,7 @@ abstract class mcneese_catalog_class_base {
    * @see: $this->load()
    */
   public function load_all($check_expire = TRUE, $force = FALSE) {
-    return $this->load($check_expire, $force, TRUE, 100);
+    return $this->load($check_expire, $force, TRUE, NULL, 100);
   }
 
   /**
@@ -287,14 +343,16 @@ abstract class mcneese_catalog_class_base {
    * @param bool $wrapped
    *   (optional) When TRUE, content will be wrapped in a div tag with appropriate class names.
    *   When FALSE, the no wrapping div tag will be used.
+   * @param string $markup_type
+   *   (optional) The markup type filter to use.
    *
    * @return string
    *   The processed HTML.
    *   An empty string is returned on error.
    */
-  public function get_markup($page = NULL, $per_page = NULL, $wrapped = TRUE) {
+  public function get_markup($page = NULL, $per_page = NULL, $wrapped = TRUE, $markup_type = 'full_html') {
     if (is_null($this->markup)) {
-      $this->render_markup($page, $per_page);
+      $this->render_markup($page, $per_page, $markup_type);
     }
 
     if (!is_string($this->markup)) {
@@ -360,6 +418,17 @@ abstract class mcneese_catalog_class_base {
     }
 
     return FALSE;
+  }
+
+  /**
+   * Get the catalog path name.
+   *
+   * @return string|null
+   *   The path name string assigned to this class.
+   *   NULL is returned if no path name string is assigned.
+   */
+  public function get_path_name() {
+    return $this->path_name;
   }
 
   /**
@@ -457,6 +526,148 @@ abstract class mcneese_catalog_class_base {
     }
 
     return $this->list_as;
+  }
+
+  /**
+   * Removes all data from the cache.
+   *
+   * Be sure to run this inside of a transaction.
+   *
+   * @return bool|null
+   *   TRUE on success, FALSE otherwise.
+   */
+  public function clear_cache_data() {
+    if (!is_string($this->table) || empty($this->table)) {
+      return FALSE;
+    }
+
+    if (!is_string($this->cache_name) || empty($this->cache_name)) {
+      return FALSE;
+    }
+
+    db_query('delete from {' . $this->table . '}');
+    db_query('update {' . self::CACHE_TABLE . '} set updated = NULL, catalog_id = NULL, legacy_id = NULL where name = :cache_name', array(':cache_name' => $this->cache_name));
+
+    return TRUE;
+  }
+
+  /**
+   * Assign show visibility setting.
+   *
+   * @param bool $show_invisible
+   *   Toggle loading of content with visible flag set to TRUE or FALSE.
+   */
+  public function set_show_invisible($show_invisible) {
+    if (!is_bool($show_invisible)) {
+      return;
+    }
+
+    $this->show_invisible = $show_invisible;
+  }
+
+  /**
+   * Get show visibility setting.
+   *
+   * @return bool
+   *   TRUE/FALSE of current show_invisible setting.
+   */
+  public function get_show_invisible($show_invisible) {
+    if (!is_bool($this->show_invisible)) {
+      $this->show_invisible = FALSE;
+    }
+
+    return $this->show_invisible;
+  }
+
+  /**
+   * Loads the an entire item from the currently cached catalog.
+   *
+   * This does not check cache and will load nothing database cache is not populated.
+   *
+   * @param int $id
+   *   The item id.
+   * @param int $as_legacy_id
+   *   (optional) When TRUE, the provided id is the legacy id.
+   *   When FALSE, it is the normal id.
+   *
+   * @return array|bool
+   *   A description string on success.
+   *   FALSE is returned on error.
+   */
+  public function get_item($id, $as_legacy_id = FALSE) {
+    if (!is_int($this->catalog_id) || empty($this->table)) {
+      return FALSE;
+    }
+
+    if (!is_int($id) || !is_bool($as_legacy_id)) {
+      return FALSE;
+    }
+
+    try {
+      $query = db_select($this->table, 'mct');
+      $query->fields('mct');
+
+      if ($as_legacy_id) {
+        $query->condition('mct.legacy_id', $id);
+      }
+      else {
+        $query->condition('mct.id', $id);
+      }
+
+      $result = $query->execute()->fetchAll();
+      if (is_array($result)) {
+        if (empty($result)) {
+          return array();
+        }
+
+        return array_pop($result);
+      }
+    }
+    catch (Exception $e) {
+      // @todo
+    }
+    catch (Error $e) {
+      // @todo
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Assign a cache lifetime.
+   *
+   * @param string lifetime
+   *   The lifetime string using the string format provided by PHP date().
+   *
+   * @return bool
+   *   TRUE on success, FALSE otherwise.
+   *
+   * @see: date()
+   */
+  public function set_cache_lifetime($lifetime) {
+    if (is_string($lifetime)) {
+      $this->cache_lifetime = $lifetime;
+    }
+    elseif (is_null($lifetime)) {
+      $this->cache_lifetime = self::CACHE_LIFETIME;
+    }
+    else {
+      return FALSE;
+    }
+
+    return TRUE;
+  }
+
+  /**
+   * Get the assigned cache lifetime.
+   *
+   * @return string
+   *   The lifetime string using the string format provided by PHP date().
+   *
+   * @see: date()
+   */
+  public function get_cache_lifetime() {
+    return $this->cache_lifetime;
   }
 
   /**
@@ -627,6 +838,10 @@ abstract class mcneese_catalog_class_base {
       $per_page = NULL;
     }
 
+    if (is_null($page)) {
+      $page = 0;
+    }
+
     if (!is_int($page) || $page < 0) {
       $per_page = NULL;
     }
@@ -702,6 +917,11 @@ abstract class mcneese_catalog_class_base {
     $result = drupal_http_request($path . '?page-size=' . $per_page . '&page=1');
 
     if (!isset($result->code) && $result->code != 200) {
+      // @todo: report problem to watchdog().
+      return FALSE;
+    }
+
+    if (!isset($result->data)) {
       // @todo: report problem to watchdog().
       return FALSE;
     }
@@ -860,29 +1080,6 @@ abstract class mcneese_catalog_class_base {
   }
 
   /**
-   * Removes all data from the cache.
-   *
-   * Be sure to run this inside of a transaction.
-   *
-   * @return bool|null
-   *   TRUE on success, FALSE otherwise.
-   */
-  protected function clear_cache_data() {
-    if (!is_string($this->table) || empty($this->table)) {
-      return FALSE;
-    }
-
-    if (!is_string($this->cache_name) || empty($this->cache_name)) {
-      return FALSE;
-    }
-
-    db_query('delete from {' . $this->table . '}');
-    db_query('update {' . self::CACHE_TABLE . '} set updated = NULL, catalog_id = NULL where name = :cache_name', array(':cache_name' => $this->cache_name));
-
-    return TRUE;
-  }
-
-  /**
    * Loads the catalog data from the cache.
    *
    * @return bool
@@ -890,6 +1087,9 @@ abstract class mcneese_catalog_class_base {
    */
   protected function get_catalog_ids_from_cache() {
     try {
+      $old_catalog_id = $this->catalog_id;
+      $old_legacy_id = $this->legacy_id;
+
       $this->catalog_id = NULL;
       $this->legacy_id = NULL;
 
@@ -901,10 +1101,16 @@ abstract class mcneese_catalog_class_base {
       }
     }
     catch (Exception $e) {
+      $this->catalog_id = $old_catalog_id;
+      $this->legacy_id = $old_legacy_id;
+
       // @todo
       return FALSE;
     }
     catch (Error $e) {
+      $this->catalog_id = $old_catalog_id;
+      $this->legacy_id = $old_legacy_id;
+
       // @todo
       return FALSE;
     }
@@ -967,13 +1173,19 @@ abstract class mcneese_catalog_class_base {
    *   If an integer, then this represents the particular page in use for generating a pager.
    * @param int|null $per_page
    *   (optional) $page is defined and is an integer, then this represents the number of items per page.
+   * @param string $markup_type
+   *   (optional) The markup type filter to use.
    *
    * @return bool
    *   TRUE on success, FALSE otherwise.
    */
-  protected function render_markup($page = NULL, $per_page = NULL) {
+  protected function render_markup($page = NULL, $per_page = NULL, $markup_type = 'full_html') {
     if (is_null($this->processed)) {
       return FALSE;
+    }
+
+    if (!is_string($markup_type)) {
+      $markup_type = 'full_html';
     }
 
     $markup = '';
@@ -990,6 +1202,18 @@ abstract class mcneese_catalog_class_base {
         $this->markup .= '</li>';
       }
       $this->markup .= '</ul>';
+    }
+    elseif ($this->list_as == self::AS_LIST_ITEM) {
+      foreach ($this->processed as $item) {
+        $this->markup .= '<li class="' . $this->get_class_base_name() . '-list_item">';
+        $this->markup .= '<div class="' . $this->get_class_base_name() . '-name">' . check_plain($item->name) . '</div>';
+
+        if ($this->use_description) {
+          $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->description, 'full_html') . '</div>';
+        }
+
+        $this->markup .= '</li>';
+      }
     }
     elseif ($this->list_as == self::AS_DIVIDER) {
       $this->markup .= '<div class="' . $this->get_class_base_name() . '-list list-as_divider">';

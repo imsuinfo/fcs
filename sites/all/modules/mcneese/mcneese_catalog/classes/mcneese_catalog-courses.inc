@@ -24,9 +24,31 @@ class mcneese_catalog_class_courses extends mcneese_catalog_class_base {
     $this->cache_name     = 'courses';
     $this->cache_lifetime = '+24 hours';
 
-    $this->select_condition = ' where visible and active';
+    if ($this->show_invisible) {
+      $this->select_condition = ' where active';
+    }
+    else {
+      $this->select_condition = ' where visible and active';
+    }
 
     $this->list_name = 'course-list';
+  }
+
+  /**
+   * Assign show visibility setting.
+   *
+   * @param bool $show_invisible
+   *   Toggle loading of content with visible flag set to TRUE or FALSE.
+   */
+  public function set_show_invisible($show_invisible) {
+    parent::set_show_invisible($show_invisible);
+
+    if ($this->show_invisible) {
+      $this->select_condition = ' where active';
+    }
+    else {
+      $this->select_condition = ' where visible and active';
+    }
   }
 
   /**
@@ -84,11 +106,6 @@ class mcneese_catalog_class_courses extends mcneese_catalog_class_base {
         continue;
       }
 
-      // ignore invisible items.
-      if (property_exists($item->status, 'visible') && !$item->status->visible) {
-        continue;
-      }
-
       // ignore inactive items.
       if (property_exists($item->status, 'active') && !$item->status->active) {
         continue;
@@ -123,7 +140,11 @@ class mcneese_catalog_class_courses extends mcneese_catalog_class_base {
       }
 
       $entry->active = TRUE;
+
       $entry->visible = TRUE;
+      if (property_exists($item->status, 'visible') && !$item->status->visible) {
+        $entry->visible = FALSE;
+      }
 
       $entry->searchable = TRUE;
       if (property_exists($item->status, 'searchable') && !$item->status->searchable) {
@@ -150,13 +171,19 @@ class mcneese_catalog_class_courses extends mcneese_catalog_class_base {
    *   If an integer, then this represents the particular page in use for generating a pager.
    * @param int|null $per_page
    *   (optional) $page is defined and is an integer, then this represents the number of items per page.
+   * @param string $markup_type
+   *   (optional) The markup type filter to use.
    *
    * @return bool
    *   TRUE on success, FALSE otherwise.
    */
-  protected function render_markup($page = NULL, $per_page = NULL) {
+  protected function render_markup($page = NULL, $per_page = NULL, $markup_type = 'full_html') {
     if (is_null($this->processed)) {
       return FALSE;
+    }
+
+    if (!is_string($markup_type)) {
+      $markup_type = 'full_html';
     }
 
     $markup = '';
@@ -172,6 +199,17 @@ class mcneese_catalog_class_courses extends mcneese_catalog_class_base {
         $this->markup .= '</li>';
       }
       $this->markup .= '</ul>';
+    }
+    elseif ($this->list_as == self::AS_LIST_ITEM) {
+      foreach ($this->processed as $item) {
+        $this->markup .= '<li class="' . $this->get_class_base_name() . '-list_item">';
+        $this->markup .= '<a href="//' . self::BASE_URL . self::BASE_URL_COURSE . '?catoid=' . ((int) $this->legacy_id) . '&coid=' . ((int) $item->legacy_id) . '" class="' . $this->get_class_base_name() . '-name">' . check_plain($item->prefix) . ' ' . check_plain($item->code) . ' - ' . check_plain($item->name) . '</a>';
+
+        if ($this->use_description) {
+          $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->description, 'full_html') . '</div>';
+        }
+        $this->markup .= '</li>';
+      }
     }
     elseif ($this->list_as == self::AS_DIVIDER) {
       $this->markup .= '<div class="' . $this->get_class_base_name() . '-list list-as_divider">';

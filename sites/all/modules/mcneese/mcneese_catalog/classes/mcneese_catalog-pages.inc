@@ -22,9 +22,31 @@ class mcneese_catalog_class_pages extends mcneese_catalog_class_base {
     $this->cache_name     = 'pages';
     $this->cache_lifetime = '+24 hours';
 
-    $this->select_condition = ' where visible and active';
+    if ($this->show_invisible) {
+      $this->select_condition = ' where active';
+    }
+    else {
+      $this->select_condition = ' where visible and active';
+    }
 
     $this->list_name = 'page-list';
+  }
+
+  /**
+   * Assign show visibility setting.
+   *
+   * @param bool $show_invisible
+   *   Toggle loading of content with visible flag set to TRUE or FALSE.
+   */
+  public function set_show_invisible($show_invisible) {
+    parent::set_show_invisible($show_invisible);
+
+    if ($this->show_invisible) {
+      $this->select_condition = ' where active';
+    }
+    else {
+      $this->select_condition = ' where visible and active';
+    }
   }
 
   /**
@@ -72,11 +94,6 @@ class mcneese_catalog_class_pages extends mcneese_catalog_class_base {
         continue;
       }
 
-      // ignore invisible items.
-      if (property_exists($item->status, 'visible') && !$item->status->visible) {
-        continue;
-      }
-
       // ignore inactive items.
       if (property_exists($item->status, 'active') && !$item->status->active) {
         continue;
@@ -109,7 +126,11 @@ class mcneese_catalog_class_pages extends mcneese_catalog_class_base {
       }
 
       $entry->active = TRUE;
+
       $entry->visible = TRUE;
+      if (property_exists($item->status, 'visible') && !$item->status->visible) {
+        $entry->visible = FALSE;
+      }
 
       $entry->searchable = TRUE;
       if (property_exists($item->status, 'searchable') && !$item->status->searchable) {

@@ -419,6 +419,16 @@ function mcneese_catalog_install() {
 
       constraint mcneese_catalog_pages_pkey primary key (id, catalog_id)
     )');
+
+    if (module_exists('workbench_menu')) {
+      $item_type[] = array(
+        'machine_name' => 'item_mcneese_catalog',
+        'human_name' => "McNeese Catalog",
+        'description' => "Represents content pulled from the McNeese Catalog.",
+      );
+
+      cf_db_options_add_options('workbench_menu', 'item_type', $item_type);
+    }
   }
   catch (Exception $e) {
     $transaction->rollback();

@@ -200,11 +200,13 @@ class mcneese_catalog_class_catalogs extends mcneese_catalog_class_base {
    *   If an integer, then this represents the particular page in use for generating a pager.
    * @param int|null $per_page
    *   (optional) $page is defined and is an integer, then this represents the number of items per page.
+   * @param string $markup_type
+   *   (optional) The markup type filter to use.
    *
    * @return bool
    *   TRUE on success, FALSE otherwise.
    */
-  protected function render_markup($page = NULL, $per_page = NULL) {
+  protected function render_markup($page = NULL, $per_page = NULL, $markup_type = 'full_html') {
     if (is_null($this->processed)) {
       return FALSE;
     }
@@ -214,11 +216,15 @@ class mcneese_catalog_class_catalogs extends mcneese_catalog_class_base {
       return FALSE;
     }
 
+    if (!is_string($markup_type)) {
+      $markup_type = 'full_html';
+    }
+
     if ($this->list_as == self::AS_LINK) {
       $this->markup = '<a href="" class="' . $this->get_class_base_name() . '-title list-as_link">' . check_plain($this->processed[0]->name);
 
       if ($this->use_description) {
-        $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->processed[0]->description, 'full_html') . '</div>';
+        $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->processed[0]->description, $markup_type) . '</div>';
         $this->markup .= '</div>';
       }
 
@@ -228,7 +234,7 @@ class mcneese_catalog_class_catalogs extends mcneese_catalog_class_base {
       $this->markup = '<h3 class="' . $this->get_class_base_name() . '-title list-as_header">' . check_plain($this->processed[0]->name);
 
       if ($this->use_description) {
-        $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->processed[0]->description, 'full_html') . '</div>';
+        $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->processed[0]->description, $markup_type) . '</div>';
         $this->markup .= '</div>';
       }
 
@@ -238,7 +244,7 @@ class mcneese_catalog_class_catalogs extends mcneese_catalog_class_base {
       $this->markup = '<div class="' . $this->get_class_base_name() . '-title list-as_divider"' . check_plain($this->processed[0]->name);
 
       if ($this->use_description) {
-        $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->processed[0]->description, 'full_html') . '</div>';
+        $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->processed[0]->description, $markup_type) . '</div>';
         $this->markup .= '</div>';
       }
 
@@ -248,17 +254,17 @@ class mcneese_catalog_class_catalogs extends mcneese_catalog_class_base {
       $this->markup = '<span class="' . $this->get_class_base_name() . '-title list-as_span">' . check_plain($this->processed[0]->name);
 
       if ($this->use_description) {
-        $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->processed[0]->description, 'full_html') . '</div>';
+        $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->processed[0]->description, $markup_type) . '</div>';
         $this->markup .= '</div>';
       }
 
       $this->markup .= '</div>';
     }
-    elseif ($this->list_as == self::AS_LIST) {
+    elseif ($this->list_as == self::AS_LIST || $this->list_as == self::AS_LIST_ITEM) {
       $this->markup = '<li class="' . $this->get_class_base_name() . '-title list-as_list">' . check_plain($this->processed[0]->name);
 
       if ($this->use_description) {
-        $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->processed[0]->description, 'full_html') . '</div>';
+        $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->processed[0]->description, $markup_type) . '</div>';
       }
 
       $this->markup .= '</li>';

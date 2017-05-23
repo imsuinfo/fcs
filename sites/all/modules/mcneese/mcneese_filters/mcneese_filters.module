@@ -67,8 +67,10 @@ function mcneese_filters_denied_tags_settings($form, &$form_state, $filter, $for
  *    The language code of the text to be filtered.
  * @param boolean $cache
  *    Whether or not to check the cache.
+ * @param int $cache_id
+ *    The ID of the filtered text in {cache_filter}, if $cache is TRUE.
  */
-function mcneese_filters_denied_tags_process($text, $filter, $format, $langcode, $cache) {
+function mcneese_filters_denied_tags_process($text, $filter, $format, $langcode, $cache, $cache_id) {
   if (empty($text)) return $text;
 
   $dom = new cf_dom(TRUE, TRUE, TRUE, $text);
@@ -105,8 +107,10 @@ function mcneese_filters_denied_tags_process($text, $filter, $format, $langcode,
  *    The language code of the text to be filtered.
  * @param boolean $cache
  *    Whether or not to check the cache.
+ * @param int $cache_id
+ *    The ID of the filtered text in {cache_filter}, if $cache is TRUE.
  */
-function mcneese_filters_replace_redirects_process($text, $filter, $format, $langcode, $cache) {
+function mcneese_filters_replace_redirects_process($text, $filter, $format, $langcode, $cache, $cache_id) {
   if (empty($text)) return $text;
 
   // if the redirect module is not installed and enabled, then nothing can be done.

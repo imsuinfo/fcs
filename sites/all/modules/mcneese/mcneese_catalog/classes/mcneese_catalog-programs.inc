@@ -11,11 +11,18 @@
  */
 
 class mcneese_catalog_class_programs extends mcneese_catalog_class_base {
+  const BASE_URL_PROGRAM = '/preview_program.php';
+  const CACHE_TABLE_DEGREE_TYPES  = 'mcneese_catalog_degree_types';
+  const CACHE_TABLE_PROGRAM_TYPES  = 'mcneese_catalog_program_types';
+
+  private $cached_degree_types  = NULL;
+  private $cached_program_types = NULL;
+
+  private $cache_name_degree_types  = NULL;
+  private $cache_name_program_types = NULL;
+
   private $processed_degree_types  = NULL;
   private $processed_program_types = NULL;
-
-  private $table_degree_types  = NULL;
-  private $table_program_types = NULL;
 
   protected $on_conflict_fields_degree_types  = NULL;
   protected $on_conflict_fields_program_types = NULL;
@@ -31,18 +38,23 @@ class mcneese_catalog_class_programs extends mcneese_catalog_class_base {
     $this->cache_name     = 'programs';
     $this->cache_lifetime = '+24 hours';
 
-    $this->select_condition = ' where visible and active';
+    if ($this->show_invisible) {
+      $this->select_condition = ' where active';
+    }
+    else {
+      $this->select_condition = ' where visible and active';
+    }
 
     $this->list_name = 'program-list';
 
-    $this->processed_degree_types  = NULL;
-    $this->processed_program_types = NULL;
-
-    $this->table_degree_types  = 'mcneese_catalog_degree_types';
-    $this->table_program_types = 'mcneese_catalog_program_types';
+    $this->cached_degree_types  = NULL;
+    $this->cached_program_types = NULL;
 
     $this->cache_name_degree_types  = 'degree_types';
     $this->cache_name_program_types = 'program_types';
+
+    $this->processed_degree_types  = NULL;
+    $this->processed_program_types = NULL;
 
     $this->on_conflict_fields_degree_types = array('id', 'catalog_id');
     $this->on_conflict_fields_program_types = array('id', 'catalog_id');
@@ -52,19 +64,532 @@ class mcneese_catalog_class_programs extends mcneese_catalog_class_base {
    * Class destructor.
    */
   public function __destruct() {
-    unset($this->processed_degree_types);
-    unset($this->processed_program_types);
-
-    unset($this->table_degree_types);
-    unset($this->table_program_types);
+    unset($this->cached_degree_types);
+    unset($this->cached_program_types);
 
     unset($this->cache_name_degree_types);
     unset($this->cache_name_program_types);
+
+    unset($this->processed_degree_types);
+    unset($this->processed_program_types);
 
     unset($this->on_conflict_fields_degree_types);
     unset($this->on_conflict_fields_program_types);
 
     parent::__destruct();
+  }
+
+  /**
+   * Load and store the latest or cached data.
+   *
+   * @param bool $check_expire
+   *   (optional) When TRUE, will check to see if cache needs to be re-built.
+   * @param bool $force
+   *   (optional) When TRUE, will force rebuild of the cache (if possible).
+   * @param bool $all
+   *   (optional) When TRUE, will attempt to load all data.
+   *   When FALSE, only the requested number of rows will be loaded.
+   * @param int|null $page
+   *   (optional) The page number to load (example: 1->100 = page 1 and 101 -> 200 = page 2, etc..).
+   *   Must not be NULL when $per_page is an integer and $all is FALSE.
+   * @param int|null $per_page
+   *   (optional) When an integer, defines the number of rows per page to load.
+   *   When NULL, all data will be loaded via a single http request.
+   *
+   * @return bool|int|NULL
+   *   TRUE on success.
+   *   NULL is returned on error, but cached data exists and is being used.
+   *   FALSE is returned on error, but no data is available to use.
+   */
+  public function load($check_expire = TRUE, $force = FALSE, $all = TRUE, $page = NULL, $per_page = NULL) {
+    if (!is_bool($check_expire)) {
+      $check_expire = FALSE;
+    }
+
+    if (!is_bool($force)) {
+      $force = FALSE;
+    }
+
+    if ($force) {
+      $this->clear_cache_data();
+    }
+
+    // TRUE = success, NULL = expired, FALSE = failed, -1 = overflow.
+    $cache_loaded = $this->get_cache($check_expire, $page, $per_page);
+
+    // do not attempt to load beyond what is possible.
+    if (is_int($cache_loaded) || $cache_loaded < 0) {
+      return FALSE;
+    }
+
+    $this->get_cache_degree_types($check_expire, $page, $per_page);
+    $this->get_cache_program_types($check_expire, $page, $per_page);
+
+    if (is_array($this->cached) && ($cache_loaded || (is_null($cache_loaded) && !$check_expire))) {
+      $this->processed = $this->cached;
+      $this->processed_degree_types = $this->cached_degree_types;
+      $this->processed_program_types = $this->cached_program_types;
+      $this->cached = NULL;
+      $this->loaded = TRUE;
+      return TRUE;
+    }
+    unset($cache_loaded);
+
+
+    // request new data from the remote server.
+    if (!$this->request_data($per_page)) {
+      if (is_array($this->cached)) {
+        // provide cache as failsafe.
+        $this->processed = $this->cached;
+        $this->processed_degree_types = $this->cached_degree_types;
+        $this->processed_program_types = $this->cached_program_types;
+        $this->cached = NULL;
+        $this->loaded = NULL;
+        return NULL;
+      }
+
+      return FALSE;
+    }
+
+
+    // process the received data, sanitizing it and preparing it for local storage and use.
+    if (!is_object($this->loaded) || !$this->process_data()) {
+      if (is_array($this->cached)) {
+        // provide cache as failsafe.
+        $this->processed = $this->cached;
+        $this->processed_degree_types = $this->cached_degree_types;
+        $this->processed_program_types = $this->cached_program_types;
+        $this->cached = NULL;
+        $this->loaded = NULL;
+        return NULL;
+      }
+
+      return FALSE;
+    }
+
+
+    // store the received data into local caches.
+    if (!$this->write_cache_data()) {
+      // @todo: handle error conditions.
+      // this is not a critical error because the cache is not required.
+    }
+
+    // get the total amount in the table.
+    $this->total = (int) db_query('select count(id) from {' . $this->table . '}')->fetchField();
+
+    // use the cached information to load the subset of data.
+    if (!$all) {
+      unset($this->processed);
+
+      $cache_loaded = $this->get_cache(FALSE, $page, $per_page);
+      if (is_array($this->cached)) {
+        $this->processed = $this->cached;
+        $this->processed_degree_types = $this->cached_degree_types;
+        $this->processed_program_types = $this->cached_program_types;
+        $this->cached = NULL;
+        $this->loaded = TRUE;
+        return TRUE;
+      }
+      unset($cache_loaded);
+
+      return FALSE;
+    }
+
+    $this->loaded = TRUE;
+
+    return TRUE;
+  }
+
+  /**
+   * Assign show visibility setting.
+   *
+   * @param bool $show_invisible
+   *   Toggle loading of content with visible flag set to TRUE or FALSE.
+   */
+  public function set_show_invisible($show_invisible) {
+    parent::set_show_invisible($show_invisible);
+
+    if ($this->show_invisible) {
+      $this->select_condition = ' where active';
+    }
+    else {
+      $this->select_condition = ' where visible and active';
+    }
+  }
+
+  /**
+   * Returns the processed degree type data, if any exists.
+   *
+   * @return array|null
+   *   An array of processed data.
+   *   NULL if not defined.
+   */
+  public function get_processed_degree_types() {
+    return $this->processed_degree_types;
+  }
+
+  /**
+   * Returns the processed program type data, if any exists.
+   *
+   * @return array|null
+   *   An array of processed data.
+   *   NULL if not defined.
+   */
+  public function get_processed_program_types() {
+    return $this->processed_program_types;
+  }
+
+  /**
+   * Removes all data from the cache.
+   *
+   * Be sure to run this inside of a transaction.
+   *
+   * @return bool|null
+   *   TRUE on success, FALSE otherwise.
+   */
+  public function clear_cache_data() {
+    if (!is_string($this->table) || empty($this->table)) {
+      return FALSE;
+    }
+
+    if (!is_string($this->cache_name) || empty($this->cache_name)) {
+      return FALSE;
+    }
+
+    db_query('delete from {' . $this->table . '}');
+    db_query('delete from {' . self::CACHE_TABLE_DEGREE_TYPES . '}');
+    db_query('delete from {' . self::CACHE_TABLE_PROGRAM_TYPES . '}');
+    db_query('update {' . self::CACHE_TABLE . '} set updated = NULL, catalog_id = NULL, legacy_id = NULL where name in (:cache_name, :cache_name_degree_types, :cache_name_program_types)', array(':cache_name' => $this->cache_name, ':cache_name_degree_types' => $this->cache_name_degree_types, ':cache_name_program_types' => $this->cache_name_program_types));
+
+    return TRUE;
+  }
+
+  /**
+   * Loads the an entire degree type item from the currently cached catalog.
+   *
+   * This does not check cache and will load nothing database cache is not populated.
+   *
+   * @param int $id
+   *   The item id.
+   * @param int $as_legacy_id
+   *   (optional) When TRUE, the provided id is the legacy id.
+   *   When FALSE, it is the normal id.
+   *
+   * @return array|bool
+   *   A description string on success.
+   *   FALSE is returned on error.
+   */
+  public function get_item_degree_type($id, $as_legacy_id = FALSE) {
+    if (!is_int($this->catalog_id) || empty($this->table)) {
+      return FALSE;
+    }
+
+    if (!is_int($id) || !is_bool($as_legacy_id)) {
+      return FALSE;
+    }
+
+    try {
+      $query = db_select(self::CACHE_TABLE_DEGREE_TYPES, 'mct');
+      $query->fields('mct');
+
+      if ($as_legacy_id) {
+        $query->condition('mct.legacy_id', $id);
+      }
+      else {
+        $query->condition('mct.id', $id);
+      }
+
+      $result = $query->execute()->fetchAll();
+      if (is_array($result)) {
+        if (empty($result)) {
+          return array();
+        }
+
+        return array_pop($result);
+      }
+    }
+    catch (Exception $e) {
+      // @todo
+    }
+    catch (Error $e) {
+      // @todo
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Loads the an entire program type item from the currently cached catalog.
+   *
+   * This does not check cache and will load nothing database cache is not populated.
+   *
+   * @param int $id
+   *   The item id.
+   * @param int $as_legacy_id
+   *   (optional) When TRUE, the provided id is the legacy id.
+   *   When FALSE, it is the normal id.
+   *
+   * @return array|bool
+   *   A description string on success.
+   *   FALSE is returned on error.
+   */
+  public function get_item_program_type($id, $as_legacy_id = FALSE) {
+    if (!is_int($this->catalog_id) || empty($this->table)) {
+      return FALSE;
+    }
+
+    if (!is_int($id) || !is_bool($as_legacy_id)) {
+      return FALSE;
+    }
+
+    try {
+      $query = db_select(self::CACHE_TABLE_PROGRAM_TYPES, 'mct');
+      $query->fields('mct');
+
+      if ($as_legacy_id) {
+        $query->condition('mct.legacy_id', $id);
+      }
+      else {
+        $query->condition('mct.id', $id);
+      }
+
+      $result = $query->execute()->fetchAll();
+      if (is_array($result)) {
+        if (empty($result)) {
+          return array();
+        }
+
+        return array_pop($result);
+      }
+    }
+    catch (Exception $e) {
+      // @todo
+    }
+    catch (Error $e) {
+      // @todo
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Returns the cached table, specific to degree types.
+   *
+   * @param bool $check_expire
+   *  (optional) When TRUE, will check to see if cache needs to be re-built.
+   * @param int|null $page
+   *   (optional) The page number to load (example: 1->100 = page 1 and 101 -> 200 = page 2, etc..).
+   *   Must not be NULL when $per_page is an integer.
+   * @param int|null $per_page
+   *   (optional) When an integer, defines the number of rows per page to load.
+   *   When NULL, all data will be loaded via a single http request.
+   *
+   * @return bool|null
+   *   TRUE is returned on successful cache load.
+   *   NULL is returned when cache is expired.
+   *   FALSE is returned on error.
+   */
+  protected function get_cache_degree_types($check_expire = FALSE, $page = NULL, $per_page = NULL) {
+    $expired = FALSE;
+    if ($check_expire) {
+      try {
+        $last_updated = db_query('select updated from {' . self::CACHE_TABLE . '} where name = :cache_name', array(':cache_name' => $this->cache_name_degree_types))->fetchField();
+
+        if (is_null($last_updated)) {
+          $expired = TRUE;
+        }
+        elseif (REQUEST_TIME >= strtotime($this->cache_lifetime, $last_updated)) {
+          $expired = TRUE;
+        }
+        unset($last_updated);
+      }
+      catch (Exception $e) {
+        // @todo
+      }
+      catch (Error $e) {
+        // @todo
+      }
+    }
+
+    // if a category id is supplied, then assume it is the correct version.
+    if (is_int($this->catalog_id)) {
+      $catalog_id = $this->catalog_id;
+      $legacy_id = $this->legacy_id;
+      $this->get_catalog_ids_from_cache();
+
+      // if the supplied categeory id is not the same as the one stored in the cache, then the cache is out of date.
+      if ($catalog_id != $this->catalog_id) {
+        $expired = TRUE;
+      }
+
+      $this->catalog_id = $catalog_id;
+      $this->legacy_id = $legacy_id;
+
+      unset($catalog_id);
+      unset($legacy_id);
+    }
+
+    if ($expired) {
+      return NULL;
+    }
+
+    if (!is_int($per_page) || $per_page < 1) {
+      $per_page = NULL;
+    }
+
+    if (!is_int($page) || $page < 0) {
+      $per_page = NULL;
+    }
+
+    $arguments = array();
+    $query_string = 'select * from {' . self::CACHE_TABLE_DEGREE_TYPES . '}';
+    if (!is_null($this->select_condition)) {
+      $query_string .= $this->select_condition;
+    }
+
+    try {
+      if (is_int($per_page) && is_int($page)) {
+        $query_string .= ' limit :limit offset :offset';
+        $arguments[':limit'] = $per_page;
+        $arguments[':offset'] = $per_page * $page;
+
+        if (is_null($this->total)) {
+          $this->total = (int) db_query('select count(id) from {' . self::CACHE_TABLE_DEGREE_TYPES . '}')->fetchField();
+        }
+
+        // do not attempt to select more than is available.
+        if ($page * $per_page > $this->total) {
+          return -1;
+        }
+      }
+
+      $items = db_query($query_string, $arguments)->fetchAll();
+    }
+    catch (Exception $e) {
+      cf_error::on_exception($e);
+      return FALSE;
+    }
+    catch (Error $e) {
+      cf_error::on_exception($e);
+      return FALSE;
+    }
+
+    if (is_array($items) && !empty($items)) {
+      $this->cached_degree_types = $items;
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Returns the cached table, specific to program types.
+   *
+   * @param bool $check_expire
+   *  (optional) When TRUE, will check to see if cache needs to be re-built.
+   * @param int|null $page
+   *   (optional) The page number to load (example: 1->100 = page 1 and 101 -> 200 = page 2, etc..).
+   *   Must not be NULL when $per_page is an integer.
+   * @param int|null $per_page
+   *   (optional) When an integer, defines the number of rows per page to load.
+   *   When NULL, all data will be loaded via a single http request.
+   *
+   * @return bool|null
+   *   TRUE is returned on successful cache load.
+   *   NULL is returned when cache is expired.
+   *   FALSE is returned on error.
+   */
+  protected function get_cache_program_types($check_expire = FALSE, $page = NULL, $per_page = NULL) {
+    $expired = FALSE;
+    if ($check_expire) {
+      try {
+        $last_updated = db_query('select updated from {' . self::CACHE_TABLE . '} where name = :cache_name', array(':cache_name' => $this->cache_name_program_types))->fetchField();
+
+        if (is_null($last_updated)) {
+          $expired = TRUE;
+        }
+        elseif (REQUEST_TIME >= strtotime($this->cache_lifetime, $last_updated)) {
+          $expired = TRUE;
+        }
+        unset($last_updated);
+      }
+      catch (Exception $e) {
+        // @todo
+      }
+      catch (Error $e) {
+        // @todo
+      }
+    }
+
+    // if a category id is supplied, then assume it is the correct version.
+    if (is_int($this->catalog_id)) {
+      $catalog_id = $this->catalog_id;
+      $legacy_id = $this->legacy_id;
+      $this->get_catalog_ids_from_cache();
+
+      // if the supplied categeory id is not the same as the one stored in the cache, then the cache is out of date.
+      if ($catalog_id != $this->catalog_id) {
+        $expired = TRUE;
+      }
+
+      $this->catalog_id = $catalog_id;
+      $this->legacy_id = $legacy_id;
+
+      unset($catalog_id);
+      unset($legacy_id);
+    }
+
+    if ($expired) {
+      return NULL;
+    }
+
+    if (!is_int($per_page) || $per_page < 1) {
+      $per_page = NULL;
+    }
+
+    if (!is_int($page) || $page < 0) {
+      $per_page = NULL;
+    }
+
+    $arguments = array();
+    $query_string = 'select * from {' . self::CACHE_TABLE_PROGRAM_TYPES . '}';
+    if (!is_null($this->select_condition)) {
+      $query_string .= $this->select_condition;
+    }
+
+    try {
+      if (is_int($per_page) && is_int($page)) {
+        $query_string .= ' limit :limit offset :offset';
+        $arguments[':limit'] = $per_page;
+        $arguments[':offset'] = $per_page * $page;
+
+        if (is_null($this->total)) {
+          $this->total = (int) db_query('select count(id) from {' . self::CACHE_TABLE_PROGRAM_TYPES . '}')->fetchField();
+        }
+
+        // do not attempt to select more than is available.
+        if ($page * $per_page > $this->total) {
+          return -1;
+        }
+      }
+
+      $items = db_query($query_string, $arguments)->fetchAll();
+    }
+    catch (Exception $e) {
+      cf_error::on_exception($e);
+      return FALSE;
+    }
+    catch (Error $e) {
+      cf_error::on_exception($e);
+      return FALSE;
+    }
+
+    if (is_array($items) && !empty($items)) {
+      $this->cached_program_types = $items;
+      return TRUE;
+    }
+
+    return FALSE;
   }
 
   /**
@@ -115,11 +640,6 @@ class mcneese_catalog_class_programs extends mcneese_catalog_class_base {
         continue;
       }
 
-      // ignore invisible items.
-      if (property_exists($item->status, 'visible') && !$item->status->visible) {
-        continue;
-      }
-
       // ignore inactive items.
       if (property_exists($item->status, 'active') && !$item->status->active) {
         continue;
@@ -152,7 +672,11 @@ class mcneese_catalog_class_programs extends mcneese_catalog_class_base {
       }
 
       $entry->active = TRUE;
+
       $entry->visible = TRUE;
+      if (property_exists($item->status, 'visible') && !$item->status->visible) {
+        $entry->visible = FALSE;
+      }
 
       $entry->searchable = TRUE;
       if (property_exists($item, 'searchable') && !$item->searchable) {
@@ -332,10 +856,10 @@ class mcneese_catalog_class_programs extends mcneese_catalog_class_base {
               $on_conflict_fields_conditions .= ' and ';
             }
 
-            $on_conflict_fields_conditions .= '{' . $this->table_degree_types . '}.' . $field . ' = :' . $field;
+            $on_conflict_fields_conditions .= '{' . self::CACHE_TABLE_DEGREE_TYPES . '}.' . $field . ' = :' . $field;
           }
 
-          $query_string = 'insert into {' . $this->table_degree_types . '} (';
+          $query_string = 'insert into {' . self::CACHE_TABLE_DEGREE_TYPES . '} (';
           $query_string .= $name_string;
           $query_string .= ') values (';
           $query_string .= $placeholder_string;
@@ -385,10 +909,10 @@ class mcneese_catalog_class_programs extends mcneese_catalog_class_base {
               $on_conflict_fields_conditions .= ' and ';
             }
 
-            $on_conflict_fields_conditions .= '{' . $this->table_program_types . '}.' . $field . ' = :' . $field;
+            $on_conflict_fields_conditions .= '{' . self::CACHE_TABLE_PROGRAM_TYPES . '}.' . $field . ' = :' . $field;
           }
 
-          $query_string = 'insert into {' . $this->table_program_types . '} (';
+          $query_string = 'insert into {' . self::CACHE_TABLE_PROGRAM_TYPES . '} (';
           $query_string .= $name_string;
           $query_string .= ') values (';
           $query_string .= $placeholder_string;
@@ -422,31 +946,6 @@ class mcneese_catalog_class_programs extends mcneese_catalog_class_base {
   }
 
   /**
-   * Removes all data from the cache.
-   *
-   * Be sure to run this inside of a transaction.
-   *
-   * @return bool|null
-   *   TRUE on success, FALSE otherwise.
-   */
-  protected function clear_cache_data() {
-    if (!is_string($this->table) || empty($this->table)) {
-      return FALSE;
-    }
-
-    if (!is_string($this->cache_name) || empty($this->cache_name)) {
-      return FALSE;
-    }
-
-    db_query('delete from {' . $this->table . '}');
-    db_query('delete from {' . $this->table_degree_types . '}');
-    db_query('delete from {' . $this->table_program_types . '}');
-    db_query('update {' . self::CACHE_TABLE . '} set updated = NULL, catalog_id = NULL where name in (:cache_name, :cache_name_degree_types, :cache_name_program_types)', array(':cache_name' => $this->cache_name, ':cache_name_degree_types' => $this->cache_name_degree_types, ':cache_name_program_types' => $this->cache_name_program_types));
-
-    return TRUE;
-  }
-
-  /**
    * Renders the markup.
    *
    * @param int|null $page
@@ -454,13 +953,19 @@ class mcneese_catalog_class_programs extends mcneese_catalog_class_base {
    *   If an integer, then this represents the particular page in use for generating a pager.
    * @param int|null $per_page
    *   (optional) $page is defined and is an integer, then this represents the number of items per page.
+   * @param string $markup_type
+   *   (optional) The markup type filter to use.
    *
    * @return bool
    *   TRUE on success, FALSE otherwise.
    */
-  protected function render_markup($page = NULL, $per_page = NULL) {
+  protected function render_markup($page = NULL, $per_page = NULL, $markup_type = 'full_html') {
     if (is_null($this->processed)) {
       return FALSE;
+    }
+
+    if (!is_string($markup_type)) {
+      $markup_type = 'full_html';
     }
 
     $markup = '';
@@ -473,12 +978,11 @@ class mcneese_catalog_class_programs extends mcneese_catalog_class_base {
         }
 
         $this->markup .= '<li class="' . $this->get_class_base_name() . '-list_item">';
-        $this->markup .= '<div class="' . $this->get_class_base_name() . '-name">' . check_plain($item->name) . $code . '</div>';
+        $this->markup .= '<a href="//' . self::BASE_URL . self::BASE_URL_PROGRAM . '?catoid=' . ((int) $this->legacy_id) . '&poid=' . ((int) $item->legacy_id) . '" class="' . $this->get_class_base_name() . '-name">' . check_plain($item->name) . $code . '</a>';
 
         if ($this->use_description) {
-          $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->description, 'full_html') . '</div>';
+          $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->description, $markup_type) . '</div>';
         }
-
         $this->markup .= '</li>';
       }
       $this->markup .= '</ul>';
@@ -492,12 +996,11 @@ class mcneese_catalog_class_programs extends mcneese_catalog_class_base {
         }
 
         $this->markup .= '<div class="' . $this->get_class_base_name() . '-list_item">';
-        $this->markup .= '<div class="' . $this->get_class_base_name() . '-name">' . check_plain($item->name) . $code . '</div>';
+        $this->markup .= '<a href="//' . self::BASE_URL . self::BASE_URL_PROGRAM . '?catoid=' . ((int) $this->legacy_id) . '&poid=' . ((int) $item->legacy_id) . '" class="' . $this->get_class_base_name() . '-name">' . check_plain($item->name) . $code . '</a>';
 
         if ($this->use_description) {
-          $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->description, 'full_html') . '</div>';
+          $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->description, $markup_type) . '</div>';
         }
-
         $this->markup .= '</div>';
       }
       $this->markup .= '</div>';
@@ -511,12 +1014,11 @@ class mcneese_catalog_class_programs extends mcneese_catalog_class_base {
         }
 
         $this->markup .= '<span class="' . $this->get_class_base_name() . '-list_item">';
-        $this->markup .= '<div class="' . $this->get_class_base_name() . '-name">' . check_plain($item->name) . $code . '</div>';
+        $this->markup .= '<a href="//' . self::BASE_URL . self::BASE_URL_PROGRAM . '?catoid=' . ((int) $this->legacy_id) . '&poid=' . ((int) $item->legacy_id) . '" class="' . $this->get_class_base_name() . '-name">' . check_plain($item->name) . $code . '</a>';
 
         if ($this->use_description) {
-          $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->description, 'full_html') . '</div>';
+          $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->description, $markup_type) . '</div>';
         }
-
         $this->markup .= '</span>';
       }
       $this->markup .= '</div>';
@@ -530,10 +1032,10 @@ class mcneese_catalog_class_programs extends mcneese_catalog_class_base {
         }
 
         $this->markup .= '<div class="' . $this->get_class_base_name() . '-list_item">';
-        $this->markup .= '<div class="' . $this->get_class_base_name() . '-name">' . check_plain($item->name) . $code . '</div>';
+        $this->markup .= '<a href="//' . self::BASE_URL . self::BASE_URL_PROGRAM . '?catoid=' . ((int) $this->legacy_id) . '&poid=' . ((int) $item->legacy_id) . '" class="' . $this->get_class_base_name() . '-name">' . check_plain($item->name) . $code . '</a>';
 
         if ($this->use_description) {
-          $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->description, 'full_html') . '</div>';
+          $this->markup .= '<div class="' . $this->get_class_base_name() . '-description">' . check_markup($item->description, $markup_type) . '</div>';
         }
 
         $this->markup .= '</div>';
@@ -596,11 +1098,6 @@ class mcneese_catalog_class_programs extends mcneese_catalog_class_base {
         continue;
       }
 
-      // ignore invisible items.
-      if (property_exists($item->status, 'visible') && !$item->status->visible) {
-        continue;
-      }
-
       // ignore inactive items.
       if (property_exists($item->status, 'active') && !$item->status->active) {
         continue;
@@ -633,7 +1130,11 @@ class mcneese_catalog_class_programs extends mcneese_catalog_class_base {
       }
 
       $entry->active = TRUE;
+
       $entry->visible = TRUE;
+      if (property_exists($item->status, 'visible') && !$item->status->visible) {
+        $entry->visible = FALSE;
+      }
 
       $entry->searchable = TRUE;
       if (property_exists($item, 'searchable') && !$item->searchable) {
@@ -709,11 +1210,6 @@ class mcneese_catalog_class_programs extends mcneese_catalog_class_base {
         continue;
       }
 
-      // ignore invisible items.
-      if (property_exists($item->status, 'visible') && !$item->status->visible) {
-        continue;
-      }
-
       // ignore inactive items.
       if (property_exists($item->status, 'active') && !$item->status->active) {
         continue;
@@ -746,7 +1242,11 @@ class mcneese_catalog_class_programs extends mcneese_catalog_class_base {
       }
 
       $entry->active = TRUE;
+
       $entry->visible = TRUE;
+      if (property_exists($item->status, 'visible') && !$item->status->visible) {
+        $entry->visible = FALSE;
+      }
 
       $entry->searchable = TRUE;
       if (property_exists($item, 'searchable') && !$item->searchable) {
