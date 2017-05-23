@@ -153,7 +153,7 @@ function ldap_user_user_entity_fields() {
       'label' => 'LDAP Server ID that puid was derived from.  NULL if puid is independent of server configuration instance.',
       'description' => 'This field should not be edited.',
       'required' => 0,
-      'default_value_function' => 'ldap_user_provisioned_sid_default',
+      'default_value' => array(),
       'settings' => array(
         'text_processing' => 0,
       ),
@@ -198,7 +198,7 @@ function ldap_user_user_entity_fields() {
       'label' => 'Value of user\'s permanent unique id.  This should never change for a given ldap identified user.',
       'description' => 'This field should not be edited.',
       'required' => 0,
-      'default_value_function' => 'ldap_user_puid_default',
+      'default_value' => array(),
       'settings' => array(
         'text_processing' => 0,
       ),
@@ -242,7 +242,7 @@ function ldap_user_user_entity_fields() {
       'label' => 'Property specified as user\'s puid.',
       'description' => 'This field should not be edited.',
       'required' => 0,
-      'default_value_function' => 'ldap_user_puid_property_default',
+      'default_value' => array(),
       'settings' => array(
         'text_processing' => 0,
       ),
@@ -286,7 +286,7 @@ function ldap_user_user_entity_fields() {
       'label' => 'User LDAP DN',
       'description' => 'May change when user\'s DN changes. This field should not be edited.',
       'required' => 0,
-      'default_value_function' => 'ldap_user_dn_default',
+      'default_value' => array(),
       'settings' => array(
         'text_processing' => 0,
       ),
