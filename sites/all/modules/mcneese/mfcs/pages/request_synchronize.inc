@@ -9,37 +9,18 @@
  * @addtogroup mfcs
  * @{
  */
+
 /**
  * Provides the facilities use request synchronize main page(s).
  *
- * @param array $form
- *   The form array as defined by drupals form api.
- * @param array $form_state
- *   The form state array as defined by drupals form api
  * @param int|null $page_number
  *   (optional) When there are more than a certain number of rows,
  *   this represent the page number for a given sequence of rows.
  *
  * @return string
- *   The HTML output representing the page.
+ *   The HTML representing the page.
  */
-function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NULL) {
-  if (!is_array($form)) {
-    cf_error::invalid_array('form');
-
-    drupal_not_found();
-    drupal_exit();
-    return array();
-  }
-
-  if (!is_array($form_state)) {
-    cf_error::invalid_array('form_state');
-
-    drupal_not_found();
-    drupal_exit();
-    return array();
-  }
-
+function mfcs_request_synchronize_0_page($page_number = NULL) {
   // require that page number be only an integer.
   if (!is_null($page_number) && !cf_is_integer($page_number)) {
     drupal_not_found();
@@ -98,6 +79,7 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
   $class_password = 'column-password ';
   $class_type = 'column-type ';
   $class_address = 'column-address ';
+  $class_disabled = 'column-disabled ';
   $class_operations = 'column-operations no-print ';
 
   $sorting = array();
@@ -147,6 +129,11 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
       $order_column = array(7 => strtolower($sorting[$order]));
       $class_address .= 'sorting_1 ';
     }
+    elseif ($order == 'disabled') {
+      $sorting['disabled'] = is_null($sort) ? 'DESC' : $sort;
+      $order_column = array(8 => strtolower($sorting[$order]));
+      $class_address .= 'sorting_1 ';
+    }
     else {
       $sorting['id'] = 'ASC';
       $order_column = array(0 => strtolower($sorting['id']));
@@ -168,6 +155,7 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
       'password' => 'password',
       'type' => 'type',
       'address' => 'address',
+      'disabled' => 'disabled',
     ),
     'associative' => FALSE,
   );
@@ -262,6 +250,11 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
       'class' => $class_address,
     );
 
+    $row['disabled'] = array(
+      'data' => $item->disabled == 1 ? 'Disabled' : 'Enabled',
+      'class' => $class_disabled,
+    );
+
     $row['operations'] = array(
       'data' => '',
       'class' => $class_operations,
@@ -271,6 +264,12 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
       $row['type']['data'] = 'iCalendar';
       $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/synchronize-0/ical/' . rawurlencode($item->password) . $url_arguments . '" class="operation-link operation-link-view" title="Synchronization URL">Link</a>';
     }
+    elseif ($item->type == MFCS_SYNCHRONIZE_TYPE_NONE) {
+      $row['type']['data'] = 'None';
+    }
+
+    $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/synchronize-0/edit/' . ((int) $item->id) . $url_arguments . '" class="operation-link operation-link-edit">Edit</a>';
+    $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/synchronize-0/create/' . ((int) $item->id) . $url_arguments . '" class="operation-link operation-link-copy">Copy</a>';
 
     $rows[] = $row;
   }
@@ -287,6 +286,7 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
     'password' => array('field' => 'password', 'data' => 'Password', 'align' => 'center'),
     'type' => array('field' => 'type', 'data' => 'Type', 'align' => 'center'),
     'address' => array('field' => 'address', 'data' => 'Address', 'align' => 'center'),
+    'disabled' => array('field' => 'disabled', 'data' => 'Status', 'align' => 'center'),
     'operations' => array('data' => 'Operations', 'align' => 'center', 'class' => array('no-print')),
   );
 
@@ -335,7 +335,8 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
       array('id' => 5, 'column' => 'password', 'name' => 'Password', 'className' => 'column-password'),
       array('id' => 6, 'column' => 'type', 'name' => 'Type', 'className' => 'column-type'),
       array('id' => 7, 'column' => 'address', 'name' => 'Address', 'className' => 'column-address'),
-      array('id' => 8, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+      array('id' => 8, 'column' => 'disabled', 'name' => 'Status', 'className' => 'column-disbled'),
+      array('id' => 9, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     ),
     'displayStart' => $options['start'],
     'pageLength' => $rows_per_page,
@@ -391,17 +392,20 @@ function mfcs_request_synchronize_0_form($form, &$form_state, $page_number = NUL
     $navigation_bottom .= '<a href="' . $base_path . 'requests/synchronize-0/' . $next_page . $url_arguments . '" class="table_listing-choice table_listing-choice-next no-print" title="Next Page">Next</a>';
   }
 
-  $form = array();
+  $markup = '<div id="mfcs_request_synchronize_0_form">';
+  $markup .= '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
+  $markup .= mcneese_libraries_theme_table($synchronize_list, $datatable_settings);
+  #markup .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
+  $markup .=  '<br><div>';
+  $markup .=  'The <strong>iCalendar</strong> synchronize process is intended to be used by <strong>zimbra calendar</strong> for processing only the approved requests from the current day forward. ';
+  $markup .=  'Other ip addresses may be added for exceptional, testing, or training purposes. ';
+  $markup .=  '</div>';
+  $markup .=  '<br><div>';
+  $markup .= 'You may <a href="' . $base_path . 'requests/synchronize-0/create' . $url_arguments . '" class="operation-link operation-link-add">Add a new synchronization access</a>.';
+  $markup .=  '</div>';
+  $markup .=  '</div>';
 
-  $form['synchronize_list']['#markup'] = '<div class="table_listing-navigator table_listing-navigator-top no-print">' . $navigation_top . '</div>';
-  $form['synchronize_list']['#markup'] .= mcneese_libraries_theme_table($synchronize_list, $datatable_settings);
-  #$form['synchronize_list']['#markup'] .= '<div class="table_listing-navigator table_listing-navigator-bottom">' . $navigation_bottom . '</div>';
-  $form['synchronize_list']['#markup'] .=  '<br><div>';
-  $form['synchronize_list']['#markup'] .=  'The <strong>iCalendar</strong> synchronize process is intended to be used by <strong>zimbra calendar</strong> for processing only the approved requests from the current day forward. ';
-  $form['synchronize_list']['#markup'] .=  'Other ip addresses may be added for exceptional, testing, or training purposes. ';
-  $form['synchronize_list']['#markup'] .=  '</div>';
-
-  return $form;
+  return $markup;
 }
 
 /**
@@ -629,6 +633,570 @@ function mfcs_request_synchronize_0_ical_page($password, $custom = NULL, $load_h
 
   unset($ical);
   exit();
+}
+
+/**
+ * Provides the facilities use request synchronize access create/copy/edit form.
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ * @param int|null $synchronize_id
+ *   (optional) The ID of an existing synchronize access to copy from.
+ *   If NULL, then a new synchronize access is created.
+ * @param bool $new
+ *   (optional) If TRUE, and synchronize_id is not NULL, then this is a copy form.
+ *   Otherwise if synchronize_id is not NULL, then this is an edit form.
+ *
+ * @return array
+ *   The settings representing the form.
+ */
+function mfcs_request_synchronize_0_create_form($form, &$form_state, $synchronize_id = NULL, $new = TRUE) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  // require that page number be only an integer.
+  if (!is_null($synchronize_id) && !cf_is_integer($synchronize_id)) {
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!is_bool($new)) {
+    cf_error::invalid_bool('new');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  global $conf;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  if (is_null($synchronize_id)) {
+    mfcs_add_canonical_headers('requests/synchronize-0/create');
+    $page_title = 'Create Synchronize Access';
+  }
+  else {
+    if ($new) {
+      mfcs_add_canonical_headers('requests/synchronize-0/create/' . $synchronize_id);
+      $page_title = 'Copy Synchronize Access: ' . $synchronize_id;
+    }
+    else {
+      mfcs_add_canonical_headers('requests/synchronize-0/edit/' . $synchronize_id);
+      $page_title = 'Edit Synchronize Access: ' . $synchronize_id;
+    }
+  }
+
+  drupal_set_title($page_title);
+
+  $user = cf_current_user();
+
+  // @todo: load existing settings for 'copy' process.
+  $default_values = array(
+    'type' => MFCS_SYNCHRONIZE_TYPE_ICAL,
+    'password' => NULL,
+    'address' => NULL,
+    'status' => 0,
+  );
+
+  $item = NULL;
+  if (!is_null($synchronize_id)) {
+    $item = mfcs_request_synchronize_load_by_id($synchronize_id);
+
+    if (is_object($item)) {
+      $default_values['type'] = $item->type;
+      $default_values['password'] = $item->password;
+      $default_values['address'] = $item->address;
+      $default_values['status'] = (int) $item->disabled;
+    }
+  }
+
+  $form = array();
+
+  $form['form'] = array(
+    '#tree' => TRUE,
+  );
+
+  $form['form']['synchronize_id'] = array(
+    '#type' => 'value',
+    '#value' => $synchronize_id,
+  );
+
+  $form['form']['user'] = array(
+    '#type' => 'value',
+    '#value' => $user,
+  );
+
+  $form['form']['new'] = array(
+    '#type' => 'value',
+    '#value' => $new,
+  );
+
+  $form['form']['item'] = array(
+    '#type' => 'value',
+    '#value' => $item,
+  );
+
+  $form['synchronize'] = array(
+    '#tree' => TRUE,
+  );
+
+  $options = array(
+    MFCS_SYNCHRONIZE_TYPE_NONE => 'None',
+    MFCS_SYNCHRONIZE_TYPE_ICAL => 'Calendar',
+  );
+
+  $form['synchronize']['type'] = array(
+    '#id' => 'synchronize-type',
+    '#type' => 'select',
+    '#title' => 'Type',
+    '#options' => $options,
+    '#default_value' => $default_values['type'],
+    '#required' => TRUE,
+    '#description' => 'The synchrinoze type.',
+  );
+
+  // this will not be copied.
+  $form['synchronize']['password'] = array(
+    '#id' => 'synchronize-password',
+    '#type' => 'textfield',
+    '#title' => 'Password',
+    '#default_value' => $default_values['password'],
+    '#required' => FALSE,
+    '#description' => 'A unique password associated with the specified ip address. This is recommended to be a randomly generated long hash. Leave empty to randomly generate.',
+  );
+
+  $form['synchronize']['address'] = array(
+    '#id' => 'synchronize-address',
+    '#type' => 'textfield',
+    '#title' => 'Address',
+    '#default_value' => $default_values['address'],
+    '#required' => TRUE,
+    '#description' => 'A valid ip address to restrict this synchronization to.',
+  );
+
+  $form['synchronize']['status'] = array(
+    '#id' => 'synchronize-status',
+    '#type' => 'select',
+    '#title' => 'Status',
+    '#options' => array(0 => 'Enabled', 1 => 'Disabled'),
+    '#default_value' => $default_values['status'],
+    '#required' => TRUE,
+    '#description' => 'Whether or not this access is disabled.',
+  );
+
+  $form['submit'] = array(
+    '#id' => 'mfcs-synchronize-create-submit',
+    '#type' => 'container',
+    '#tree' => TRUE,
+  );
+
+  $form['submit']['cancel'] = array(
+    '#id' => 'mfcs-synchronize-create-submit-cancel',
+    '#name' => 'mfcs-synchronize-create-submit-cancel',
+    '#type' => 'submit',
+    '#default_value' => 'Cancel',
+  );
+
+  $form['submit']['submit'] = array(
+    '#id' => 'mfcs-synchronize-create-submit-submit',
+    '#name' => 'mfcs-synchronize-create-submit-submit',
+    '#type' => 'submit',
+    '#default_value' => 'Submit',
+  );
+
+  return $form;
+}
+
+
+/**
+ * Provides the facilities use request synchronize access create/copy/edit form validation.
+ */
+function mfcs_request_synchronize_0_create_form_pre_validate(&$form, &$form_state) {
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  if ($clicked_id == 'mfcs-synchronize-create-submit-cancel') {
+    $form['synchronize']['address']['#required'] = FALSE;
+  }
+}
+
+/**
+ * Provides the facilities use request synchronize access create/copy/edit form validation.
+ */
+function mfcs_request_synchronize_0_create_form_validate($form, &$form_state) {
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  if ($clicked_id == 'mfcs-synchronize-create-submit-cancel') {
+    return;
+  }
+
+  if (strlen($form_state['values']['synchronize']['password']) != 0 && preg_match('/\W/', $form_state['values']['synchronize']['password']) > 0) {
+    form_set_error('synchronize][password', 'The <strong>password</strong> may only be letters, numbers, and underscores.');
+  }
+
+  if (@inet_pton($form_state['values']['synchronize']['address']) === FALSE) {
+    form_set_error('synchronize][address', 'The provided <strong>address</strong> is not a valid IP address.');
+  }
+}
+
+/**
+ * Provides the facilities use request synchronize access create/copy/edit form submital.
+ */
+function mfcs_request_synchronize_0_create_form_submit($form, &$form_state) {
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  if ($clicked_id == 'mfcs-synchronize-create-submit-cancel') {
+    if (empty($form_state['values']['redirect_to'])) {
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/synchronize-0');
+    }
+    else {
+      $form_state['redirect'] = $form_state['values']['redirect_to'];
+    }
+
+    return;
+  }
+
+  global $user;
+
+  $instance = mfcs_instance();
+
+  $values = array(
+    'type' => $form_state['values']['synchronize']['type'],
+    'address' => $form_state['values']['synchronize']['address'],
+    'disabled' => $form_state['values']['synchronize']['status'],
+    'updated' => $instance,
+  );
+
+  if (strlen($form_state['values']['synchronize']['password']) == 0) {
+    $values['password'] = preg_replace('/\W/', '', drupal_random_key(40));
+    if (strlen($values['password']) < 21) {
+      $values['password'] .= preg_replace('/\W/', '', drupal_random_key(20));
+    }
+  }
+  else {
+    $values['password'] = $form_state['values']['synchronize']['password'];
+  }
+
+  $transaction = db_transaction();
+  $failure = FALSE;
+  try {
+    if (is_numeric($form['form']['synchronize_id']['#value'])) {
+      if ($form['form']['new']['#value']) {
+        $query = db_insert('mfcs_synchronize');
+
+        $values['user_id'] = $user->uid;
+        $values['created'] = $instance;
+
+        $action = 'copy';
+      }
+      else {
+        $query = db_update('mfcs_synchronize');
+        $query->condition('id', $form['form']['synchronize_id']['#value']);
+
+        $values['id'] = $form['form']['synchronize_id']['#value'];
+
+        $action = 'update';
+      }
+    }
+    else {
+      $query = db_insert('mfcs_synchronize');
+
+      $values['user_id'] = $user->uid;
+      $values['created'] = $instance;
+
+      $action = 'create';
+    }
+
+    $query->fields($values);
+    $query->execute();
+  }
+  catch (Error $e) {
+    $transaction->rollback();
+    cf_error::on_exception($e);
+    $failure = TRUE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_exception($e);
+    $failure = TRUE;
+  }
+
+  if ($failure) {
+    form_set_error('form', 'An error occurred while trying to ' . $action . ' the synchronizaton access. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to ' . $action . ' the synchronizaton access: @synchronize_id.', array('@synchronize_id' => $form['form']['synchronize_id']['#value']), WATCHDOG_ERROR);
+
+    $form_state['rebuild'] = TRUE;
+    $form_state['redirect'] = FALSE;
+    $form_state['submitted'] = FALSE;
+
+    return;
+  }
+
+  // redirect after submitting.
+  if (empty($form_state['values']['redirect_to'])) {
+    $form_state['redirect'] = mfcs_build_redirect_array('requests/synchronize-0');
+  }
+  else {
+    $form_state['redirect'] = $form_state['values']['redirect_to'];
+  }
+}
+
+/**
+ * Provides the facilities use request synchronize access delete form.
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ * @param int $synchronize_id
+ *   The ID of an existing synchronize access to delete.
+ *
+ * @return array
+ *   The settings representing the form.
+ */
+function mfcs_request_synchronize_0_delete_form($form, $form_state, $synchronize_id) {
+  if (!is_array($form)) {
+    cf_error::invalid_array('form');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  if (!is_array($form_state)) {
+    cf_error::invalid_array('form_state');
+
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  // require that page number be only an integer.
+  if (!is_null($synchronize_id) && !cf_is_integer($synchronize_id)) {
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  global $conf;
+  global $base_path;
+  global $mfcs_determined;
+
+  $url_arguments = '';
+  if (!empty($mfcs_determined['complete'])) {
+    $url_arguments .= '?' . $mfcs_determined['complete'];
+  }
+
+  $item = mfcs_request_synchronize_load_by_id($synchronize_id);
+
+  if (!is_object($item)) {
+    drupal_not_found();
+    drupal_exit();
+    return array();
+  }
+
+  $page_title = 'Delete Synchronize Access';
+  drupal_set_title($page_title);
+
+  $options = array(
+    MFCS_SYNCHRONIZE_TYPE_NONE => 'None',
+    MFCS_SYNCHRONIZE_TYPE_ICAL => 'Calendar',
+  );
+
+  $form = array();
+  $form['form'] = array(
+    '#tree' => TRUE,
+  );
+
+  $form['form']['synchronize_id'] = array(
+    '#type' => 'value',
+    '#value' => $synchronize_id,
+  );
+
+  $form['confirmation'] = array(
+    '#markup' => '',
+  );
+
+  $form['confirmation']['#markup'] .= '<h3>Are you sure you want to delete this synchronization access?</h3> ';
+  $form['confirmation']['#markup'] .= '<div>';
+  $form['confirmation']['#markup'] .= '<strong>ID</strong>: ' . $item->id . '<br>';
+  $form['confirmation']['#markup'] .= '<strong>Type</strong>: ' . $options[$item->type] . '<br>';
+  $form['confirmation']['#markup'] .= '<strong>Password</strong>: ' . $item->password . '<br>';
+  $form['confirmation']['#markup'] .= '<strong>Address</strong>: ' . $item->address . '<br>';
+  $form['confirmation']['#markup'] .= '<strong>Status</strong>: ' . ($item->disabled == 1 ? 'Disabled' : 'Enabled') . '<br>';
+  $form['confirmation']['#markup'] .= '</div>';
+  $form['confirmation']['#markup'] .= '<br>';
+
+  $form['display']['submit'] = array(
+    '#id' => 'mfcs-synchronize-delete-submit',
+    '#type' => 'container',
+    '#tree' => TRUE,
+    '#attributes' => array(
+      'class' => array('no-print'),
+    ),
+  );
+
+  $form['display']['submit']['no'] = array(
+    '#id' => 'mfcs-synchronize-delete-submit-no',
+    '#name' => 'mfcs-synchronize-delete-submit-no',
+    '#type' => 'submit',
+    '#default_value' => 'No',
+  );
+
+  $form['display']['submit']['yes'] = array(
+    '#id' => 'mfcs-synchronize-delete-submit-yes',
+    '#name' => 'mfcs-synchronize-delete-submit-yes',
+    '#type' => 'submit',
+    '#default_value' => 'Yes',
+  );
+
+  return $form;
+}
+
+/**
+ * Provides the facilities use request synchronize access delete form submital.
+ */
+function mfcs_request_synchronize_0_delete_form_submit($form, &$form_state) {
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  if ($clicked_id == 'mfcs-synchronize-delete-submit-no') {
+    if (empty($form_state['values']['redirect_to'])) {
+      $form_state['redirect'] = mfcs_build_redirect_array('requests/synchronize-0');
+    }
+    else {
+      $form_state['redirect'] = $form_state['values']['redirect_to'];
+    }
+
+    return;
+  }
+
+  $transaction = db_transaction();
+  $failure = FALSE;
+  try {
+    $query = db_delete('mfcs_synchronize');
+    $query->condition('id', $form['form']['synchronize_id']['#value']);
+    $query->execute();
+  }
+  catch (Error $e) {
+    $transaction->rollback();
+    cf_error::on_exception($e);
+    $failure = TRUE;
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    cf_error::on_exception($e);
+    $failure = TRUE;
+  }
+
+  if ($failure) {
+    form_set_error('form', 'An error occurred while trying to delete the synchronizaton access. Please contact the support staff.');
+    watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to delete the synchronizaton access: @synchronize_id.', array('@synchronize_id' => $form['form']['synchronize_id']['#value']), WATCHDOG_ERROR);
+
+    $form_state['rebuild'] = TRUE;
+    $form_state['redirect'] = FALSE;
+    $form_state['submitted'] = FALSE;
+
+    return;
+  }
+
+  // redirect after submitting.
+  if (empty($form_state['values']['redirect_to'])) {
+    $form_state['redirect'] = mfcs_build_redirect_array('requests/synchronize-0');
+  }
+  else {
+    $form_state['redirect'] = $form_state['values']['redirect_to'];
+  }
+}
+
+/**
+ * Load the synchronize access by the specified id.
+ *
+ * @param int $id
+ *   The synchronize id.
+ *
+ * @return object|FALSE
+ *   The synchronize result item.
+ *   FALSE is returned on error.
+ */
+function mfcs_request_synchronize_load_by_id($id) {
+  // instead of writing a new load function, use mfcs_management_search_table() to get the data, but expect only a single result.
+  mfcs_include(MFCS_INCLUDE_MANAGEMENT);
+
+  $conditions = array();
+  $options = array(
+    'sort' => 'asc',
+    'start' => 0,
+    'limit' => 1,
+    'count' => FALSE,
+    'fields' => array(
+      'id' => 'id',
+      'user_id' => 'user_id',
+      'created' => 'created',
+      'updated' => 'updated',
+      'password' => 'password',
+      'type' => 'type',
+      'address' => 'address',
+      'disabled' => 'disabled',
+    ),
+    'associative' => FALSE,
+  );
+
+  $options['extra_fields']['users'] = array(
+    'alias' => 'u',
+    'join' => 'inner',
+    'on' => 'ms.user_id = u.uid',
+    'columns' => array(
+      'user_id' => 'uid',
+      'name' => 'name',
+    ),
+  );
+
+  $items_returned = mfcs_management_search_table('mfcs_synchronize', 'ms', 'id', $conditions, $options);
+
+  $items = array();
+  if (isset($items_returned['results']) && is_array($items_returned['results'])) {
+    $items = $items_returned['results'];
+  }
+
+  // expect to load only a single item.
+  if (count($items) != 1) {
+    return FALSE;
+  }
+
+  return reset($items);
 }
 
 /**

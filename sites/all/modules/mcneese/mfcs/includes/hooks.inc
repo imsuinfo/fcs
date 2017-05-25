@@ -1555,8 +1555,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   $items['requests/synchronize-0'] = array(
     'title' => 'Synchronize Requests',
     'description' => 'The synchronize ',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_synchronize_0_form'),
+    'page callback' => 'mfcs_request_synchronize_0_page',
     'file' => 'request_synchronize.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_synchronize_request_access',
@@ -1569,7 +1568,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   $items['requests/synchronize-0/ajax'] = array(
     'title' => 'Synchronize Requests',
     'description' => 'The synchronize ',
-    'page callback' => 'mfcs_ajax_synchronize_0_form',
+    'page callback' => 'mfcs_request_synchronize_0_page',
     'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
     'access callback' => 'mfcs_synchronize_request_access',
@@ -1578,11 +1577,67 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'requests',
   );
 
-  $items['requests/synchronize-0/%'] = array(
+  $items['requests/synchronize-0/create'] = array(
     'title' => 'Synchronize Requests',
     'description' => 'The synchronize ',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mfcs_request_synchronize_0_form', 2),
+    'page arguments' => array('mfcs_request_synchronize_0_create_form'),
+    'file' => 'request_synchronize.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_synchronize_request_access',
+    'access arguments' => array(),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/synchronize-0/create/%'] = array(
+    'title' => 'Synchronize Requests',
+    'description' => 'The synchronize ',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_synchronize_0_create_form', 3),
+    'file' => 'request_synchronize.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_synchronize_request_access',
+    'access arguments' => array(),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/synchronize-0/edit/%'] = array(
+    'title' => 'Synchronize Requests',
+    'description' => 'The synchronize ',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_synchronize_0_create_form', 3, FALSE),
+    'file' => 'request_synchronize.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_synchronize_request_access',
+    'access arguments' => array(),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/synchronize-0/delete/%'] = array(
+    'title' => 'Synchronize Requests',
+    'description' => 'The synchronize ',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mfcs_request_synchronize_0_delete_form', 3),
+    'file' => 'request_synchronize.inc',
+    'file path' => $module_path . '/pages',
+    'access callback' => 'mfcs_synchronize_request_access',
+    'access arguments' => array(),
+    'tab_parent' => 'requests',
+    'tab_root' => 'requests',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['requests/synchronize-0/%'] = array(
+    'title' => 'Synchronize Requests',
+    'description' => 'The synchronize ',
+    'page callback' => 'mfcs_request_synchronize_0_page',
+    'page arguments' => array(2),
     'file' => 'request_synchronize.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_synchronize_request_access',
