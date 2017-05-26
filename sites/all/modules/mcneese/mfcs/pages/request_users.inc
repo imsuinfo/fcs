@@ -843,6 +843,13 @@ function mfcs_request_users_0_view_page($user_id) {
     $filters_active = 'No Active Filters';
   }
 
+  if ($account->login == 0) {
+    $last_login = 'Never';
+  }
+  else {
+    $last_login = date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $account->login);
+  }
+
   $customization = '';
   $customization .= '<div class="view_user-item view_user-item-calendar"><span class="item-label item-label-calendar strong">Calendar:</span> <span class="item-value item-value-calendar">' . $calendar_text . '</span></div>';
   $customization .= '<div class="view_user-item view_user-item-calendar_holidays"><span class="item-label item-label-calendar_holidays strong">Holidays:</span> <span class="item-value item-value-calendar_holidays">' . $calendar_holidays . '</span></div>';
@@ -862,7 +869,7 @@ function mfcs_request_users_0_view_page($user_id) {
   $markup .= '<div class="view_user-item view_user-item-banner_id"><span class="item-label item-label-banner_id strong">Banner ID:</span> <span class="item-value item-value-banner_id">' . $account->mfcs['banner_id'] . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-phone"><span class="item-label item-label-phone strong">Phone:</span> <span class="item-value item-value-phone">' . $phone . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-updated_on"><span class="item-label item-label-updated_on strong">Updated On:</span> <span class="item-value item-value-updated_on">' . date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $updated) . '</span></div>';
-  $markup .= '<div class="view_user-item view_user-item-last_login"><span class="item-label item-label-last_login strong">Last Login:</span> <span class="item-value item-value-last_login">' . date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $account->login) . '</span></div>';
+  $markup .= '<div class="view_user-item view_user-item-last_login"><span class="item-label item-label-last_login strong">Last Login:</span> <span class="item-value item-value-last_login">' . $last_login . '</span></div>';
   $markup .= '</div>';
 
   $markup .= '<div class="view_user-group view_user-group-status">';
