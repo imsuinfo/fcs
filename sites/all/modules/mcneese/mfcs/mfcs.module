@@ -4219,11 +4219,14 @@ function mfcs_load_request_user_by_banner_id($banner_id) {
  * @param bool $append_roles
  *   (optional) If TRUE, then the $roles are appended to the existing account.
  *   If FALSE, then the $roles replace the existing roles.
+ * @param bool $login
+ *   (optional) Set to TRUE to designate that actions performed only during login are performed.
+ *   If FALSE, then no login-specific actions are performed.
  *
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = array(), $append_roles = TRUE, $refresh_banner = TRUE) {
+function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = array(), $append_roles = TRUE, $refresh_banner = TRUE, $login = FALSE) {
   if (is_null($user_object_or_id)) {
     $user_object_or_id = cf_current_user();
   }
@@ -4245,6 +4248,11 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
 
   if (!is_bool($refresh_banner)) {
     cf_error::invalid_bool('refresh_banner');
+    return FALSE;
+  }
+
+  if (!is_bool($login)) {
+    cf_error::invalid_bool('login');
     return FALSE;
   }
 
@@ -4697,10 +4705,16 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
       $banner_invalid = TRUE;
     }
     else {
+      // banner id is valid, so remove any banner invalid settings.
+      if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID) != 0) {
+        $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_BANNER_INVALID;
+      }
+
       if (empty($banner_information['role'])) {
         $banner_invalid_no_roles = TRUE;
       }
       else {
+        // banner id is valid and has roles, so remove any banner invalid settings for when no roles are defined.
         if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) != 0) {
           $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
         }
@@ -4882,18 +4896,27 @@ function mfcs_synchronize_user_settings($user_object_or_id = NULL, $roles = arra
     }
   }
   elseif ($banner_invalid_no_roles) {
-    if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) == 0) {
-      $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
+    // invalid banner (no roles) error is only reported during the login process.
+    if ($login) {
+      if (($problems_new & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) == 0) {
+        $problems_new = $problems_new | MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
 
-      // Do not report banner id as invalid if the account is locked.
-      if ($user_information['status'] == 0 && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) != 0) {
-        $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
+        // Do not report banner id as invalid if the account is locked.
+        if ($user_information['status'] == 0 && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) != 0) {
+          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
+        }
+        elseif ($bannerless_exception) {
+          $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
+        }
+        else {
+          $changes_detected = TRUE;
+        }
       }
-      elseif ($bannerless_exception) {
+    }
+    else {
+      // otherwise, remove the warning when refreshing banner.
+      if ($refresh_banner && ($problems_new & MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES) != 0) {
         $problems_new -= MFCS_USER_PROBLEM_ACCOUNT_NO_BANNER_ROLES;
-      }
-      else {
-        $changes_detected = TRUE;
       }
     }
   }

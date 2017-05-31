@@ -2420,7 +2420,7 @@ function mfcs_hook_user_login(&$edit, $user, $category) {
     return;
   }
 
-  mfcs_synchronize_user_settings($user);
+  mfcs_synchronize_user_settings($user, array(), TRUE, TRUE, TRUE);
 
 
   // trigger a save update if the users roles should be changed according to mfcs_hook_process_user_banner_roles().
