@@ -224,7 +224,7 @@ $databases = array (
   array (
     'default' =>
     array (
-      'database' => 'fcs2',
+      'database' => 'fcs_development',
       'username' => 'fcs_user',
       'password' => $dbp['fcs_user'],
       'host' => '192.251.101.223',
