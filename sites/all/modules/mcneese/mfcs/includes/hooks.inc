@@ -1440,7 +1440,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'title' => 'User Problems - Re-sync Account',
     'description' => 'Attempt to re-synchronize user account to banner database.',
     'page callback' => 'mfcs_request_problems_0_users_resynchronize',
-    'page arguments' => array(4),
+    'page arguments' => array(3),
     'file' => 'request_problems.inc',
     'file path' => $module_path . '/pages',
     'access callback' => 'mfcs_page_generic_access',
