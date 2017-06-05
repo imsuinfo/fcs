@@ -12514,6 +12514,9 @@ function mfcs_load_room_coordinators($room_id = NULL, $coordinators_only = FALSE
  *
  * @param int $user_id
  *   This is the user id of the user.
+ * @param bool $disabled
+ *   (optional) When TRUE include disabled rooms.
+ *   When FALSE, rooms that are disabled are not processed.
  *
  * @param array|bool
  *   An array of rooms the user is a coordinator of.
@@ -12521,9 +12524,14 @@ function mfcs_load_room_coordinators($room_id = NULL, $coordinators_only = FALSE
  *
  * @see: mfcs_load_coordinator_rooms_from_banner()
  */
-function mfcs_load_coordinator_rooms($user_id) {
+function mfcs_load_coordinator_rooms($user_id, $disabled = FALSE) {
   if (!cf_is_integer($user_id)) {
     cf_error::invalid_integer('user_id');
+    return FALSE;
+  }
+
+  if (!is_bool($disabled)) {
+    cf_error::invalid_integer('disabled');
     return FALSE;
   }
 
@@ -12535,6 +12543,10 @@ function mfcs_load_coordinator_rooms($user_id) {
     $or->condition('mbr.room_coordinator_id', $user_id);
     $or->condition('mbr.venue_coordinator_id', $user_id);
     $query->condition($or);
+
+    if (!$disabled) {
+      $query->condition('mbr.disabled', 0);
+    }
 
     $query->addField('mbr', 'id', 'room_id');
     $query->addField('mbb', 'id', 'building_id');
