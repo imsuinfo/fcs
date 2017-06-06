@@ -437,10 +437,13 @@ function mfcs_request_reviewers_0_form($form, &$form_state, $classification, $re
     ),
     'displayStart' => $options['start'],
     'pageLength' => $rows_per_page,
-    'dom' => 'lfCrtip',
+    'dom' => 'lfBrtip',
     'KeyTable' => FALSE,
-    'oColVis' => array(
-      'buttonText' => '"Show / Hide"',
+    'buttons' => array(
+      'colvis' => array(
+        'extend' => '"colvis"',
+        'text' => '"Show / Hide"',
+      ),
     ),
     'oLanguage' => array(
       'sSearch' => '"Filter"',

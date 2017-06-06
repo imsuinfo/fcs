@@ -260,10 +260,13 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
     ),
     'displayStart' => 0,
     'pageLength' => 40,
-    'dom' => 'lfCrtip',
+    'dom' => 'lfBrtip',
     'KeyTable' => FALSE,
-    'oColVis' => array(
-      'buttonText' => '"Show / Hide"',
+    'buttons' => array(
+      'colvis' => array(
+        'extend' => '"colvis"',
+        'text' => '"Show / Hide"',
+      ),
     ),
     'oLanguage' => array(
       'sSearch' => '"Filter"',

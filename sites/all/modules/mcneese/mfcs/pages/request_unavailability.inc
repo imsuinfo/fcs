@@ -286,10 +286,13 @@ function mfcs_request_unavailability_0_rooms_page() {
     ),
     'displayStart' => 0,
     'pageLength' => 40,
-    'dom' => 'lfCrtip',
+    'dom' => 'lfBrtip',
     'KeyTable' => FALSE,
-    'oColVis' => array(
-      'buttonText' => '"Show / Hide"',
+    'buttons' => array(
+      'colvis' => array(
+        'extend' => '"colvis"',
+        'text' => '"Show / Hide"',
+      ),
     ),
     'oLanguage' => array(
       'sSearch' => '"Filter"',
@@ -714,10 +717,13 @@ function mfcs_request_unavailability_0_room_page($room_id, $year = NULL) {
     'columns' => $columns,
     'displayStart' => 0,
     'pageLength' => 40,
-    'dom' => 'lfCrtip',
+    'dom' => 'lfBrtip',
     'KeyTable' => FALSE,
-    'oColVis' => array(
-      'buttonText' => '"Show / Hide"',
+    'buttons' => array(
+      'colvis' => array(
+        'extend' => '"colvis"',
+        'text' => '"Show / Hide"',
+      ),
     ),
     'oLanguage' => array(
       'sSearch' => '"Filter"',

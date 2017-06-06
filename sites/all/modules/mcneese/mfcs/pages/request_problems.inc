@@ -440,11 +440,14 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     ),
     'displayStart' => $options['start'],
     'pageLength' => $rows_per_page,
-    'dom' => 'lfCrtip',
+    'dom' => 'lfBrtip',
     'KeyTable' => FALSE,
     'rowId' => '0',
-    'oColVis' => array(
-      'buttonText' => '"Show / Hide"',
+    'buttons' => array(
+      'colvis' => array(
+        'extend' => '"colvis"',
+        'text' => '"Show / Hide"',
+      ),
     ),
     'oLanguage' => array(
       'sSearch' => '"Filter"',
@@ -1790,11 +1793,14 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
     ),
     'displayStart' => $options['start'],
     'pageLength' => $rows_per_page,
-    'dom' => 'lfCrtip',
+    'dom' => 'lfBrtip',
     'KeyTable' => FALSE,
     'rowId' => '0',
-    'oColVis' => array(
-      'buttonText' => '"Show / Hide"',
+    'buttons' => array(
+      'colvis' => array(
+        'extend' => '"colvis"',
+        'text' => '"Show / Hide"',
+      ),
     ),
     'oLanguage' => array(
       'sSearch' => '"Filter"',
@@ -1830,8 +1836,14 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
   $including_ignored .= '  dt.ajax.reload();' . "\n";
   $including_ignored .= '}' . "\n";
 
-  $datatable_settings['dom'] = 'lfCBrtip';
+  $datatable_settings['dom'] = 'lfBrtip';
   $datatable_settings['buttons'] = array();
+
+  $datatable_settings['buttons']['colvis'] = array(
+    'extend' => '"colvis"',
+    'text' => '"Show / Hide"',
+  );
+
   $datatable_settings['buttons']['Include Ignored'] = array(
     'text' => '\'Show Ignored Problems\'',
     'action' => $including_ignored,

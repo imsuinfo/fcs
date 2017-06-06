@@ -116,7 +116,7 @@ function mfcs_request_search_0_form($form, &$form_state) {
     'join' => TRUE,
     'limit' => $form['form']['per_page']['#value'],
     'count' => TRUE,
-    'dom' => 'lfCrtip',
+    'dom' => 'lfBrtip',
     'columns' => $columns,
     'columns_default' => $columns_default,
   );

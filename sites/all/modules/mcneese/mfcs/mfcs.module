@@ -10530,11 +10530,14 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
     'deferRender' => TRUE,
     'displayStart' => isset($options['start']) ? $options['start'] : 0,
     'pageLength' => isset($options['limit']) ? $options['limit'] : 20,
-    'dom' => 'lfCrtip',
+    'dom' => 'lfBrtip',
     'KeyTable' => FALSE,
     'rowId' => '0',
-    'oColVis' => array(
-      'buttonText' => '"Show / Hide"',
+    'buttons' => array(
+      'colvis' => array(
+        'extend' => '"colvis"',
+        'text' => '"Show / Hide"',
+      ),
     ),
     'oLanguage' => array(
       'sSearch' => '"Filter"',
@@ -10647,8 +10650,14 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
       $showing_my_requests .= '  dt.ajax.reload();' . "\n";
       $showing_my_requests .= '}' . "\n";
 
-      $table['datatable_settings']['dom'] = 'lfCBrtip';
+      $table['datatable_settings']['dom'] = 'lfBrtip';
       $table['datatable_settings']['buttons'] = array();
+
+      $table['datatable_settings']['buttons']['colvis'] = array(
+        'extend' => '"colvis"',
+        'text' => '"Show / Hide"',
+      );
+
       $table['datatable_settings']['buttons']['Show Requests'] = array(
         'text' => '\'Show All Requests\'',
         'action' => $showing_my_requests,
@@ -10703,8 +10712,14 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
       $showing_my_requests .= '  dt.ajax.reload();' . "\n";
       $showing_my_requests .= '}' . "\n";
 
-      $table['datatable_settings']['dom'] = 'lfCBrtip';
+      $table['datatable_settings']['dom'] = 'lfBrtip';
       $table['datatable_settings']['buttons'] = array();
+
+      $table['datatable_settings']['buttons']['colvis'] = array(
+        'extend' => '"colvis"',
+        'text' => '"Show / Hide"',
+      );
+
       $table['datatable_settings']['buttons']['Show Requests'] = array(
         'text' => '\'Show As Manager\'',
         'action' => $showing_my_requests,

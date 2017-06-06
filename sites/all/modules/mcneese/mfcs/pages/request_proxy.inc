@@ -317,10 +317,13 @@ function mfcs_request_proxy_0_form($form, &$form_state, $page_number = NULL) {
     ),
     'displayStart' => $options['start'],
     'pageLength' => $rows_per_page,
-    'dom' => 'lfCrtip',
+    'dom' => 'lfBrtip',
     'KeyTable' => FALSE,
-    'oColVis' => array(
-      'buttonText' => '"Show / Hide"',
+    'buttons' => array(
+      'colvis' => array(
+        'extend' => '"colvis"',
+        'text' => '"Show / Hide"',
+      ),
     ),
     'oLanguage' => array(
       'sSearch' => '"Filter"',
