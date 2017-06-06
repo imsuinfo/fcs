@@ -1589,13 +1589,13 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
     }
   }
 
-  $class_id = ' ';
-  $class_problem = '';
-  $class_request_id = '';
-  $class_date = '';
-  $class_reason = '';
-  $class_ignore = 'no-script-hidden script-hidden';
-  $class_operations = 'no-print ';
+  $class_id = 'column-id ';
+  $class_problem = 'column-problem ';
+  $class_request_id = 'column-request_id ';
+  $class_date = 'column-date ';
+  $class_reason = 'column-reason ';
+  $class_ignore = 'column-ignore no-script-hidden ';
+  $class_operations = 'column-operations no-print ';
 
   $sorting = array();
   if (is_null($order)) {
@@ -1719,7 +1719,7 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
     );
 
     $row['ignore'] = array(
-      'data' => (isset($item->ignore) && $item->ignore == 1 ? 'Yes' : 'No'),
+      'data' => (isset($item->ignore) && $item->ignore == 1) ? 'Yes' : 'No',
       'class' => $class_ignore,
     );
 
