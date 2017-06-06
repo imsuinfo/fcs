@@ -104,8 +104,8 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
   $class_ldap_duplicate = 'column-ldap_duplicate no-script-hidden ';
   $class_primary_account = 'column-primary_account no-script-hidden ';
   $class_roles = 'column-roles ';
-  $class_logged_in = 'column-logged_in ';
-  $class_updated = 'column-updated ';
+  $class_logged_in = 'column-logged_in no-script-hidden ';
+  $class_updated = 'column-updated no-script-hidden ';
   $class_operations = 'column-operations no-print ';
 
   $sorting = array();
