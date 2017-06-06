@@ -104,6 +104,8 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
   $class_ldap_duplicate = 'column-ldap_duplicate no-script-hidden ';
   $class_primary_account = 'column-primary_account no-script-hidden ';
   $class_roles = 'column-roles ';
+  $class_logged_in = 'column-logged_in ';
+  $class_updated = 'column-updated ';
   $class_operations = 'column-operations no-print ';
 
   $sorting = array();
@@ -162,6 +164,16 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
       $sorting['roles'] = array('direction' => is_null($sort) ? 'desc' : $sort);
       $order_column = array(9 => $sorting[$order]['direction']);
       $class_roles .= 'sorting_1 ';
+    }
+    elseif ($order == 'logged_in') {
+      $sorting['logged_in'] = array('direction' => is_null($sort) ? 'desc' : $sort);
+      $order_column = array(10 => $sorting[$order]['direction']);
+      $class_logged_in .= 'sorting_1 ';
+    }
+    elseif ($order == 'updated') {
+      $sorting['updated'] = array('direction' => is_null($sort) ? 'desc' : $sort);
+      $order_column = array(11 => $sorting[$order]['direction']);
+      $class_updated .= 'sorting_1 ';
     }
     else {
       $sorting['id'] = array('direction' => 'asc');
@@ -288,6 +300,16 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
       unset($roles);
     }
 
+    $row['logged_in'] = array(
+      'data' => ($item->logged_in != 0) ? date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $item->logged_in) : 'Never',
+      'class' => $class_logged_in,
+    );
+
+    $row['updated'] = array(
+      'data' => ($item->updated != 0) ? date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $item->updated) : 'Never',
+      'class' => $class_updated,
+    );
+
     $row['operations'] = array(
       'data' => '',
       'class' => $class_operations,
@@ -331,6 +353,8 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
     'ldap_duplicate' => array('field' => 'ldap_duplicate', 'data' => 'LDAP Duplicate', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
     'primary_account' => array('field' => 'primary_account', 'data' => 'Primary Account', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
     'roles' => array('field' => 'roles', 'data' => 'Roles', 'align' => 'center'),
+    'logged_in' => array('field' => 'logged_in', 'data' => 'Last Logged In', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
+    'updated' => array('field' => 'updated', 'data' => 'Last Updated', 'align' => 'center', 'class' => array('no-script-hidden', 'script-hidden')),
     'operations' => array('data' => 'Operations', 'align' => 'center', 'class' => array('no-print')),
   );
 
@@ -388,7 +412,9 @@ function mfcs_request_users_0_form($form, &$form_state, $page_number = NULL) {
       array('id' => 7, 'column' => 'ldap_duplicate', 'name' => 'LDAP Duplicate', 'className' => 'column-ldap_duplicate', 'visible' => FALSE),
       array('id' => 8, 'column' => 'primary_account', 'name' => 'Primary Account', 'className' => 'column-primary_account', 'visible' => FALSE),
       array('id' => 9, 'column' => 'roles', 'name' => 'Roles', 'className' => 'column-roles'),
-      array('id' => 10, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
+      array('id' => 10, 'column' => 'logged_in', 'name' => 'Last Logged In', 'className' => 'column-logged_in', 'visible' => FALSE),
+      array('id' => 11, 'column' => 'updated', 'name' => 'Last Updated', 'className' => 'column-updated', 'visible' => FALSE),
+      array('id' => 12, 'column' => NULL, 'name' => 'Operations', 'className' => 'column-operations no-print', 'searchable' => FALSE, 'orderable' => FALSE),
     ),
     'displayStart' => $items_start,
     'pageLength' => $rows_per_page,
@@ -2697,14 +2723,15 @@ function mfcs_request_users_get_users($search = '', $order_by = array(), $offset
   $query_string = 'with the_users_roles as (select ur.uid, r.rid, r.name from users_roles ur inner join role r on ur.rid = r.rid order by r.name desc) ';
   $count_string = $query_string;
 
-  $query_string .= 'select u.uid as id, u.name as name, u.mail as email, u.status as status, ';
+  $query_string .= 'select u.uid as id, u.name as name, u.mail as email, u.status as status, u.login as logged_in, u.created as created, ';
   $query_string .= 'mu.banner_id as banner_id, ';
   $query_string .= 'mu.first_name as first_name, ';
   $query_string .= 'mu.last_name as last_name, ';
   $query_string .= 'mu.ldap_duplicate as ldap_duplicate, ';
   $query_string .= 'mu.primary_account as primary_account, ';
   $query_string .= 'mu.problems as problems, ';
-  $query_string .= 'array_agg(tur.name) as roles ';
+  $query_string .= 'array_agg(tur.name) as roles, ';
+  $query_string .= 'mu.updated as updated ';
   $query_string .= 'from users u ';
 
   $count_string .= 'select count(distinct u.uid) from users u ';
@@ -2782,7 +2809,6 @@ function mfcs_request_users_get_users($search = '', $order_by = array(), $offset
     if (preg_match('/' . $regex_safe_search . '/i', 'Primary Account') > 0) {
       $limit_users_by_primary_account['TRUE'] = 'TRUE';
     }
-    unset($regex_safe_search);
 
     $where_string .= 'and ( ';
     $where_string .= 'u.uid::text ilike :id ';
@@ -2820,9 +2846,20 @@ function mfcs_request_users_get_users($search = '', $order_by = array(), $offset
       $arguments[':status'] = $limit_users_by_status;
     }
 
+    $liked = db_like($search);
+
+    if (preg_match('/' . $regex_safe_search . '/i', 'Never') > 0) {
+      $where_string .= 'or u.login = 0 or mu.updated = 0 ';
+    }
+    else {
+      $where_string .= 'or (u.login <> 0 and to_char(to_timestamp(u.login), \'' . MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE_DATABASE_SEARCH . '\') ilike :date_stamp) or (mu.updated <> 0 and to_char(to_timestamp(mu.updated), \'' . MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE_DATABASE_SEARCH . '\') ilike :date_stamp) ';
+
+      $arguments[':date_stamp'] = '%' . $liked . '%';
+    }
+    unset($regex_safe_search);
+
     $where_string .= ') ';
 
-    $liked = db_like($search);
     $arguments[':id'] = '%' . $liked . '%';
     $arguments[':name'] = '%' . $liked . '%';
     $arguments[':email'] = '%' . $liked . '%';
@@ -2842,7 +2879,7 @@ function mfcs_request_users_get_users($search = '', $order_by = array(), $offset
   $count_string .= $where_string;
   unset($where_string);
 
-  $query_string .= 'group by u.uid, mu.banner_id, mu.first_name, mu.last_name, mu.ldap_duplicate, mu.primary_account, mu.problems ';
+  $query_string .= 'group by u.uid, mu.banner_id, mu.first_name, mu.last_name, mu.ldap_duplicate, mu.primary_account, mu.problems, mu.updated ';
 
   // default to order by user id.
   if (empty($order_by)) {
@@ -2866,6 +2903,8 @@ function mfcs_request_users_get_users($search = '', $order_by = array(), $offset
       case 'ldap_duplicate':
       case 'primary_account':
       case 'roles':
+      case 'logged_in':
+      case 'updated':
         break;
       default;
         continue;

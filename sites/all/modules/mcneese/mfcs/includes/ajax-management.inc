@@ -2044,6 +2044,12 @@ function mfcs_ajax_users_0_list($argument_1 = NULL) {
     elseif ($order_column == 9) {
       $sorting['roles'] = array('direction' => $order_direction);
     }
+    elseif ($order_column == 10) {
+      $sorting['logged_in'] = array('direction' => $order_direction);
+    }
+    elseif ($order_column == 11) {
+      $sorting['updated'] = array('direction' => $order_direction);
+    }
   }
 
   // always provide the unique id in the ordering to guarantee consistency in range results.
@@ -2195,18 +2201,21 @@ function mfcs_ajax_users_0_list($argument_1 = NULL) {
         }
       }
 
-      $row[10] = '<a href="' . $base_path . 'users-0/view/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View User">View</a>';
+      $row[10] = ($item->logged_in != 0) ? date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $item->logged_in) : 'Never';
+      $row[11] = ($item->updated != 0) ? date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $item->updated) : 'Never';
+
+      $row[12] = '<a href="' . $base_path . 'users-0/view/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="View User">View</a>';
 
       if ($is_manager || $is_administer) {
-        $row[10] .= ' <a href="' . $base_path . 'users-0/edit/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Edit User">Edit</a>';
-        $row[10] .= ' <a href="' . $base_path . 'users-0/customize/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Customize User">Customize</a>' ;
+        $row[12] .= ' <a href="' . $base_path . 'users-0/edit/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Edit User">Edit</a>';
+        $row[12] .= ' <a href="' . $base_path . 'users-0/customize/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Customize User">Customize</a>' ;
 
         if ($item->problems != MFCS_USER_PROBLEM_NONE) {
-          $row[10] .= ' <a href="' . $base_path . 'problems-0/users/user/' . $item->id . $url_arguments . '" class="operation-link operation-link-problems" title="View User Problems">Problems</a>' ;
+          $row[12] .= ' <a href="' . $base_path . 'problems-0/users/user/' . $item->id . $url_arguments . '" class="operation-link operation-link-problems" title="View User Problems">Problems</a>' ;
         }
       }
       elseif ($item->id == $user->uid && ($is_requester || $is_reviewer)) {
-        $row[10] .= ' <a href="' . $base_path . 'users-0/customize/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Customize User">Customize</a>' ;
+        $row[12] .= ' <a href="' . $base_path . 'users-0/customize/' . $item->id . $url_arguments . '" class="operation-link operation-link-view" title="Customize User">Customize</a>' ;
       }
 
       $response['data'][] = $row;
