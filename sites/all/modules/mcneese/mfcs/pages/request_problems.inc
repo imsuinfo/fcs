@@ -160,15 +160,15 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     }
   }
 
-  $class_user_id = 'no-script-hidden script-hidden ';
-  $class_name = '';
-  $class_first_name = '';
-  $class_last_name = '';
-  $class_problems_account = '';
-  $class_problems_forms = '';
-  $class_problems_other = '';
-  $class_date = '';
-  $class_operations = 'no-print ';
+  $class_user_id = 'column-user_id no-script-hidden script-hidden ';
+  $class_name = 'column-name ';
+  $class_first_name = 'column-first_name ';
+  $class_last_name = 'column-last_name ';
+  $class_problems_account = 'column-problems_account ';
+  $class_problems_forms = 'column-problems_forms ';
+  $class_problems_other = 'column-problems_other ';
+  $class_date = 'column-date ';
+  $class_operations = 'column-operations no-print ';
 
   $sorting = array();
   if (is_null($order)) {
@@ -365,7 +365,7 @@ function mfcs_request_problems_0_users_form($form, &$form_state, $page_number = 
     );
 
     $row['updated_problems'] = array(
-      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $item->updated_problems)),
+      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $item->updated_problems)),
       'class' => $class_date,
     );
 
@@ -1709,7 +1709,7 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
     );
 
     $row['date'] = array(
-      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $item->date)),
+      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $item->date)),
       'class' => $class_date,
     );
 

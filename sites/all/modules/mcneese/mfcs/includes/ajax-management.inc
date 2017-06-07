@@ -739,13 +739,12 @@ function mfcs_ajax_management_listing_0($custom_conditions = array(), $override_
       );
     }
 
-    // Commented out because this is confusing because the date format will not match.
-    #$conditions['or_1']['value_date'] = array(
-    #  'field' => 'text(to_timestamp(mer.created))',
-    #  'operator' => MFCS_OPERATOR_LIKE,
-    #  'search' => $get_post['search']['value'],
-    #  'expression' => TRUE,
-    #);
+    $conditions['or_1']['value_date'] = array(
+      'field' => 'to_char(to_timestamp(mer.created), \'' . MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE_DATABASE_SEARCH . '\')',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $get_post['search']['value'],
+      'expression' => TRUE,
+    );
 
     if (!empty($limit_status)) {
       $conditions['or_1']['value_status'] = array(
@@ -974,13 +973,12 @@ function mfcs_ajax_problems_0_users_list() {
       );
     }
 
-    // Commented out because this is confusing because the date format will not match.
-    #$conditions['or_1']['value_date'] = array(
-    #  'field' => 'text(to_timestamp(mu.updated_problems))',
-    #  'operator' => MFCS_OPERATOR_LIKE,
-    #  'search' => $get_post['search']['value'],
-    #  'expression' => TRUE,
-    #);
+    $conditions['or_1']['value_date'] = array(
+      'field' => 'to_char(to_timestamp(mu.updated_problems), \'' . MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE_DATABASE_SEARCH . '\')',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $get_post['search']['value'],
+      'expression' => TRUE,
+    );
 
     $count_options['results'] = FALSE;
     $problems_returned = mfcs_management_search_users($count_conditions, $count_options);
@@ -1263,13 +1261,12 @@ function mfcs_ajax_problems_0_requests_list($argument_1 = NULL) {
       'expression' => TRUE,
     );
 
-    // Commented out because this is confusing because the date format will not match.
-    #$conditions['or_1']['value_date'] = array(
-    #  'field' => 'text(to_timestamp(mu.updated))',
-    #  'operator' => MFCS_OPERATOR_LIKE,
-    #  'search' => $get_post['search']['value'],
-    #  'expression' => TRUE,
-    #);
+    $conditions['or_1']['value_date'] = array(
+      'field' => 'to_char(to_timestamp(mpr.date), \'' . MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE_DATABASE_SEARCH . '\')',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $get_post['search']['value'],
+      'expression' => TRUE,
+    );
 
     $count_options['results'] = FALSE;
     $problems_returned = mfcs_miscellaneous_problems_request_search($count_conditions, $count_options);
@@ -1505,13 +1502,12 @@ function mfcs_ajax_email_log_0_list() {
       'expression' => TRUE,
     );
 
-    // Commented out because this is confusing because the date format will not match.
-    #$conditions['or_1']['value_date'] = array(
-    #  'field' => 'text(to_timestamp(' . $table_alias . '.date))',
-    #  'operator' => MFCS_OPERATOR_LIKE,
-    #  'search' => $get_post['search']['value'],
-    #  'expression' => TRUE,
-    #);
+    $conditions['or_1']['value_date'] = array(
+      'field' => 'to_char(to_timestamp(' . $table_alias . '.date), \'' . MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE_DATABASE_SEARCH . '\')',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $get_post['search']['value'],
+      'expression' => TRUE,
+    );
 
     $conditions['or_1']['value_destination'] = array(
       'field' => $table_alias . '.destination',
@@ -1609,7 +1605,7 @@ function mfcs_ajax_email_log_0_list() {
       $row[0] = '' . $email_log->id;
       $row[1] = '' . $email_log->user_id;
       $row[2] = '<a href="' . $base_path . 'users-0/view/' . $email_log->user_id . $url_arguments . '" class="user-link">' . check_plain($email_log->name) . '</a>';
-      $row[3] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $email_log->date));
+      $row[3] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $email_log->date));
 
       if (empty($email_log->destination_user_id)) {
         $row[4] = check_plain($email_log->destination);
@@ -1766,6 +1762,9 @@ function mfcs_ajax_synchronize_0_form() {
     elseif ($order_column == 7) {
       $sorting['address'] = $order_direction;
     }
+    elseif ($order_column == 8) {
+      $sorting['disabled'] = $order_direction;
+    }
   }
 
   // always provide the unique id in the ordering to guarantee consistency in range results.
@@ -1788,6 +1787,7 @@ function mfcs_ajax_synchronize_0_form() {
     'password' => 'password',
     'type' => 'type',
     'address' => 'address',
+    'disabled' => 'disabled',
   );
 
   $options['extra_fields']['users'] = array(
@@ -1827,13 +1827,25 @@ function mfcs_ajax_synchronize_0_form() {
       'expression' => TRUE,
     );
 
-    // Commented out because this is confusing because the date format will not match.
-    #$conditions['or_1']['value_date'] = array(
-    #  'field' => 'text(to_timestamp(' . $table_alias . '.date))',
-    #  'operator' => MFCS_OPERATOR_LIKE,
-    #  'search' => $get_post['search']['value'],
-    #  'expression' => TRUE,
-    #);
+    $conditions['or_1']['value_account'] = array(
+      'field' => 'u.name',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $get_post['search']['value'],
+    );
+
+    $conditions['or_1']['value_created'] = array(
+      'field' => 'to_char(to_timestamp(' . $table_alias . '.created), \'' . MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE_DATABASE_SEARCH . '\')',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $get_post['search']['value'],
+      'expression' => TRUE,
+    );
+
+    $conditions['or_1']['value_updated'] = array(
+      'field' => 'to_char(to_timestamp(' . $table_alias . '.updated), \'' . MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE_DATABASE_SEARCH . '\')',
+      'operator' => MFCS_OPERATOR_LIKE,
+      'search' => $get_post['search']['value'],
+      'expression' => TRUE,
+    );
 
     $conditions['or_1']['value_password'] = array(
       'field' => $table_alias . '.password',
@@ -1921,11 +1933,12 @@ function mfcs_ajax_synchronize_0_form() {
       $row[5] = check_plain($item->password);
       $row[6] = 'Unknown';
       $row[7] = check_plain($item->address);
-      $row[8] = '';
+      $row[8] = $item->disabled == 1 ? 'Disabled' : 'Enabled';
+      $row[9] = '';
 
       if ($item->type == MFCS_SYNCHRONIZE_TYPE_ICAL) {
         $row[6] = 'iCalendar';
-        $row[8] .= ' <a href="' . $base_path . 'requests/synchronize-0/ical/' . rawurlencode($item->password) . $url_arguments . '" class="operation-link operation-link-view" title="Synchronization URL">Link</a>';
+        $row[9] .= ' <a href="' . $base_path . 'requests/synchronize-0/ical/' . rawurlencode($item->password) . $url_arguments . '" class="operation-link operation-link-view" title="Synchronization URL">Link</a>';
       }
 
       $response['data'][] = $row;

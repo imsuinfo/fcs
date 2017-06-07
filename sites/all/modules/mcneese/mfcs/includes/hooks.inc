@@ -1568,7 +1568,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
   $items['requests/synchronize-0/ajax'] = array(
     'title' => 'Synchronize Requests',
     'description' => 'The synchronize ',
-    'page callback' => 'mfcs_request_synchronize_0_page',
+    'page callback' => 'mfcs_ajax_synchronize_0_form',
     'file' => 'ajax-management.inc',
     'file path' => $module_path . '/includes',
     'access callback' => 'mfcs_synchronize_request_access',

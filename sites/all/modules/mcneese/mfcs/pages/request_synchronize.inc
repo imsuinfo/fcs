@@ -226,12 +226,12 @@ function mfcs_request_synchronize_0_page($page_number = NULL) {
     );
 
     $row['created'] = array(
-      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $item->created)),
+      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $item->created)),
       'class' => $class_created,
     );
 
     $row['updated'] = array(
-      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $item->updated)),
+      'data' => check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $item->updated)),
       'class' => $class_updated,
     );
 

@@ -252,7 +252,7 @@ function mfcs_request_email_log_0_form($form, &$form_state, $page_number = NULL)
     );
 
     $row['date'] = array(
-      'data' => '<div class="column-item item-date item-date-0">' . check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS, $email_log->date)) . '</div>',
+      'data' => '<div class="column-item item-date item-date-0">' . check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $email_log->date)) . '</div>',
       'class' => $class_date,
     );
 

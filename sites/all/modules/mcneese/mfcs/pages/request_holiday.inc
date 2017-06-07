@@ -154,12 +154,12 @@ function mfcs_request_holiday_0_form($form, &$form_state, $year = NULL) {
     );
 
     if ($item->date_stop == strtotime('midnight tomorrow', $item->date_start)) {
-      $formatted_date = date(MFCS_DATE_FORMAT_DATE, $item->date_start);
+      $formatted_date = date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $item->date_start);
     }
     else {
-      $formatted_date = date(MFCS_DATE_FORMAT_DATE, $item->date_start);
+      $formatted_date = date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $item->date_start);
       $formatted_date .= ' to ';
-      $formatted_date .= date(MFCS_DATE_FORMAT_DATE, $item->date_stop);
+      $formatted_date .= date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $item->date_stop);
     }
 
     $row['date'] = array(
