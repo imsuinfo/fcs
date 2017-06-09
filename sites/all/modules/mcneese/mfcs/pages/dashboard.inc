@@ -28,11 +28,26 @@ function mfcs_dashboard_page() {
 
   mfcs_add_canonical_headers('requests');
 
+  $instance = mfcs_instance();
+
   // access check is performed here instead of via the hook_menu() so that different responses may be provided based on access control situations.
   $user_account_new_banner_access_problem = FALSE;
   if (mfcs_dashboard_page_access() === FALSE) {
-    if (!empty($user->mfcs) && is_array($user->mfcs) && array_key_exists('problems', $user->mfcs) && ($user->mfcs['problems'] & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0) {
-      $user_account_new_banner_access_problem = TRUE;
+    if (!empty($user->mfcs) && is_array($user->mfcs) && array_key_exists('problems', $user->mfcs)) {
+      // continue to check access so long as the user has insufficient access.
+      if (($user->mfcs['problems'] & MFCS_USER_PROBLEM_ACCOUNT_NO_ACCESS) != 0) {
+        // only due this when banner is expected to be available.
+        $backup_begin = strtotime('12:00am', $instance);
+        $backup_end = strtotime('4:00am', $instance);
+
+        if ($instance < $backup_begin || $instance > $backup_end) {
+          mfcs_synchronize_user_settings($user, array(), TRUE, TRUE, TRUE);
+        }
+      }
+
+      if (($user->mfcs['problems'] & MFCS_USER_PROBLEM_ACCOUNT_CREATE_BANNER_UNAVAILABLE) != 0) {
+        $user_account_new_banner_access_problem = TRUE;
+      }
     }
   }
 
@@ -205,8 +220,6 @@ function mfcs_dashboard_page() {
   if ($can_list) {
     mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
     mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
-
-    $instance = mfcs_instance();
 
     $year = date('Y', $instance);
 
