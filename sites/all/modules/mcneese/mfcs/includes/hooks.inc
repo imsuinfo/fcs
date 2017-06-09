@@ -3145,7 +3145,7 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
 
   // validate banner id, if invalid, then strip all user roles.
   $banner_information = mfcs_load_request_user_by_banner_id($mfcs_user_settings['banner_id']);
-  if (is_bool($banner_information) || empty($banner_information['roles'])) {
+  if (is_bool($banner_information) || empty($banner_information['role'])) {
     $user_status = NULL;
     if (isset($user->status)) {
       $user_status = (int) $user->status;
