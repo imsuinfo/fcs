@@ -887,4 +887,4 @@ ini_set('display_startup_errors', TRUE);
 
 
 // optionally provide a default calendar.
-$conf['mfcs_user_calendar_default'] = 1; // 1 = MFCS_USER_CALENDAR_ORIGINAL, 2 = MFCS_USER_CALENDAR_FULL
+$conf['mfcs_user_calendar_default'] = 2; // 1 = MFCS_USER_CALENDAR_ORIGINAL, 2 = MFCS_USER_CALENDAR_FULL
