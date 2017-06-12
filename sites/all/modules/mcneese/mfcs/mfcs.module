@@ -1614,10 +1614,10 @@ function mfcs_unavailability_request_access($operation, $year = NULL, $room_id =
     }
     $proxy_as[$user->uid] = (int) $user->uid;
 
-    $room_coordinators = mfcs_load_room_coordinators($room_id, TRUE);
-    if (is_array($room_coordinators)) {
-      foreach ($room_coordinators as $room_coordinator) {
-        if (array_key_exists($room_coordinator, $proxy_as)) {
+    $all_coordinators = mfcs_load_venue_and_room_coordinators($room_id, TRUE);
+    if (is_array($all_coordinators)) {
+      foreach ($all_coordinators as $all_coordinator) {
+        if (array_key_exists($all_coordinator, $proxy_as)) {
           $is_coordinator_or_proxy_or_power = TRUE;
           break;
         }
@@ -12467,12 +12467,12 @@ function mfcs_gpg_sign($message) {
 }
 
 /**
- * Returns a list of venue coordinators associated with a given room.
+ * Returns a list of room coordinators associated with a given room.
  *
  * @param integer|null $room_id
  *   (optional) A room ID to limit the listing to.
  * @param bool $coordinators_only
- *   (optional) Do not return room ids, only coordinators.
+ *   (optional) Do not return room ids, only coordinator ids.
  *
  * @return array|bool
  *   When $coordinators_only is FALSE, an array containing the venue
@@ -12510,9 +12510,148 @@ function mfcs_load_room_coordinators($room_id = NULL, $coordinators_only = FALSE
     }
     else {
       $query->addField('mbr', 'id', 'id');
+      $query->addField('mbr', 'room_coordinator_id', 'room_coordinator_id');
+
+      $rows = $query->execute()->fetchAllKeyed();
+    }
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+
+  return $rows;
+}
+
+/**
+ * Returns a list of venue coordinators associated with a given room.
+ *
+ * @param integer|null $room_id
+ *   (optional) A room ID to limit the listing to.
+ * @param bool $coordinators_only
+ *   (optional) Do not return room ids, only coordinator ids.
+ *
+ * @return array|bool
+ *   When $coordinators_only is FALSE, an array containing the venue
+ *   coordinator ids with the room ids as the array keys.
+ *   When $coordinators_only is TRUE, an array containing a distinct set of
+ *   venue coordinator ids with the keys being the coordinator id as well.
+ *   FALSE is returned on error.
+ */
+function mfcs_load_venue_coordinators($room_id = NULL, $coordinators_only = FALSE) {
+  if (!is_null($room_id) && !cf_is_integer($room_id)) {
+    cf_error::invalid_integer('room_id');
+
+    return FALSE;
+  }
+
+  if (!is_bool($coordinators_only)) {
+    cf_error::invalid_bool('coordinators_only');
+
+    return FALSE;
+  }
+
+  $rows = array();
+  try {
+    $query = db_select('mfcs_banner_rooms', 'mbr');
+
+    if (!is_null($room_id)) {
+      $query->condition('mbr.id', $room_id);
+    }
+
+    if ($coordinators_only) {
+      $query->addField('mbr', 'venue_coordinator_id', 'venue_coordinator_id');
+      $query->distinct();
+
+      $rows = $query->execute()->fetchAllKeyed(0, 0);
+    }
+    else {
+      $query->addField('mbr', 'id', 'id');
       $query->addField('mbr', 'venue_coordinator_id', 'venue_coordinator_id');
 
       $rows = $query->execute()->fetchAllKeyed();
+    }
+  }
+  catch (Error $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_exception($e);
+
+    return FALSE;
+  }
+
+  return $rows;
+}
+
+/**
+ * Returns a list of venue coordinators and room coordinators associated with a given room.
+ *
+ * @param integer|null $room_id
+ *   (optional) A room ID to limit the listing to.
+ * @param bool $coordinators_only
+ *   (optional) Do not return room ids, only coordinator ids.
+ *
+ * @return array|bool
+ *   When $coordinators_only is FALSE, an array containing the venue
+ *   coordinator ids with the room ids as the array keys.
+ *   When $coordinators_only is TRUE, an array containing a distinct set of
+ *   venue coordinator ids with the keys being the coordinator id as well.
+ *   FALSE is returned on error.
+ */
+function mfcs_load_venue_and_room_coordinators($room_id = NULL, $coordinators_only = FALSE) {
+  if (!is_null($room_id) && !cf_is_integer($room_id)) {
+    cf_error::invalid_integer('room_id');
+
+    return FALSE;
+  }
+
+  if (!is_bool($coordinators_only)) {
+    cf_error::invalid_bool('coordinators_only');
+
+    return FALSE;
+  }
+
+  $rows = array();
+  try {
+    $query = db_select('mfcs_banner_rooms', 'mbr');
+
+    if (!is_null($room_id)) {
+      $query->condition('mbr.id', $room_id);
+    }
+
+    if ($coordinators_only) {
+      $query->addField('mbr', 'room_coordinator_id', 'room_coordinator_id');
+      $query->addField('mbr', 'venue_coordinator_id', 'venue_coordinator_id');
+      $query->distinct();
+
+      $temporary_rows = $query->execute()->fetchAll();
+    }
+    else {
+      $query->addField('mbr', 'id', 'id');
+      $query->addField('mbr', 'room_coordinator_id', 'room_coordinator_id');
+      $query->addField('mbr', 'venue_coordinator_id', 'venue_coordinator_id');
+
+      $temporary_rows = $query->execute()->fetchAll();
+    }
+
+    // merge the two different columns into a single distinct set of user ids.
+    foreach ($temporary_rows as $temporary_row) {
+      if (is_numeric($temporary_row->room_coordinator_id)) {
+        $rows[$temporary_row->room_coordinator_id] = $temporary_row->room_coordinator_id;
+      }
+
+      if (is_numeric($temporary_row->venue_coordinator_id)) {
+        $rows[$temporary_row->venue_coordinator_id] = $temporary_row->venue_coordinator_id;
+      }
     }
   }
   catch (Error $e) {

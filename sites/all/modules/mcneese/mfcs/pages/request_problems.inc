@@ -1115,7 +1115,7 @@ function mfcs_request_problems_0_user_form_submit($form, &$form_state) {
         }
 
         if ($process_reviewer_role) {
-          $all_coordinators = mfcs_load_room_coordinators(NULL, TRUE);
+          $all_coordinators = mfcs_load_venue_and_room_coordinators(NULL, TRUE);
           if (array_key_exists($form['values']['problem_user']['#value']->uid, $all_coordinators)) {
             if (isset($reviewer_role_id->rid) && !array_key_exists($reviewer_role_id->rid, $system_roles)) {
               $system_roles[$reviewer_role_id->rid] = 'reviewer';

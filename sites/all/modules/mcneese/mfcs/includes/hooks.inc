@@ -3284,7 +3284,7 @@ function mfcs_hook_process_user_banner_roles($user, &$problems, $changes = array
       $can_review = TRUE;
     }
 
-    $all_coordinators = mfcs_load_room_coordinators(NULL, TRUE);
+    $all_coordinators = mfcs_load_venue_and_room_coordinators(NULL, TRUE);
     if (array_key_exists($primary_account_id, $all_coordinators)) {
       if (array_key_exists($reviewer_role->rid, $processed_roles)) {
         $can_review = TRUE;
