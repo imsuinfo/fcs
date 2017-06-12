@@ -1888,7 +1888,9 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
       $parameters['requester_included'] = FALSE;
     }
 
-    if ($send_email) {
+    // Do not send 'no-issues' emails if messages is empty, even if asked to send an e-mail.
+    // this is done to prevent flooding the reviewers with e-mails (ticket: fcs-98).
+    if ($send_email && strlen($message) > 0) {
       mfcs_send_workflow_emails($request_id, $parameters);
     }
   }
