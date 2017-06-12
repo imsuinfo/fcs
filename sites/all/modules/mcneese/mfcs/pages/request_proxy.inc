@@ -696,7 +696,7 @@ function mfcs_request_proxy_0_delete_form($form, &$form_state, $id) {
   }
 
   return confirm_form($form,
-    'Are you sure you want to delete the proxy %proxy_name (%proxy_id) from being a venue coordinator proxy for the user %user_name (%user_id)?', array('%proxy_name' => $proxy_name, '%proxy_id' => $proxy_user->uid, '%user_name' => $user_name, '%user_id' => $user->uid),
+    t('Are you sure you want to delete the proxy %proxy_name (%proxy_id) from being a venue coordinator proxy for the user %user_name (%user_id)?', array('%proxy_name' => $proxy_name, '%proxy_id' => $proxy_user->uid, '%user_name' => $user_name, '%user_id' => $user->uid)),
     $destination,
     'This action cannot be undone.',
     'Delete',
