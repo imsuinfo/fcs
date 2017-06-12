@@ -1943,7 +1943,9 @@ function mfcs_request_users_0_add_or_edit_form_submit($form, &$form_state, $edit
   }
 
   // synchronize user settings to identify any problems (without syncing banner)
-  mfcs_synchronize_user_settings($saved_account->uid, array(), TRUE, FALSE);
+  if (is_object($saved_account)) {
+    mfcs_synchronize_user_settings($saved_account->uid, array(), TRUE, FALSE);
+  }
 
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
