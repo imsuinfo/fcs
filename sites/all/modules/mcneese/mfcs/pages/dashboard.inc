@@ -692,7 +692,7 @@ function mfcs_dashboard_page_updated_1_2_message() {
   drupal_add_js($colorbox_path . '/js/colorbox.js', array('group' => JS_LIBRARY));
 
   $markup = '<div id="mfcs_dashboard_page_updated_1_2_message_popup" class="system_updated_notice_1_2 colorbox-inline">';
-  $markup .= '<h4>The Facilities Use System has now be updated to version 1.2!</h4>';
+  $markup .= '<h4>The Facilities Use System has now been updated to version 1.2!</h4>';
   $markup .= '<br>';
 
   $markup .= '<div>This fixes a number of issues observed, improves the calendar interaction, looks even cleaner on phones and other small devices, improves the terminology, and more...</div>';
@@ -786,7 +786,7 @@ function mfcs_dashboard_page_updated_1_2_message() {
   drupal_add_js($javascript, array('type' => 'inline', 'group' => JS_THEME, 'preprocess' => TRUE, 'cache' => FALSE));
 
 
-  $markup_wrapper = '<center><h3 class="inline-block border-1 border-style-solid margin-3 padding-3 align_center" style="width: 80%; background-color: #eeffb5;"><a id="mfcs_dashboard_page_updated_1_2_message_popup_open">The Facilities Use System has now be updated to version 1.2!</a></h3><br>';
+  $markup_wrapper = '<center><h3 class="inline-block border-1 border-style-solid margin-3 padding-3 align_center" style="width: 80%; background-color: #eeffb5;"><a id="mfcs_dashboard_page_updated_1_2_message_popup_open">The Facilities Use System has now been updated to version 1.2!</a></h3><br>';
   $markup_wrapper .= '<div class="mfcs_dashboard_page_updated_1_2_message_popup_overlay" style="display: none">';
   $markup_wrapper .= $markup;
   $markup_wrapper .= '</div></center>';
