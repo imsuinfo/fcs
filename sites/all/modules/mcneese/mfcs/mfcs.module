@@ -11312,6 +11312,10 @@ function mfcs_get_requests_current_review_decisions($request_ids, $classificatio
     $review_decisions = array(
       MFCS_REVIEW_DECISION_ISSUES,
       MFCS_REVIEW_DECISION_ISSUES_NONE,
+
+      // temporary, for transition purposes.
+      MFCS_REVIEW_DECISION_APPROVE,
+      MFCS_REVIEW_DECISION_DENY,
     );
   }
   elseif ($step === MFCS_REVIEW_STEP_FINAL_DECISION) {
