@@ -241,10 +241,10 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           if (!empty($coordinator_problems['disabled']['current']['processed_name'])) {
             $user_venue_coordinator_name = '<a href="' . $base_path . 'users-0/view/' . $coordinator_problems['disabled']['current']['user_id'] . '" title="User ID: ' . $coordinator_problems['disabled']['current']['user_id'] .'">' . $coordinator_problems['disabled']['current']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['disabled']['current']['id'] . ']</sup>';
 
-            drupal_set_message('Warning: The Venue Coordinator (' . $user_venue_coordinator_name . ') assigned to this request no longer has access to this system.', 'warning', FALSE);
+            drupal_set_message('<span class="strong uppercase">Warning</span>: The Venue Coordinator (' . $user_venue_coordinator_name . ') assigned to this request no longer has access to this system.', 'warning', FALSE);
           }
           else {
-            drupal_set_message('Warning: The Venue Coordinator assigned to this request no longer has access to this system.', 'warning', FALSE);
+            drupal_set_message('<span class="strong uppercase">Warning</span>: The Venue Coordinator assigned to this request no longer has access to this system.', 'warning', FALSE);
           }
         }
 
@@ -253,10 +253,10 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             $user_venue_coordinator_name = '<a href="' . $base_path . 'users-0/view/' . $coordinator_problems['out_of_sync']['current']['user_id'] . '">' . $coordinator_problems['out_of_sync']['current']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['out_of_sync']['current']['user_id'] . ']</sup>';
             $user_banner_coordinator_name = '<a href="' . $base_path . 'users-0/view/' . $coordinator_problems['out_of_sync']['banner']['banner_id'] . '" title="User ID: ' . $coordinator_problems['out_of_sync']['banner']['banner_id'] .'">' . $coordinator_problems['out_of_sync']['banner']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['out_of_sync']['banner']['banner_id'] . ']</sup>';
 
-            drupal_set_message('Warning: The Venue Coordinator (' . $user_venue_coordinator_name . ') assigned to this request no longer the same as the Venue Coordinator (' . $user_banner_coordinator_name . ') assigned via Banner.', 'warning', FALSE);
+            drupal_set_message('<span class="strong uppercase">Warning</span>: The Venue Coordinator (' . $user_venue_coordinator_name . ') assigned to this request no longer the same as the Venue Coordinator (' . $user_banner_coordinator_name . ') assigned via Banner.', 'warning', FALSE);
           }
           else {
-            drupal_set_message('Warning: The Venue Coordinator assigned to this request is no longer  the same as the Venue Coordinator assigned via Banner.', 'warning', FALSE);
+            drupal_set_message('<span class="strong uppercase">Warning</span>: The Venue Coordinator assigned to this request is no longer  the same as the Venue Coordinator assigned via Banner.', 'warning', FALSE);
           }
         }
       }
@@ -1540,7 +1540,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         $conflict_message = '';
         if (!empty($all_holidays)) {
           $conflict_message .= '<div class="warning-holidays">';
-          $conflict_message .= '<div class="warning-holidays-title">This request is scheduled on the same dates as the following:</div>';
+          $conflict_message .= '<div class="warning-holidays-title"><span class="strong uppercase">Warning</span>: This request is scheduled on the same dates as the following:</div>';
           $conflict_message .= '<ul class="warning-holidays-list">';
           foreach ($all_holidays as $holiday) {
             $conflict_message .= '<li class="warning-holidays-list-item">' . t('<strong>@holiday</strong> on: <em>@date</em>.', array('@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title)) . '</li>';
@@ -2227,7 +2227,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
     }
 
     if ($step_latest !== $step_previous) {
-      drupal_set_message('Warning: the request has changed since you last loaded this page. This page is out of date and has been reloaded. No changes have been made.', 'warning');
+      drupal_set_message('<span class="strong uppercase">Warning</span>: the request has changed since you last loaded this page. This page is out of date and has been reloaded. No changes have been made.', 'warning');
       watchdog(MFCS_WATCHDOG_ID, 'The user \'%user_name\' (%user_id) attempted to review a request using a stale page', array('%user_name' => $user->name, '%user_id' => $user->uid), WATCHDOG_WARNING);
       return;
     }
@@ -2399,7 +2399,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
         form_set_error('', 'An internal error occurred while checking the room for availability. Please contact the support staff.');
       }
       elseif (!empty($room_unavailability['conflicts']) || !empty($room_unavailability['unavailable'])) {
-        $unavailable_message = '<span class="uppercase">Conflict</span>: The specified room is currently unavailable for the following dates: ';
+        $unavailable_message = '<span class="strong uppercase">Conflict</span>: The specified room is currently unavailable for the following dates: ';
         $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability);
         form_set_error('review][operations][decision', $unavailable_message);
         unset($unavailable_message);
@@ -2414,7 +2414,7 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
         // there currently can only be a single holiday per day, so only process a single holiday.
         $holiday = reset($all_holidays);
         if (is_object($holiday)) {
-          drupal_set_message(t('Warning: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'holiday-0/view/@year/' . $holiday->year. '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => $holiday->year, '@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title)), 'warning');
+          drupal_set_message(t('<span class="strong uppercase">Warning</span>: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'holiday-0/view/@year/' . $holiday->year. '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => $holiday->year, '@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title)), 'warning');
         }
         unset($holiday);
       }

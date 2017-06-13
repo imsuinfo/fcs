@@ -757,7 +757,7 @@ function mfcs_request_cancelling_0_form_validate($form, &$form_state) {
 
       if (!empty($holidays[$day_start])) {
         $holiday = reset($holidays[$day_start]);
-        drupal_set_message(t('Warning: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'holiday-0/view/' . $holiday->year . '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => date('Y', $holiday->date), '@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title)), 'warning');
+        drupal_set_message(t('<span class="strong uppercase">Warning</span>: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'holiday-0/view/' . $holiday->year . '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => date('Y', $holiday->date), '@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title)), 'warning');
       }
       unset($holiday);
       unset($day_start);
@@ -775,7 +775,7 @@ function mfcs_request_cancelling_0_form_validate($form, &$form_state) {
           $time .= ' to ' . date(MFCS_DATE_FORMAT_TIME_SECONDS, $form['form']['request']['#value']['dates']['time_stop'][$key]->value);
         }
 
-        $unavailable_message = '<span class="uppercase">Conflict</span>: The room is no longer available for <strong>' .  $time . '</strong> and therefore may not be uncancelled because of the following:<br>';
+        $unavailable_message = '<span class="strong uppercase">Conflict</span>: The room is no longer available for <strong>' .  $time . '</strong> and therefore may not be uncancelled because of the following:<br>';
         $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability);
         form_set_error('dates][' . $key . '][select', $unavailable_message);
       }

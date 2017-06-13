@@ -4522,7 +4522,7 @@ function mfcs_get_request_field_setup_special_requests($form, &$form_state, &$fi
   }
 
   $field_title = 'Will the Event Require any Additional Special Requests for Setup?';
-  $field_notes = '<span id="mfcs-markup-request-title_display-note-setup_special_requests" class="title_display-note"><span class="uppercase">Important</span>: If you need MSU PD to open the venue for you, answer \'<strong>yes</strong>\' and enter that time information in the explanation box.</span>';
+  $field_notes = '<span id="mfcs-markup-request-title_display-note-setup_special_requests" class="title_display-note"><span class="strong uppercase">Important</span>: If you need MSU PD to open the venue for you, answer \'<strong>yes</strong>\' and enter that time information in the explanation box.</span>';
   $limits_check = array(
     'title' => $field_title,
     'field' => 'special_requests',

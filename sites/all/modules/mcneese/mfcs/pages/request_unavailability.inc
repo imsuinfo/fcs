@@ -945,7 +945,7 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
   // report any detected unavailability to request conflicts.
   $conflicts = mfcs_unavailability_rooms_conflicts($unavailability_id);
   if (!empty($conflicts)) {
-    $conflict_message = 'Warning: the following requests are scheduled on unavailable dates:<ul>';
+    $conflict_message = '<span class="strong uppercase">Warning</span>: the following requests are scheduled on unavailable dates:<ul>';
     foreach ($conflicts as $conflict) {
       $conflict_message .= '<li><a href="' . $base_path . 'requests/view-0/' . $conflict['id'] . $url_arguments . '">' . check_plain($conflict['title']) . '</a></li>';
     }

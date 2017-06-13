@@ -496,7 +496,7 @@ function mfcs_request_manage_0_move_form_validate($form, &$form_state) {
           form_set_error('', 'An internal error occurred while checking the room for availability. Please contact the support staff.');
         }
         elseif (!empty($room_unavailability['conflicts']) || !empty($room_unavailability['unavailable'])) {
-          $unavailable_message = '<span class="uppercase">Warning</span>: The specified room is currently unavailable for the following dates: ';
+          $unavailable_message = '<span class="strong uppercase">Warning</span>: The specified room is currently unavailable for the following dates: ';
           $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability, TRUE);
           drupal_set_message($unavailable_message, 'warning');
           unset($unavailable_message);
@@ -511,7 +511,7 @@ function mfcs_request_manage_0_move_form_validate($form, &$form_state) {
           if (is_object($holiday)) {
             $unavailable_message .= '<strong>';
             $unavailable_message .= '@title</a></strong>.';
-            drupal_set_message(t('Warning: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'holiday-0/view/@year/' . $holiday->year. '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => $holiday->year, '@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title)), 'warning');
+            drupal_set_message(t('<span class="strong uppercase">Warning</span>: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'holiday-0/view/@year/' . $holiday->year. '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => $holiday->year, '@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title)), 'warning');
           }
           unset($holiday);
         }
