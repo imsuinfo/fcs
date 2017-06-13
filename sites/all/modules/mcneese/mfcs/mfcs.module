@@ -9015,6 +9015,22 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
           $and->condition('mer.step', MFCS_REVIEW_STEP_COMPLETED);
           $or->condition($and);
           unset($and);
+
+          // check to see if the user is a reviewer and include reviewable requests in the listing, regardless of review state, but only for request classifications the user belongs to.
+          if ($reviewer) {
+            $reviewer_settings = mfcs_get_reviewer_settings_by_user_id($user->uid);
+
+            if (is_null($or)) {
+              $or = db_or();
+            }
+
+            $and = db_and();
+            $and->condition('mer.status', $show_status_reviewer, 'IN');
+            $and->condition('mer.step', $show_step_reviewer, 'IN');
+            $and->condition('mer.classification', $reviewer_settings['request_classifications'], 'IN');
+
+            $or->condition($and);
+          }
         }
       }
 
