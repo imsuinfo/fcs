@@ -321,6 +321,7 @@ function mfcs_ical_generate_requests(&$ical, $requests, $date_settings, $ical_eo
 
     $request_description_begin .= 'The reserved location is: ' . "\n";
     $request_description_begin .= '  - ' . $building_options[$request->building] . ' ' . $room_options[$request->room] . "\n";
+    $request_description_begin .= "\n";
 
     $request_description_end = "\n\n";
     $request_description_end = 'The Request ID is: ' . $request->id . ".\n";
