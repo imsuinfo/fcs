@@ -9020,16 +9020,20 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
           if ($reviewer) {
             $reviewer_settings = mfcs_get_reviewer_settings_by_user_id($user->uid);
 
-            if (is_null($or)) {
-              $or = db_or();
+            // if the classifications array was empty, this would produce an sql error and if it is empty, there should be no reason to run this additional condition.
+            if (!empty($reviewer_settings['request_classifications'])) {
+
+              if (is_null($or)) {
+                $or = db_or();
+              }
+
+              $and = db_and();
+              $and->condition('mer.status', $show_status_reviewer, 'IN');
+              $and->condition('mer.step', $show_step_reviewer, 'IN');
+              $and->condition('mer.classification', $reviewer_settings['request_classifications'], 'IN');
+
+              $or->condition($and);
             }
-
-            $and = db_and();
-            $and->condition('mer.status', $show_status_reviewer, 'IN');
-            $and->condition('mer.step', $show_step_reviewer, 'IN');
-            $and->condition('mer.classification', $reviewer_settings['request_classifications'], 'IN');
-
-            $or->condition($and);
           }
         }
       }
