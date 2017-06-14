@@ -551,7 +551,33 @@ function mfcs_hook_menu_requests_reviewing(&$items, $module_path) {
   $items['requests/review-0/ajax'] = array(
     'title' => '',
     'page callback' => 'mfcs_ajax_review_0',
+    'page arguments' => array(3),
+    'file' => 'ajax.inc',
+    'file path' => $module_path . '/includes',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('review'),
+    'type' => MENU_CALLBACK,
+    'tab_parent' => 'requests/review-0',
+    'tab_root' => 'requests/review-0',
+  );
+
+  $items['requests/review-0/ajax/%'] = array(
+    'title' => '',
+    'page callback' => 'mfcs_ajax_review_0',
     'page arguments' => array(),
+    'file' => 'ajax.inc',
+    'file path' => $module_path . '/includes',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('review'),
+    'type' => MENU_CALLBACK,
+    'tab_parent' => 'requests/review-0',
+    'tab_root' => 'requests/review-0',
+  );
+
+  $items['requests/review-0/ajax/%/%'] = array(
+    'title' => '',
+    'page callback' => 'mfcs_ajax_review_0',
+    'page arguments' => array(3, 4),
     'file' => 'ajax.inc',
     'file path' => $module_path . '/includes',
     'access callback' => 'mfcs_page_request_access',
@@ -653,6 +679,19 @@ function mfcs_hook_menu_requests_listing(&$items, $module_path) {
     'title' => '',
     'page callback' => 'mfcs_ajax_list_0',
     'page arguments' => array(3),
+    'file' => 'ajax.inc',
+    'file path' => $module_path . '/includes',
+    'access callback' => 'mfcs_page_request_access',
+    'access arguments' => array('list'),
+    'type' => MENU_CALLBACK,
+    'tab_parent' => 'requests/list-0',
+    'tab_root' => 'requests/list-0',
+  );
+
+  $items['requests/list-0/ajax/%/%'] = array(
+    'title' => '',
+    'page callback' => 'mfcs_ajax_list_0',
+    'page arguments' => array(3, 4),
     'file' => 'ajax.inc',
     'file path' => $module_path . '/includes',
     'access callback' => 'mfcs_page_request_access',

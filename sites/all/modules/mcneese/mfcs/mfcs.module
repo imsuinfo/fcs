@@ -8524,6 +8524,9 @@ function mfcs_build_room_unavailable_message($availability_issues, $blank_target
  *     'only_requester': When defined as a boolean, represents that only requests whose requester is the current user xor the user specified by 'user_id' are loaded.
  *     'only_reviewer': When defined as a boolean, represents that only requests whose reviewer is the current user are loaded (venue coordinators are also reviewers).
  *                      This only applies when review restrictions are set to MFCS_REVIEW_RESTRICTION_REVIEW.
+ *     'only_reviewer-under_review': When defined as a boolean, represents that all requests that are under review are loaded.
+ *                                   Otherwise, only requests reviewable by the current reviewer are loaded.
+ *                                   This only applies when 'only_reviewer' is TRUE.
  *
  * @return array|false
  *   An array of containing the following:
@@ -8636,9 +8639,14 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
   }
 
   $only_reviewer = NULL;
+  $only_reviewer_under_review = NULL;
   if ($review_restrictions === MFCS_REVIEW_RESTRICTION_REVIEW) {
     if (isset($options['only_reviewer']) && is_bool($options['only_reviewer'])) {
       $only_reviewer = $options['only_reviewer'];
+    }
+
+    if (isset($options['only_reviewer-under_review']) && is_bool($options['only_reviewer-under_review'])) {
+      $only_reviewer_under_review = $options['only_reviewer-under_review'];
     }
   }
 
@@ -8914,33 +8922,52 @@ function mfcs_request_load_listing($conditions = array(), $options = array()) {
           }
 
           // process venue coordinator access.
-          $already_venue_coordinated_query = db_select('mfcs_reviewed', 'mrd_vc');
-          $already_venue_coordinated_query->addField('mrd_vc', 'request_id', 'request_id');
-          $already_venue_coordinated_query->where('mrd_vc.request_id = mer.id');
-          $already_venue_coordinated_query->condition('mrd_vc.classification', MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR);
+          if (!empty($venue_coordinator_ids)) {
+            $and = db_and();
+            $and->condition('mer.status', $show_status_venue_coordinator, 'IN');
+            $and->condition('mer.step', $show_step_venue_coordinator, 'IN');
+            $and->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
-          $and = db_and();
-          $and->condition('mer.status', $show_status_venue_coordinator, 'IN');
-          $and->condition('mer.step', $show_step_venue_coordinator, 'IN');
-          $and->condition('mer.id', $already_venue_coordinated_query, 'NOT IN');
-          $and->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
+            if (!is_bool($only_reviewer_under_review) || !$only_reviewer_under_review) {
+              $already_venue_coordinated_query = db_select('mfcs_reviewed', 'mrd_vc');
+              $already_venue_coordinated_query->addField('mrd_vc', 'request_id', 'request_id');
+              $already_venue_coordinated_query->where('mrd_vc.request_id = mer.id');
+              $already_venue_coordinated_query->condition('mrd_vc.classification', MFCS_REVIEWER_CLASSIFICATION_VENUE_COORDINATOR);
 
-          $or->condition($and);
+              $and->condition('mer.id', $already_venue_coordinated_query, 'NOT IN');
+            }
+
+            $or->condition($and);
+          }
 
           // process review access.
-          if (!empty($reviewer_settings['classifications'])) {
-            $already_reviewed_query = db_select('mfcs_reviewers', 'mr_r');
-            $already_reviewed_query->innerJoin('mfcs_reviewed', 'mrd_r', 'mr_r.reviewer_classification = mrd_r.classification');
-            $already_reviewed_query->addField('mrd_r', 'request_id', 'request_id');
-            $already_reviewed_query->where('mr_r.request_classification = mer.classification AND mr_r.review_step = mer.step');
-            $already_reviewed_query->condition('mr_r.user_id', $user->uid);
-            $already_reviewed_query->condition('mr_r.disabled', 0);
+          if (empty($reviewer_settings['steps'])) {
+            // if the user is a venue coordinator, but has no reviewer roles, they should still be able to view requests under review.
+            if (is_bool($only_reviewer_under_review) && $only_reviewer_under_review && !empty($venue_coordinator_ids)) {
+              $and = db_and();
+              $and->condition('mer.status', $show_status_reviewer, 'IN');
+              $and->condition('mer.step', $show_step_reviewer, 'IN');
+              $and->condition('mer.venue_coordinator', $venue_coordinator_ids, 'IN');
 
+              $or->condition($and);
+            }
+          }
+          else {
             $and = db_and();
             $and->condition('mer.status', $show_status_reviewer, 'IN');
             $and->condition('mer.step', $show_step_reviewer, 'IN');
             $and->condition('mer.step', $reviewer_settings['steps'], 'IN');
-            $and->condition('mer.id', $already_reviewed_query, 'NOT IN');
+
+            if (!is_bool($only_reviewer_under_review) || !$only_reviewer_under_review) {
+              $already_reviewed_query = db_select('mfcs_reviewers', 'mr_r');
+              $already_reviewed_query->innerJoin('mfcs_reviewed', 'mrd_r', 'mr_r.reviewer_classification = mrd_r.classification');
+              $already_reviewed_query->addField('mrd_r', 'request_id', 'request_id');
+              $already_reviewed_query->where('mr_r.request_classification = mer.classification AND mr_r.review_step = mer.step');
+              $already_reviewed_query->condition('mr_r.user_id', $user->uid);
+              $already_reviewed_query->condition('mr_r.disabled', 0);
+
+              $and->condition('mer.id', $already_reviewed_query, 'NOT IN');
+            }
 
             $or->condition($and);
           }
@@ -10690,7 +10717,11 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
         $table['datatable_settings']['buttons']['Show Requests']['text'] = '\'Show My Requests\'';
       }
     }
-    elseif (isset($options['only_reviewer']) && is_bool($options['only_reviewer'])) {
+    elseif ((isset($options['only_reviewer']) && is_bool($options['only_reviewer'])) || (isset($options['only_reviewer-under_review']) && is_bool($options['only_reviewer-under_review']))) {
+      if (!isset($options['only_reviewer-under_review']) || !is_bool($options['only_reviewer-under_review'])) {
+        $options['only_reviewer-under_review'] = FALSE;
+      }
+
       $url_options = array();
       $ajax_path = preg_replace("/'/", '', $options['ajax_path']);
       preg_match('/\?[^?]*$/', $ajax_path, $url_options);
@@ -10703,36 +10734,6 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
         $url_options = '';
       }
 
-      $showing_my_requests = 'function (e, dt, node, config) {' . "\n";
-      $showing_my_requests .= '  var data = dt.ajax.params();' . "\n";
-      $showing_my_requests .= '  var url = dt.ajax.url();' . "\n";
-
-      $showing_my_requests .= '  if (url == \'' . $ajax_path . '/as_reviewer\' || url == \'' . $ajax_path . '/as_reviewer' . $url_options . '\') {' . "\n";
-      $showing_my_requests .= '    dt.ajax.url(\'' . $ajax_path . '/as_manager' . $url_options . '\');' . "\n";
-      $showing_my_requests .= '    dt.buttons(\'.datatable-showing_requests\').text(\'Show As Reviewer\');' . "\n";
-      $showing_my_requests .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests (As Manager)\');' . "\n";
-      $showing_my_requests .= '  }' . "\n";
-      $showing_my_requests .= '  else if (url == \'' . $ajax_path . '/as_manager\' || url == \'' . $ajax_path . '/as_manager' . $url_options . '\') {' . "\n";
-      $showing_my_requests .= '    dt.ajax.url(\'' . $ajax_path . '/as_reviewer' . $url_options . '\');' . "\n";
-      $showing_my_requests .= '    dt.buttons(\'.datatable-showing_requests\').text(\'Show As Manager\');' . "\n";
-      $showing_my_requests .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests (As Reviewer)\');' . "\n";
-      $showing_my_requests .= '  }' . "\n";
-      $showing_my_requests .= '  else {' . "\n";
-
-      if ($options['only_reviewer']) {
-        $showing_my_requests .= '    dt.ajax.url(\'' . $ajax_path . '/as_manager' . $url_options . '\');' . "\n";
-        $showing_my_requests .= '    dt.buttons(\'.datatable-showing_requests\').text(\'Show As Reviewer\');' . "\n";
-        $showing_my_requests .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests (As Manager)\');' . "\n";
-      }
-      else {
-        $showing_my_requests .= '    dt.ajax.url(\'' . $ajax_path . '/as_reviewer' . $url_options . '\');' . "\n";
-        $showing_my_requests .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests (As Reviewer)\');' . "\n";
-      }
-
-      $showing_my_requests .= '  }' . "\n";
-      $showing_my_requests .= '  dt.ajax.reload();' . "\n";
-      $showing_my_requests .= '}' . "\n";
-
       $table['datatable_settings']['dom'] = 'lfBrtip';
       $table['datatable_settings']['buttons'] = array();
 
@@ -10741,15 +10742,173 @@ function mfcs_build_request_ajax_table($items_returned, $conditions, $options, $
         'text' => '"Show / Hide"',
       );
 
-      $table['datatable_settings']['buttons']['Show Requests'] = array(
-        'text' => '\'Show As Manager\'',
-        'action' => $showing_my_requests,
-        'className' => '\'datatable-showing_requests\'',
-      );
-      unset($showing_my_requests);
+      $as_reviewer_text = '';
+      $as_manager_text = '';
+      $under_review_text = '';
+      $only_reviewable_text = '';
+      if (isset($options['only_reviewer-under_review']) && is_bool($options['only_reviewer-under_review'])) {
+        $under_review_text = ' (Under Review)';
+        $only_reviewable_text = ' (Only Reviewable)';
+      }
 
-      if ($options['only_reviewer'] === FALSE) {
-        $table['datatable_settings']['buttons']['Show Requests']['text'] = '\'Show As Reviewer\'';
+
+      if (isset($options['only_reviewer']) && is_bool($options['only_reviewer'])) {
+        $as_reviewer_text = ' (As Reviewer)';
+        $as_manager_text = ' (As Manager)';
+
+        $showing_my_requests = 'function (e, dt, node, config) {' . "\n";
+        $showing_my_requests .= '  var data = dt.ajax.params();' . "\n";
+        $showing_my_requests .= '  var url = dt.ajax.url();' . "\n";
+
+        $showing_my_requests .= '  if (url == \'' . $ajax_path . '/as_reviewer\' || url == \'' . $ajax_path . '/as_reviewer' . $url_options . '\' || url == \'' . $ajax_path . '/as_reviewer/under_review\' || url == \'' . $ajax_path . '/as_reviewer/under_review' . $url_options . '\' || url == \'' . $ajax_path . '/as_reviewer/only_reviewable\' || url == \'' . $ajax_path . '/as_reviewer/only_reviewable' . $url_options . '\') {' . "\n";
+        $showing_my_requests .= '    if (url == \'' . $ajax_path . '/as_reviewer/under_review\' || url == \'' . $ajax_path . '/as_reviewer/under_review' . $url_options . '\') {' . "\n";
+        $showing_my_requests .= '      dt.ajax.url(\'' . $ajax_path . '/as_manager/under_review' . $url_options . '\');' . "\n";
+        $showing_my_requests .= '      $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $as_manager_text . $under_review_text . '\');' . "\n";
+        $showing_my_requests .= '    }' . "\n";
+        $showing_my_requests .= '    else {' . "\n";
+        $showing_my_requests .= '      dt.ajax.url(\'' . $ajax_path . '/as_manager/only_reviewable' . $url_options . '\');' . "\n";
+        $showing_my_requests .= '      $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $as_manager_text . $only_reviewable_text . '\');' . "\n";
+        $showing_my_requests .= '    }' . "\n";
+        $showing_my_requests .= '    dt.buttons(\'.datatable-showing_requests\').text(\'Show As Reviewer\');' . "\n";
+        $showing_my_requests .= '  }' . "\n";
+        $showing_my_requests .= '  else if (url == \'' . $ajax_path . '/as_manager\' || url == \'' . $ajax_path . '/as_manager' . $url_options . '\' || url == \'' . $ajax_path . '/as_manager/under_review\' || url == \'' . $ajax_path . '/as_manager/under_review' . $url_options . '\' || url == \'' . $ajax_path . '/as_manager/only_reviewable\' || url == \'' . $ajax_path . '/as_manager/only_reviewable' . $url_options . '\') {' . "\n";
+        $showing_my_requests .= '    if (url == \'' . $ajax_path . '/as_manager/under_review\' || url == \'' . $ajax_path . '/as_manager/under_review' . $url_options . '\') {' . "\n";
+        $showing_my_requests .= '      dt.ajax.url(\'' . $ajax_path . '/as_reviewer/under_review' . $url_options . '\');' . "\n";
+        $showing_my_requests .= '      $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $as_reviewer_text . $under_review_text . '\');' . "\n";
+        $showing_my_requests .= '    }' . "\n";
+        $showing_my_requests .= '    else {' . "\n";
+        $showing_my_requests .= '      dt.ajax.url(\'' . $ajax_path . '/as_reviewer/only_reviewable' . $url_options . '\');' . "\n";
+        $showing_my_requests .= '      $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $as_reviewer_text . $only_reviewable_text . '\');' . "\n";
+        $showing_my_requests .= '    }' . "\n";
+        $showing_my_requests .= '    dt.buttons(\'.datatable-showing_requests\').text(\'Show As Manager\');' . "\n";
+        $showing_my_requests .= '  }' . "\n";
+        $showing_my_requests .= '  else {' . "\n";
+
+        if ($options['only_reviewer']) {
+          if ($options['only_reviewer-under_review']) {
+            $showing_my_requests .= '    dt.ajax.url(\'' . $ajax_path . '/as_manager/under_review' . $url_options . '\');' . "\n";
+            $showing_my_requests .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $as_manager_text . $under_review_text . '\');' . "\n";
+          }
+          else {
+            $showing_my_requests .= '    dt.ajax.url(\'' . $ajax_path . '/as_manager/only_reviewable' . $url_options . '\');' . "\n";
+            $showing_my_requests .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $as_manager_text . $only_reviewable_text . '\');' . "\n";
+          }
+
+          $showing_my_requests .= '    dt.buttons(\'.datatable-showing_requests\').text(\'Show As Reviewer\');' . "\n";
+        }
+        else {
+          if ($options['only_reviewer-under_review']) {
+            $showing_my_requests .= '    dt.ajax.url(\'' . $ajax_path . '/as_reviewer/under_review' . $url_options . '\');' . "\n";
+            $showing_my_requests .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $as_reviewer_text . $under_review_text . '\');' . "\n";
+          }
+          else {
+            $showing_my_requests .= '    dt.ajax.url(\'' . $ajax_path . '/as_reviewer/only_reviewable' . $url_options . '\');' . "\n";
+            $showing_my_requests .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $as_reviewer_text . $only_reviewable_text . '\');' . "\n";
+          }
+
+          $showing_my_requests .= '    dt.buttons(\'.datatable-showing_requests\').text(\'Show As Manager\');' . "\n";
+        }
+
+        $showing_my_requests .= '  }' . "\n";
+        $showing_my_requests .= '  dt.ajax.reload();' . "\n";
+        $showing_my_requests .= '}' . "\n";
+
+        $table['datatable_settings']['buttons']['Show Requests'] = array(
+          'text' => '\'Show As Manager\'',
+          'action' => $showing_my_requests,
+          'className' => '\'datatable-showing_requests\'',
+        );
+        unset($showing_my_requests);
+
+        if ($options['only_reviewer'] === FALSE) {
+          $table['datatable_settings']['buttons']['Show Requests']['text'] = '\'Show As Reviewer\'';
+        }
+      }
+
+      if (isset($options['only_reviewer-under_review']) && is_bool($options['only_reviewer-under_review'])) {
+        $showing_only_reviewable = 'function (e, dt, node, config) {' . "\n";
+        $showing_only_reviewable .= '  var data = dt.ajax.params();' . "\n";
+        $showing_only_reviewable .= '  var url = dt.ajax.url();' . "\n";
+
+        $showing_only_reviewable .= '  if (url == \'' . $ajax_path . '/as_reviewer\' || url == \'' . $ajax_path . '/as_reviewer' . $url_options . '\' || url == \'' . $ajax_path . '/as_reviewer/under_review\' || url == \'' . $ajax_path . '/as_reviewer/under_review' . $url_options . '\' || url == \'' . $ajax_path . '/as_reviewer/only_reviewable\' || url == \'' . $ajax_path . '/as_reviewer/only_reviewable' . $url_options . '\') {' . "\n";
+        $showing_only_reviewable .= '    if (url == \'' . $ajax_path . '/as_reviewer/under_review\' || url == \'' . $ajax_path . '/as_reviewer/under_review' . $url_options . '\') {' . "\n";
+        $showing_only_reviewable .= '      dt.ajax.url(\'' . $ajax_path . '/as_reviewer/only_reviewable' . $url_options . '\');' . "\n";
+        $showing_only_reviewable .= '      $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $as_reviewer_text . $only_reviewable_text . '\');' . "\n";
+        $showing_only_reviewable .= '      dt.buttons(\'.datatable-showing_requests-reviewable\').text(\'Show Under Review\');' . "\n";
+        $showing_only_reviewable .= '    }' . "\n";
+        $showing_only_reviewable .= '    else {' . "\n";
+        $showing_only_reviewable .= '      dt.ajax.url(\'' . $ajax_path . '/as_reviewer/under_review' . $url_options . '\');' . "\n";
+        $showing_only_reviewable .= '      $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $as_reviewer_text . $under_review_text . '\');' . "\n";
+        $showing_only_reviewable .= '      dt.buttons(\'.datatable-showing_requests-reviewable\').text(\'Show Only Reviewable\');' . "\n";
+        $showing_only_reviewable .= '    }' . "\n";
+        $showing_only_reviewable .= '  }' . "\n";
+        $showing_only_reviewable .= '  else if (url == \'' . $ajax_path . '/as_manager\' || url == \'' . $ajax_path . '/as_manager' . $url_options . '\' || url == \'' . $ajax_path . '/as_manager/under_review\' || url == \'' . $ajax_path . '/as_manager/under_review' . $url_options . '\' || url == \'' . $ajax_path . '/as_manager/only_reviewable\' || url == \'' . $ajax_path . '/as_manager/only_reviewable' . $url_options . '\') {' . "\n";
+        $showing_only_reviewable .= '    if (url == \'' . $ajax_path . '/as_manager/under_review\' || url == \'' . $ajax_path . '/as_manager/under_review' . $url_options . '\') {' . "\n";
+        $showing_only_reviewable .= '      dt.ajax.url(\'' . $ajax_path . '/as_manager/only_reviewable' . $url_options . '\');' . "\n";
+        $showing_only_reviewable .= '      $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $as_manager_text . $under_review_text . '\');' . "\n";
+        $showing_only_reviewable .= '      dt.buttons(\'.datatable-showing_requests-reviewable\').text(\'Show Under Review\');' . "\n";
+        $showing_only_reviewable .= '    }' . "\n";
+        $showing_only_reviewable .= '    else {' . "\n";
+        $showing_only_reviewable .= '      dt.ajax.url(\'' . $ajax_path . '/as_manager/under_review' . $url_options . '\');' . "\n";
+        $showing_only_reviewable .= '      $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $as_manager_text . $only_reviewable_text . '\');' . "\n";
+        $showing_only_reviewable .= '      dt.buttons(\'.datatable-showing_requests-reviewable\').text(\'Show Only Reviewable\');' . "\n";
+        $showing_only_reviewable .= '    }' . "\n";
+        $showing_only_reviewable .= '  }' . "\n";
+        $showing_only_reviewable .= '  else {' . "\n";
+
+        if (isset($options['only_reviewer']) && is_bool($options['only_reviewer'])) {
+          if ($options['only_reviewer']) {
+            if ($options['only_reviewer-under_review']) {
+              $showing_only_reviewable .= '    dt.ajax.url(\'' . $ajax_path . '/as_reviewer/only_reviewable' . $url_options . '\');' . "\n";
+              $showing_only_reviewable .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $as_reviewer_text . $only_reviewable_text . '\');' . "\n";
+              $showing_only_reviewable .= '    dt.buttons(\'.datatable-showing_requests-reviewable\').text(\'Show Under Review\');' . "\n";
+            }
+            else {
+              $showing_only_reviewable .= '    dt.ajax.url(\'' . $ajax_path . '/as_reviewer/under_review' . $url_options . '\');' . "\n";
+              $showing_only_reviewable .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $as_reviewer_text . $under_review_text . '\');' . "\n";
+              $showing_only_reviewable .= '    dt.buttons(\'.datatable-showing_requests-reviewable\').text(\'Show Only Reviewable\');' . "\n";
+            }
+          }
+          else {
+            if ($options['only_reviewer-under_review']) {
+              $showing_only_reviewable .= '    dt.ajax.url(\'' . $ajax_path . '/as_manager/only_reviewable' . $url_options . '\');' . "\n";
+              $showing_only_reviewable .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $as_manager_text . $only_reviewable_text . '\');' . "\n";
+              $showing_only_reviewable .= '    dt.buttons(\'.datatable-showing_requests-reviewable\').text(\'Show Under Review\');' . "\n";
+            }
+            else {
+              $showing_only_reviewable .= '    dt.ajax.url(\'' . $ajax_path . '/as_manager/under_review' . $url_options . '\');' . "\n";
+              $showing_only_reviewable .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $as_manager_text . $under_review_text . '\');' . "\n";
+              $showing_only_reviewable .= '    dt.buttons(\'.datatable-showing_requests-reviewable\').text(\'Show Only Reviewable\');' . "\n";
+            }
+          }
+        }
+        else {
+          if ($options['only_reviewer-under_review']) {
+            $showing_only_reviewable .= '    dt.ajax.url(\'' . $ajax_path . '/as_reviewer/only_reviewable' . $url_options . '\');' . "\n";
+            $showing_only_reviewable .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $only_reviewable_text . '\');' . "\n";
+            $showing_only_reviewable .= '    dt.buttons(\'.datatable-showing_requests-reviewable\').text(\'Show Under Review\');' . "\n";
+          }
+          else {
+            $showing_only_reviewable .= '    dt.ajax.url(\'' . $ajax_path . '/as_reviewer/under_review' . $url_options . '\');' . "\n";
+            $showing_only_reviewable .= '    $($($(dt).context[0].nTable).children(\'caption\')[0]).text(\'Requests' . $under_review_text . '\');' . "\n";
+            $showing_only_reviewable .= '    dt.buttons(\'.datatable-showing_requests-reviewable\').text(\'Show As Reviewer\');' . "\n";
+          }
+        }
+
+        $showing_only_reviewable .= '  }' . "\n";
+        $showing_only_reviewable .= '  dt.ajax.reload();' . "\n";
+        $showing_only_reviewable .= '}' . "\n";
+
+        $table['datatable_settings']['buttons']['Show Reviewable'] = array(
+          'text' => '\'Show Under Review\'',
+          'action' => $showing_only_reviewable,
+          'className' => '\'datatable-showing_requests-reviewable\'',
+        );
+        unset($showing_only_reviewable);
+
+        if ($options['only_reviewer-under_review']) {
+          $table['datatable_settings']['buttons']['Show Requests']['text'] = '\'Show Only Reviewable\'';
+        }
       }
     }
   }

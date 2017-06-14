@@ -114,8 +114,10 @@ function mfcs_ajax_setup_request_settings($post_method = TRUE) {
  *
  * @param string|int $argument_1
  *   Some string or number to send as the first argument.
+ * @param string|int $argument_2
+ *   Some string or number to send as the second argument.
  */
-function mfcs_ajax_list_0($argument_1 = NULL) {
+function mfcs_ajax_list_0($argument_1 = NULL, $argument_2 = NULL) {
   $user = cf_current_user();
 
   $manager = FALSE;
@@ -523,8 +525,10 @@ function mfcs_ajax_listing_0($custom_conditions = array(), $override_options = a
  *
  * @param string|int $argument_1
  *   Some string or number to send as the first argument.
+ * @param string|int $argument_2
+ *   Some string or number to send as the second argument.
  */
-function mfcs_ajax_review_0($argument_1 = NULL) {
+function mfcs_ajax_review_0($argument_1 = NULL, $argument_2 = NULL) {
   $user = cf_current_user();
 
   $manager = FALSE;
@@ -540,16 +544,41 @@ function mfcs_ajax_review_0($argument_1 = NULL) {
   );
 
   if ($manager) {
+    $options['only_reviewer-under_review'] = TRUE;
+    $under_review_caption = ' (Under Review)';
+
+    if ($argument_2 == 'under_review') {
+      $options['only_reviewer-under_review'] = TRUE;
+      $under_review_caption = ' (Under Review)';
+    }
+    elseif ($argument_2 == 'only_reviewable') {
+      $options['only_reviewer-under_review'] = FALSE;
+      $under_review_caption = ' (Only Reviewable)';
+    }
+
     $options['only_reviewer'] = TRUE;
-    $options['table_caption'] = 'Requests (As Reviewer)';
+    $options['table_caption'] = 'Requests (As Reviewer)' . $under_review_caption;
 
     if ($argument_1 == 'as_reviewer') {
       $options['only_reviewer'] = TRUE;
-      $options['table_caption'] = 'Requests (As Reviewer)';
+      $options['table_caption'] = 'Requests (As Reviewer)' . $under_review_caption;
     }
     elseif ($argument_1 == 'as_manager') {
       $options['only_reviewer'] = FALSE;
-      $options['table_caption'] = 'Requests (As Manager)';
+      $options['table_caption'] = 'Requests (As Manager)' . $under_review_caption;
+    }
+  }
+  else {
+    $options['only_reviewer-under_review'] = FALSE;
+    $under_review_caption = ' (Only Reviewable)';
+
+    if ($argument_2 == 'under_review') {
+      $options['only_reviewer-under_review'] = TRUE;
+      $under_review_caption = ' (Under Review)';
+    }
+    elseif ($argument_2 == 'only_reviewable') {
+      $options['only_reviewer-under_review'] = FALSE;
+      $under_review_caption = ' (Only Reviewable)';
     }
   }
 

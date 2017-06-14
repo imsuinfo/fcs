@@ -168,7 +168,12 @@ function mfcs_request_review_0_page($form, &$form_state, $page_number = NULL) {
 
   if ($manager) {
     $options['only_reviewer'] = TRUE;
-    $options['table_caption'] = 'Requests (As Reviewer)';
+    $options['only_reviewer-under_review'] = FALSE;
+    $options['table_caption'] = 'Requests (As Reviewer) (Only Reviewable)';
+  }
+  else {
+    $options['only_reviewer-under_review'] = FALSE;
+    $options['table_caption'] = 'Requests (Only Reviewable)';
   }
 
   if (!is_null($order)) {
