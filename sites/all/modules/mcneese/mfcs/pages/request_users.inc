@@ -574,6 +574,7 @@ function mfcs_request_users_0_view_page($user_id) {
   $roles_venue = mfcs_request_users_get_roles(FALSE, TRUE, FALSE, FALSE);
   $roles_special = mfcs_request_users_get_roles(FALSE, FALSE, TRUE, FALSE);
   $roles_administer = mfcs_request_users_get_roles(FALSE, FALSE, FALSE, TRUE);
+  $roles_review = mfcs_get_reviewers(array('mr.user_id' => (int) $user_id, 'mr.disabled' => 0), array('sort' => array('reviewer_classification' => 'asc', 'request_classification' => 'asc', 'review_step' => 'asc')));
 
   $bannerless_exception_role_id = array_search('bannerless exception', $roles_special);
 
@@ -589,6 +590,7 @@ function mfcs_request_users_0_view_page($user_id) {
     }
   }
   unset($role);
+  unset($roles_basic);
 
   if (is_null($basic)) {
     $basic = '<div class="view_user-item view_user-item-roles-basic"><span class="item-information item-information-roles-basic">No roles assigned</span></div>';
@@ -601,8 +603,51 @@ function mfcs_request_users_0_view_page($user_id) {
     }
   }
   unset($role);
+  unset($roles_venue);
   if (is_null($venue)) {
     $venue = '<div class="view_user-item view_user-item-roles-venue"><span class="item-information item-information-roles-venue">No roles assigned</span></div>';
+  }
+
+  // not actual roles by design, but are displayed as a role on the user view because they effectively are roles.
+  $review = NULL;
+  if (!empty($roles_review['results'])) {
+    $reviewer_classifications = mfcs_get_reviewer_classification_list_options();
+    $request_classifications = mfcs_get_request_classification_list_options();
+    $review_steps = mfcs_get_review_step_list_options();
+
+    $request_classification_items = array();
+    $student_organization_text = '';
+    foreach ($roles_review['results'] as $role) {
+      if (!isset($request_classification_items[$role->reviewer_classification])) {
+        $request_classification_items[$role->reviewer_classification] = array(
+          'classification' => $role->request_classification,
+          'step' => $role->review_step,
+          'text' => '',
+        );
+      }
+      $request_classification_items[$role->reviewer_classification]['text'] .= '<div class="items-review-request">';
+      $request_classification_items[$role->reviewer_classification]['text'] .= '<span class="items-review-label-classification">' . check_plain($request_classifications[$role->request_classification]) . '</span>';
+      $request_classification_items[$role->reviewer_classification]['text'] .= ' <span class="items-review-label-step">(' . check_plain($review_steps[$role->review_step]) . ')</span>';
+      $request_classification_items[$role->reviewer_classification]['text'] .= '</div>';
+    }
+    unset($role);
+    unset($request_classifications);
+    unset($review_steps);
+
+    foreach ($request_classification_items as $reviewer_classification => $request_classification_item) {
+      $review .= '<div class="view_user-item view_user-item-roles-review">';
+      $review .= '<div class="items-review-classification">' . check_plain($reviewer_classifications[$reviewer_classification]) . ':</div>';
+      $review .= $request_classification_item['text'];
+      $review .= '</div>';
+    }
+    unset($reviewer_classification);
+    unset($request_classification_item);
+    unset($request_classification_items);
+    unset($reviewer_classifications);
+  }
+  unset($roles_review);
+  if (is_null($review)) {
+    $review = '<div class="view_user-item view_user-item-roles-review"><span class="item-information item-information-roles-review">No roles assigned</span></div>';
   }
 
   $special = NULL;
@@ -612,6 +657,7 @@ function mfcs_request_users_0_view_page($user_id) {
     }
   }
   unset($role);
+  unset($roles_special);
   if (is_null($special)) {
     $special = '<div class="view_user-item view_user-item-roles-special"><span class="item-information item-information-roles-special">No roles assigned</span></div>';
   }
@@ -623,6 +669,7 @@ function mfcs_request_users_0_view_page($user_id) {
     }
   }
   unset($role);
+  unset($roles_administer);
   if (is_null($administer_text)) {
     $administer_text = '<div class="view_user-item view_user-item-roles-administer"><span class="item-information item-information-roles-administer">No roles assigned</span></div>';
   }
@@ -648,9 +695,9 @@ function mfcs_request_users_0_view_page($user_id) {
 
   $duplicate = NULL;
   if ((isset($account->mfcs['ldap_duplicate']) && $account->mfcs['ldap_duplicate']) || $total_users > 1) {
-    $duplicate = 'There <strong>Duplicate</strong> accounts for this user.';
+    $duplicate = 'Has <strong>Duplicate</strong> accounts.';
     $duplicate_accounts_in_system = FALSE;
-    $duplicate_accounts = 'There are <strong>Duplicate</strong> accounts:<ul class="item-information-list item-information-duplicate-list">';
+    $duplicate_accounts = 'Has <strong>Duplicate</strong> accounts:<ul class="item-information-list item-information-duplicate-list">';
     $duplicate_accounts_processed = array();
 
     if (is_int($banner_id)) {
@@ -897,6 +944,7 @@ function mfcs_request_users_0_view_page($user_id) {
   $markup .= '<div class="view_user-item view_user-item-email"><span class="item-label item-label-email strong">E-mail:</span> <span class="item-value item-value-email">' . $email . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-banner_id"><span class="item-label item-label-banner_id strong">Banner ID:</span> <span class="item-value item-value-banner_id">' . $account->mfcs['banner_id'] . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-phone"><span class="item-label item-label-phone strong">Phone:</span> <span class="item-value item-value-phone">' . $phone . '</span></div>';
+  $markup .= '<div class="view_user-item view_user-item-created_on"><span class="item-label item-label-created_on strong">Created On:</span> <span class="item-value item-value-created_on">' . date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $account->created) . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-updated_on"><span class="item-label item-label-updated_on strong">Updated On:</span> <span class="item-value item-value-updated_on">' . date(MFCS_DATE_FORMAT_DATE_TIME_SECONDS_SQUEEZE, $updated) . '</span></div>';
   $markup .= '<div class="view_user-item view_user-item-last_login"><span class="item-label item-label-last_login strong">Last Login:</span> <span class="item-value item-value-last_login">' . $last_login . '</span></div>';
   $markup .= '</div>';
@@ -936,19 +984,24 @@ function mfcs_request_users_0_view_page($user_id) {
   $markup .= '</div>';
 
   $markup .= '<div class="view_user-group view_user-group-roles-venue">';
-  $markup .= '<h3 class="view_user-group-header view_user-group-header-roles-venue">Venue-Specific Roles</h3>';
+  $markup .= '<h3 class="view_user-group-header view_user-group-header-roles-venue">Venue Roles</h3>';
   $markup .= $venue;
+  $markup .= '</div>';
+
+  $markup .= '<div class="view_user-group view_user-group-roles-review">';
+  $markup .= '<h3 class="view_user-group-header view_user-group-header-roles-review">Review Roles</h3>';
+  $markup .= $review;
   $markup .= '</div>';
 
   $buttons = '';
   if ($is_manager || $is_administer) {
     $markup .= '<div class="view_user-group view_user-group-roles-special">';
-    $markup .= '<h3 class="view_user-group-header view_user-group-header-roles-special">Special/Exceptional Roles</h3>';
+    $markup .= '<h3 class="view_user-group-header view_user-group-header-roles-special">Exceptional Roles</h3>';
     $markup .= $special;
     $markup .= '</div>';
 
     $markup .= '<div class="view_user-group view_user-group-roles-administer">';
-    $markup .= '<h3 class="view_user-group-header view_user-group-header-roles-administer">Administration Roles</h3>';
+    $markup .= '<h3 class="view_user-group-header view_user-group-header-roles-administer">Administrative Roles</h3>';
     $markup .= $administer_text;
     $markup .= '</div>';
 
@@ -1360,7 +1413,7 @@ function mfcs_request_users_0_add_or_edit_form($form, &$form_state, $user_id = N
 
   $form['form']['roles']['venue'] = array(
     '#type' => 'checkboxes',
-    '#title' => 'Venue-Specific Roles',
+    '#title' => 'Venue Roles',
     '#default_value' => array(),
     '#options' => $roles_venue,
     '#description' => 'These roles are auto-populated from Banner unless either <em>Manager</em> or <em>Bannerless Exception</em> roles are assigned.',
@@ -1368,15 +1421,15 @@ function mfcs_request_users_0_add_or_edit_form($form, &$form_state, $user_id = N
 
   $form['form']['roles']['special'] = array(
     '#type' => 'checkboxes',
-    '#title' => 'Special/Exceptional Roles',
+    '#title' => 'Exceptional Roles',
     '#default_value' => array(),
     '#options' => $roles_special,
-    '#description' => 'Special case roles. For example, if the <em>Bannerless Exception</em> role is specified, then the Venue-Specific Roles are not auto-enforced.',
+    '#description' => 'Special case roles. For example, if the <em>Bannerless Exception</em> role is specified, then the Venue Roles are not auto-enforced.',
   );
 
   $form['form']['roles']['administer'] = array(
     '#type' => 'checkboxes',
-    '#title' => 'Administration Roles',
+    '#title' => 'Administrative Roles',
     '#default_value' => array(),
     '#options' => $roles_administer,
     '#description' => 'These roles are related to administration and management tasks. These may only be applied to users with the <em>Manager</em> role.',
