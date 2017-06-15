@@ -937,6 +937,29 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     $reviewer_classifications['all'][MFCS_REVIEWER_CLASSIFICATION_REQUESTER] = MFCS_REVIEWER_CLASSIFICATION_REQUESTER;
   }
 
+  // in the case of comments, attempt to find any roles to comment as, for reviewers.
+  if ($decision === MFCS_REVIEW_DECISION_COMMENT && empty($reviewer_classifications['step'])) {
+    $reviewer_classifications_review = mfcs_get_reviewer_classifications($user->uid, $classification, MFCS_REVIEW_STEP_REVIEW);
+    $reviewer_classifications_final_decision = mfcs_get_reviewer_classifications($user->uid, $classification, MFCS_REVIEW_STEP_FINAL_DECISION);
+
+    if (!empty($reviewer_classifications_review)) {
+      foreach ($reviewer_classifications_review['step'] as $reviewer_classification) {
+        $reviewer_classifications['step'][$reviewer_classification] = $reviewer_classification;
+      }
+      unset($reviewer_classification);
+    }
+
+    if (!empty($reviewer_classifications_final_decision)) {
+      foreach ($reviewer_classifications_final_decision['step'] as $reviewer_classification) {
+        $reviewer_classifications['step'][$reviewer_classification] = $reviewer_classification;
+      }
+      unset($reviewer_classification);
+    }
+
+    unset($reviewer_classifications_review);
+    unset($reviewer_classifications_final_decision);
+  }
+
   // check to see if the user handles financial information or insurance information.
   if ($decision === MFCS_REVIEW_DECISION_REQUIREMENT) {
     // Some requirements options are not relevant for 'financer', so disclude them during the check.
