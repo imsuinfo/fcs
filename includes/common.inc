@@ -474,7 +474,7 @@ function drupal_http_build_query(array $query, $parent = '') {
   $params = array();
 
   foreach ($query as $key => $value) {
-    $key = ($parent ? $parent . '[' . rawurlencode($key) . ']' : rawurlencode($key));
+    $key = $parent ? $parent . rawurlencode('[' . $key . ']') : rawurlencode($key);
 
     // Recurse into children.
     if (is_array($value)) {
@@ -2914,6 +2914,7 @@ function drupal_deliver_html_page($page_callback_result, $dont_print = FALSE) {
             $page = str_replace(' is-html5 ', ' ', $page);
             $page = str_replace(' is-fixed_width ', ' ', $page);
             $page = str_replace(' is-flex_width ', ' ', $page);
+            $page = str_replace(' is-front ', ' ', $page);
             $page = preg_replace('/ at-\w+ /i', ' ', $page);
             $markup_css = isset($cf['markup_css']['body']['class']) ? $cf['markup_css']['body']['class'] : '';
             $markup_css = str_replace(' is-expanded ', ' ', $markup_css);
@@ -3008,10 +3009,11 @@ function drupal_deliver_html_page($page_callback_result, $dont_print = FALSE) {
         $database_unavailable = TRUE;
         try {
           if (function_exists('db_query')) {
-            $file = db_query("values (TRUE)")->fetchField();
-            if ($file !== FALSE) {
+            $query_result = db_query("values (TRUE)")->fetchField();
+            if ($query_result !== FALSE) {
               $database_unavailable = FALSE;
             }
+            unset($query_result);
           }
         }
         catch (Error $e) {
@@ -3019,16 +3021,37 @@ function drupal_deliver_html_page($page_callback_result, $dont_print = FALSE) {
         catch (Exception $e) {
         }
 
-        // Print a static 503 page when database is unavailable.
+        // Print a static 503 page or a static 500 (when database is unavailable).
         $error_document_file_503 = NULL;
+        $error_document_file_500_no_database = NULL;
         if ($database_unavailable) {
-          $error_document_file_503 = variable_get('error_document_file_503', '/var/www/error_documents/5xx/503.html');
+          $error_document_file_500_no_database = variable_get('error_document_file_500-no_database', '/var/www/error_documents/5xx/500-no_database.html');
+          if (!is_string($error_document_file_500_no_database) || !file_exists($error_document_file_500_no_database)) {
+            $error_document_file_500_no_database = NULL;
+          }
+          else {
+            $error_document_file_503 = variable_get('error_document_file_503', '/var/www/error_documents/5xx/503.html');
+            if (!is_string($error_document_file_503) || !file_exists($error_document_file_503)) {
+              $error_document_file_503 = NULL;
+            }
+          }
+        }
+        else {
+          $error_document_file_503 = variable_get('error_document_file_503-maintenance_mode', '/var/www/error_documents/5xx/503-maintenance_mode.html');
+          if (!is_string($error_document_file_503) || !file_exists($error_document_file_503)) {
+            $error_document_file_503 = NULL;
+          }
         }
 
-        if ($emergency_mode == 0 && is_string($error_document_file_503) && file_exists($error_document_file_503)) {
-          drupal_add_http_header('Status', '503 Service Unavailable', FALSE, 503);
-
-          $page = file_get_contents($error_document_file_503);
+        if (!$emergency_mode && (is_string($error_document_file_500_no_database) || is_string($error_document_file_503))) {
+          if (is_string($error_document_file_500_no_database)) {
+            drupal_add_http_header('Status', '500 Temporarily Unavailable', FALSE, 500);
+            $page = file_get_contents($error_document_file_500_no_database);
+          }
+          else {
+            drupal_add_http_header('Status', '503 Service Unavailable', FALSE, 503);
+            $page = file_get_contents($error_document_file_503);
+          }
 
 
           // get all drupal messages and present them to the user.
@@ -3051,17 +3074,27 @@ function drupal_deliver_html_page($page_callback_result, $dont_print = FALSE) {
                 cf_theme_get_variables($cf);
               }
 
-              $page = str_replace(' is-using_database ', ' ', $page);
-              $page = str_replace(' is-anonymous ', ' ', $page);
-              $page = str_replace(' is-logged_in ', ' ', $page);
-              $page = str_replace(' is-html5 ', ' ', $page);
-              $page = str_replace(' is-fixed_width ', ' ', $page);
-              $page = str_replace(' is-flex_width ', ' ', $page);
-              $page = preg_replace('/ at-\w+ /i', ' ', $page);
-              $markup_css = isset($cf['markup_css']['body']['class']) ? $cf['markup_css']['body']['class'] : '';
-              $markup_css = str_replace(' is-expanded ', ' ', $markup_css);
-              $markup_css = str_replace(' is-collapsed ', ' ', $markup_css);
-              $page = str_replace('<body id="mcneese-body" class="mcneese ', '<body id="mcneese-body" class="mcneese ' . $markup_css . ' ', $page);
+              $fixed_css = isset($cf['markup_css']['body']['class']) ? $cf['markup_css']['body']['class'] : '';
+              $fixed_css = preg_replace('/ is-using_database\b/i', '', $fixed_css);
+              $fixed_css = preg_replace('/ is-anonymous\b/i', '', $fixed_css);
+              $fixed_css = preg_replace('/ is-logged_in\b/i', '', $fixed_css);
+              $fixed_css = preg_replace('/ is-fixed_width\b/i', '', $fixed_css);
+              $fixed_css = preg_replace('/ is-flex_width\b/i', '', $fixed_css);
+              $fixed_css = preg_replace('/ is-unsupported\b/i', '', $fixed_css);
+              $fixed_css = preg_replace('/ is-legacy\b/i', '', $fixed_css);
+              $fixed_css = preg_replace('/ is-expanded\b/i', '', $fixed_css);
+              $fixed_css = preg_replace('/ is-collapsed\b/i', '', $fixed_css);
+              $fixed_css = preg_replace('/ is-front\b/i', '', $fixed_css);
+              $fixed_css = preg_replace('/ date-year-\d+\b/i', '', $fixed_css);
+              $fixed_css = preg_replace('/ date-month-\d+\b/i', '', $fixed_css);
+              $fixed_css = preg_replace('/ date-week-\d+\b/i', '', $fixed_css);
+              $fixed_css = preg_replace('/ date-day-\d+\b/i', '', $fixed_css);
+              $fixed_css = preg_replace('/ date-hour-\d+\b/i', '', $fixed_css);
+              $fixed_css = preg_replace('/ date-minute-\d+\b/i', '', $fixed_css);
+              $fixed_css = preg_replace('/ at-\w+\b/i', '', $fixed_css);
+
+              $page = preg_replace('/<body id="mcneese-body" class="([^"]*)"/i', '<body id="mcneese-body" class="mcneese ' . $fixed_css . '"', $page);
+              unset($fixed_css);
             }
             catch (Error $e) {
               // if the code is currently being modified, then errors could occur, so attempt to silently ignore them.
