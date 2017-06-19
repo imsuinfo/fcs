@@ -943,6 +943,7 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
   }
 
   // report any detected unavailability to request conflicts.
+  $conflict_message = NULL;
   $conflicts = mfcs_unavailability_rooms_conflicts($unavailability_id);
   if (!empty($conflicts)) {
     $conflict_message = '<span class="strong uppercase">Warning</span>: the following requests are scheduled on unavailable dates:<ul>';
@@ -950,7 +951,6 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
       $conflict_message .= '<li><a href="' . $base_path . 'requests/view-0/' . $conflict['id'] . $url_arguments . '">' . check_plain($conflict['title']) . '</a></li>';
     }
     $conflict_message .= '</ul>';
-    drupal_set_message($conflict_message, 'warning');
   }
 
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
@@ -1055,6 +1055,12 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
 
       $markup .= '<br class="clear">';
     }
+  }
+
+  if (!is_null($conflict_message)) {
+    $markup .= '<div class="conflict_messages">';
+    $markup .= $conflict_message;
+    $markup .= '</div>';
   }
 
   $markup .= '</div>';
