@@ -2107,7 +2107,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
   }
 
   if (is_array($warnings) && !empty($warnings)) {
-    $form['warnings']['#markup'] = '<div class="request-warnings">';
+    $form['warnings']['#markup'] = '<div class="request-warnings no-print">';
 
     foreach ($warnings as $warning) {
       $form['warnings']['#markup'] .= '<div class="request-warning">' . $warning . '</div>';
