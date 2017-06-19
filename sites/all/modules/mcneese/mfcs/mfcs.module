@@ -13913,9 +13913,6 @@ function mfcs_get_unavailabilities($year, $room_id = NULL, $building_id = NULL, 
     }
 
     if (!is_null($timestamp_start)) {
-      // only process values on a per day-to-day basis by setting the timestamps to midnight for each day.
-      $timestamp_start_midnight = strtotime('midnight today', $timestamp_start);
-
       if (is_null($timestamp_stop)) {
         // because year - 1 is included, only load results that include the current year.
         $year_fixed = mfcs_strtotime_year_fixup($year);
@@ -13928,30 +13925,26 @@ function mfcs_get_unavailabilities($year, $room_id = NULL, $building_id = NULL, 
         $query->condition($or);
 
         $and = db_and();
-        $and->condition('mu.date_start', $timestamp_start_midnight, '>=');
-        $and->condition('mu.date_stop', $timestamp_start_midnight, '<');
+        $and->condition('mu.date_start', $timestamp_start, '>=');
+        $and->condition('mu.date_stop', $timestamp_start, '<');
         $query->condition($and);
       }
       else {
-        // only process values on a per day-to-day basis by setting the timestamps to midnight for each day.
-        // the stop-point is exclusive, so 'tomorrow' must be used instead of 'today'.
-        $timestamp_stop_midnight = strtotime('midnight tomorrow', $timestamp_stop);
-
         $or = db_or();
 
         $and = db_and();
-        $and->condition('mu.date_start', $timestamp_start_midnight, '>=');
-        $and->condition('mu.date_start', $timestamp_stop_midnight, '<');
+        $and->condition('mu.date_start', $timestamp_start, '>=');
+        $and->condition('mu.date_start', $timestamp_stop, '<');
         $or->condition($and);
 
         $and = db_and();
-        $and->condition('mu.date_stop', $timestamp_start_midnight, '>');
-        $and->condition('mu.date_stop', $timestamp_stop_midnight, '<=');
+        $and->condition('mu.date_stop', $timestamp_start, '>');
+        $and->condition('mu.date_stop', $timestamp_stop, '<=');
         $or->condition($and);
 
         $and = db_and();
-        $and->condition('mu.date_start', $timestamp_start_midnight, '<');
-        $and->condition('mu.date_stop', $timestamp_start_midnight, '>');
+        $and->condition('mu.date_start', $timestamp_start, '<');
+        $and->condition('mu.date_stop', $timestamp_start, '>');
         $or->condition($and);
 
         $query->condition($or);
