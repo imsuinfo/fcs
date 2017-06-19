@@ -1618,7 +1618,10 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         }
 
         if (!empty($conflict_message)) {
-          $warnings[] = $conflict_message;
+          if ($show_display) {
+            $warnings[] = $conflict_message;
+          }
+
           if (!(($status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED || $status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED) && $step == MFCS_REVIEW_STEP_COMPLETED)) {
             $form['review']['operations']['warnings']['#markup']  .= $conflict_message;
           }
