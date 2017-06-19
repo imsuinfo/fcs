@@ -8190,20 +8190,23 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
 
     $query->distinct();
 
-    $statuses = array(
-      MFCS_REQUEST_STATUS_LOCKED,
-      MFCS_REQUEST_STATUS_CLOSED_ACCEPTED,
+    $not_these_status = array(
+      MFCS_REQUEST_STATUS_DELETED,
+      MFCS_REQUEST_STATUS_CLOSED_DENIED,
+      MFCS_REQUEST_STATUS_CLOSED_UNAVAILABLE,
+      MFCS_REQUEST_STATUS_CLOSED_DUE_TO_LOCK,
+      MFCS_REQUEST_STATUS_CANCELLED,
+      MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED,
     );
 
-    $query->condition('mer.status', $statuses, 'IN');
+    $query->condition('mer.status', $not_these_status, 'NOT IN');
     $query->condition('mer.room', $room);
     $query->condition('mfdd.value', $dates, 'IN');
     $query->condition('mfdd.cancelled', 1, '<>'); // using <> for backwards compatibility where mfdd.cancelled may be NULL.
 
     if (!is_null($request_id)) {
-      $query->condition('mer.id', $request_id, '<>');
+      $query->condition('mer.id', $request_id);
     }
-
     $results = $query->execute()->fetchAll();
 
 
@@ -8235,7 +8238,7 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
         $query->condition('mfdtsp.revision', $result->time_stop_revision);
 
         if (!is_null($request_id)) {
-          $query->condition('mfdd.request_id', $request_id, '<>');
+          $query->condition('mfdd.request_id', $request_id);
         }
 
         $or = db_or();
