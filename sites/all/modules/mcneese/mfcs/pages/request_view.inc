@@ -231,6 +231,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
     }
   }
 
+  $warnings = array();
   if ($can_reassign_request && is_null($use_revision)) {
     if ($show_display) {
       $coordinator_problems = mfcs_get_request_venue_coordinator_inconsistencies($request);
@@ -241,10 +242,10 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           if (!empty($coordinator_problems['disabled']['current']['processed_name'])) {
             $user_venue_coordinator_name = '<a href="' . $base_path . 'users-0/view/' . $coordinator_problems['disabled']['current']['user_id'] . '" title="User ID: ' . $coordinator_problems['disabled']['current']['user_id'] .'">' . $coordinator_problems['disabled']['current']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['disabled']['current']['id'] . ']</sup>';
 
-            drupal_set_message('<span class="strong uppercase">Warning</span>: The Venue Coordinator (' . $user_venue_coordinator_name . ') assigned to this request no longer has access to this system.', 'warning', FALSE);
+            $warnings[] = '<span class="strong uppercase">Warning</span>: The Venue Coordinator (' . $user_venue_coordinator_name . ') assigned to this request no longer has access to this system.';
           }
           else {
-            drupal_set_message('<span class="strong uppercase">Warning</span>: The Venue Coordinator assigned to this request no longer has access to this system.', 'warning', FALSE);
+            $warnings[] = '<span class="strong uppercase">Warning</span>: The Venue Coordinator assigned to this request no longer has access to this system.';
           }
         }
 
@@ -253,10 +254,10 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
             $user_venue_coordinator_name = '<a href="' . $base_path . 'users-0/view/' . $coordinator_problems['out_of_sync']['current']['user_id'] . '">' . $coordinator_problems['out_of_sync']['current']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['out_of_sync']['current']['user_id'] . ']</sup>';
             $user_banner_coordinator_name = '<a href="' . $base_path . 'users-0/view/' . $coordinator_problems['out_of_sync']['banner']['banner_id'] . '" title="User ID: ' . $coordinator_problems['out_of_sync']['banner']['banner_id'] .'">' . $coordinator_problems['out_of_sync']['banner']['processed_name'] . '</a> <sup>[id: ' . $coordinator_problems['out_of_sync']['banner']['banner_id'] . ']</sup>';
 
-            drupal_set_message('<span class="strong uppercase">Warning</span>: The Venue Coordinator (' . $user_venue_coordinator_name . ') assigned to this request no longer the same as the Venue Coordinator (' . $user_banner_coordinator_name . ') assigned via Banner.', 'warning', FALSE);
+            $warnings[] = '<span class="strong uppercase">Warning</span>: The Venue Coordinator (' . $user_venue_coordinator_name . ') assigned to this request no longer the same as the Venue Coordinator (' . $user_banner_coordinator_name . ') assigned via Banner.';
           }
           else {
-            drupal_set_message('<span class="strong uppercase">Warning</span>: The Venue Coordinator assigned to this request is no longer  the same as the Venue Coordinator assigned via Banner.', 'warning', FALSE);
+            $warnings[] = '<span class="strong uppercase">Warning</span>: The Venue Coordinator assigned to this request is no longer  the same as the Venue Coordinator assigned via Banner.';
           }
         }
       }
@@ -444,6 +445,12 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
   if (is_string($request_type)) {
     $request_type = (int) $request_type;
   }
+
+
+  $form['warnings'] = array(
+    '#type' => 'markup',
+    '#markup' => '',
+  );
 
 
   if ($show_display) {
@@ -1610,12 +1617,13 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           }
         }
 
-        if (($status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED || $status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED) && $step == MFCS_REVIEW_STEP_COMPLETED) {
-          drupal_set_message($conflict_message, 'warning');
+        if (!empty($conflict_message)) {
+          $warnings[] = $conflict_message;
+          if (!(($status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED || $status === MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED) && $step == MFCS_REVIEW_STEP_COMPLETED)) {
+            $form['review']['operations']['warnings']['#markup']  .= $conflict_message;
+          }
         }
-        else {
-          $form['review']['operations']['warnings']['#markup']  .= $conflict_message;
-        }
+
         unset($conflict_message);
         unset($all_dates);
         unset($all_time_start);
@@ -2096,6 +2104,16 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
         ),
       );
     }
+  }
+
+  if (is_array($warnings) && !empty($warnings)) {
+    $form['warnings']['#markup'] = '<div class="request-warnings">';
+
+    foreach ($warnings as $warning) {
+      $form['warnings']['#markup'] .= '<div class="request-warning">' . $warning . '</div>';
+    }
+
+    $form['warnings']['#markup'] .= '</div>';
   }
 
   return $form;

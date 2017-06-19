@@ -95,6 +95,11 @@ function mfcs_request_create_0_form($form, &$form_state, $copy_request = NULL) {
     '#tree' => TRUE,
   );
 
+  $form['warnings'] = array(
+    '#type' => 'markup',
+    '#markup' => '',
+  );
+
   $form['request'] = array(
     '#tree' => TRUE,
   );
@@ -150,6 +155,23 @@ function mfcs_request_create_0_form($form, &$form_state, $copy_request = NULL) {
       'path' => 'request[',
     ),
   );
+
+  if (isset($form_state['warnings']) && !empty($form_state['warnings'])) {
+    $warnings_markup = NULL;
+    foreach ($form_state['warnings'] as $warning_group => $warning) {
+      if (empty($warning)) {
+        continue;
+      }
+
+      $warnings_markup .= $warning;
+    }
+    unset($warning);
+
+    if (!is_null($warnings_markup)) {
+      $form['warnings'] .= $warnings_markup;
+    }
+    unset($warnings_markup);
+  }
 
   if (is_array($request)) {
     $form['form']['existing']['#value'] = mfcs_get_request_existing_values($request);
