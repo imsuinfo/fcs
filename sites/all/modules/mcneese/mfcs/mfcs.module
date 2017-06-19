@@ -13934,7 +13934,8 @@ function mfcs_get_unavailabilities($year, $room_id = NULL, $building_id = NULL, 
       }
       else {
         // only process values on a per day-to-day basis by setting the timestamps to midnight for each day.
-        $timestamp_stop_midnight = strtotime('midnight today', $timestamp_stop);
+        // the stop-point is exclusive, so 'tomorrow' must be used instead of 'today'.
+        $timestamp_stop_midnight = strtotime('midnight tomorrow', $timestamp_stop);
 
         $or = db_or();
 
