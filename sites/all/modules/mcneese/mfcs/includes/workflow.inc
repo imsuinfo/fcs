@@ -1446,7 +1446,7 @@ function mfcs_workflow_step_review($request_id, $user, $decision, $restriction =
     // Of the ones required, if all are set to provided, then mark the insurance provided as provided.
     // Of the ones required, if any are set to not provided, then mark the insurance provided as not provided.
     if ($contractor_insurance === MFCS_INSURANCE_REQUIRED_NOT && $unaffiliated_insurance === MFCS_INSURANCE_REQUIRED_NOT && $affiliated_insurance === MFCS_INSURANCE_REQUIRED_NOT) {
-      $provided_insurance = MFCS_INSURANCE_PROVIDED_NOT;
+      $provided_insurance = MFCS_INSURANCE_REQUIRED_NOT;
     }
     else {
       $provided_insurance = MFCS_INSURANCE_REQUIRED;
