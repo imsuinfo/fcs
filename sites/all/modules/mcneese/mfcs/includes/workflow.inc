@@ -3394,6 +3394,9 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         elseif ($parameters['reminder_data']->interval == MFCS_REMINDER_INTERVAL_DAY_1) {
           $remaining_days = '1';
         }
+        elseif ($parameters['reminder_data']->interval == MFCS_REMINDER_INTERVAL_DAY_0) {
+          $remaining_days = '0';
+        }
       }
 
       $remaining_content = "\n" . 'This is the ' . $remaining_days . '-day reminder e-mail submitted on: ' . $current_date . ".\n";
@@ -3401,12 +3404,26 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
       $email_params['title_suffix'] = 'Unreviewed Request';
       $email_params['content'] = '';
-      $email_params['content'] .= 'This is a reminder that the review process has not been completed and the first event/meeting date begins in approximately ' . $remaining_days . ' days for the request: ' . check_plain($request_title) . ".\n";
+
+      if ($remaining_days == '0') {
+        $email_params['content'] .= 'This is a reminder that the review process has not been completed and the first event/meeting date begins today for the request: ' . check_plain($request_title) . ".\n";
+      }
+      else {
+        $email_params['content'] .= 'This is a reminder that the review process has not been completed and the first event/meeting date begins in approximately ' . $remaining_days . ' days for the request: ' . check_plain($request_title) . ".\n";
+      }
+
       $email_params['content'] .= $remaining_content;
       $email_params['content'] .= "\n";
       $email_params['content'] .= $standard_content;
       $email_params['markup'] = '';
-      $email_params['markup'] .= 'This is a reminder that the review process has not been completed and the first event/meeting date begins in approximately ' . $remaining_days . ' days for the request: <em>' . check_plain($request_title) . '</em>.<br>';
+
+      if ($remaining_days == '0') {
+        $email_params['markup'] .= 'This is a reminder that the review process has not been completed and the first event/meeting date begins today for the request: <em>' . check_plain($request_title) . '</em>.<br>';
+      }
+      else {
+        $email_params['markup'] .= 'This is a reminder that the review process has not been completed and the first event/meeting date begins in approximately ' . $remaining_days . ' days for the request: <em>' . check_plain($request_title) . '</em>.<br>';
+      }
+
       $email_params['markup'] .= $remaining_markup;
       $email_params['markup'] .= '<br>';
       $email_params['markup'] .= $standard_markup;

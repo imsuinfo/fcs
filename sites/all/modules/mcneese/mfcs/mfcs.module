@@ -170,6 +170,7 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 9);
  * Defines e-mail reminder intervals.
  */
  define('MFCS_REMINDER_INTERVAL_NONE', 0);
+ define('MFCS_REMINDER_INTERVAL_DAY_0', 0);
  define('MFCS_REMINDER_INTERVAL_DAY_1', 1);
  define('MFCS_REMINDER_INTERVAL_DAY_2', 2);
  define('MFCS_REMINDER_INTERVAL_DAY_3', 3);
@@ -183,6 +184,7 @@ define('MFCS_REQUEST_STATUS_CLOSED_ACCEPTED_CANCELLED', 9);
  define('MFCS_REMINDER_INTERVAL_DAY_11', 11);
  define('MFCS_REMINDER_INTERVAL_DAY_12', 12);
  define('MFCS_REMINDER_INTERVAL_DAY_30', 30);
+ define('MFCS_REMINDER_INTERVAL_WEEK_0', 1000);
  define('MFCS_REMINDER_INTERVAL_WEEK_1', 1001);
  define('MFCS_REMINDER_INTERVAL_WEEK_2', 1002);
  define('MFCS_REMINDER_INTERVAL_WEEK_3', 1003);
@@ -6370,6 +6372,7 @@ function mfcs_unreviewed_request_alert_alert_cron() {
   $parameters['reminder_reason'] = 'unreviewed_request';
 
   $intervals = array(
+    MFCS_REMINDER_INTERVAL_DAY_0,
     MFCS_REMINDER_INTERVAL_DAY_1,
     MFCS_REMINDER_INTERVAL_DAY_3,
     MFCS_REMINDER_INTERVAL_DAY_7,
@@ -6382,29 +6385,40 @@ function mfcs_unreviewed_request_alert_alert_cron() {
   $all_sent = array();
   $reminder_logged = array();
   foreach ($intervals as $interval) {
-    if ($interval == MFCS_REMINDER_INTERVAL_DAY_1) {
+    $results = NULL;
+    if ($interval == MFCS_REMINDER_INTERVAL_DAY_0) {
+      $from = strtotime('midnight today', $dates['today']);
+      $to = strtotime('tomorrow', $from);
+
+      $parameters['message_priority'] = MFCS_MAIL_PRIORITY_HIGHEST;
+      $results = mfcs_get_requests_unreviewed($from, $to, $today);
+    }
+    elseif ($interval == MFCS_REMINDER_INTERVAL_DAY_1) {
       $from = strtotime('+1 days', $dates['today']);
       $min_create_date = strtotime('-3 days', $dates['today']);
 
       $parameters['message_priority'] = MFCS_MAIL_PRIORITY_HIGH;
+      $results = mfcs_get_requests_unreviewed($from, NULL, $min_create_date);
     }
     elseif ($interval == MFCS_REMINDER_INTERVAL_DAY_3) {
       $from = strtotime('+3 days', $dates['today']);
       $min_create_date = strtotime('-4 days', $dates['today']);
 
       $parameters['message_priority'] = MFCS_MAIL_PRIORITY_HIGH;
+      $results = mfcs_get_requests_unreviewed($from, NULL, $min_create_date);
     }
     elseif ($interval == MFCS_REMINDER_INTERVAL_DAY_7) {
       $from = strtotime('+7 days', $dates['today']);
       $min_create_date = strtotime('-7 days', $dates['today']);
 
       $parameters['message_priority'] = MFCS_MAIL_PRIORITY_HIGH;
+      $results = mfcs_get_requests_unreviewed($from, NULL, $min_create_date);
     }
     else {
       continue;
     }
 
-    $results = mfcs_get_requests_unreviewed($from, NULL, $min_create_date);
+
     if (!empty($results)) {
       $sent = array();
 
@@ -11701,7 +11715,7 @@ function mfcs_get_requests_not_providing_insurance($date_from = NULL, $date_to =
  *   A < is performed on this value.
  * @param int|null $min_create_date
  *   (optional) When not NULL, an date timestamp integer that is considered the minimum create date.
- *   For exmaple, requests that are created within a certain number of days should avoid something like sending a 3-day alert for a request what was created 2 days before the event takes place.
+ *   For example, requests that are created within a certain number of days should avoid something like sending a 3-day alert for a request what was created 2 days before the event takes place.
  *
  * @return array|bool
  *   An array of requests. FALSE is returned on error.
@@ -11946,6 +11960,7 @@ function mfcs_get_request_reminders($dates, $type, $interval = NULL, $request_id
   }
 
   $intervals = array(
+    MFCS_REMINDER_INTERVAL_DAY_0 => MFCS_REMINDER_INTERVAL_DAY_0,
     MFCS_REMINDER_INTERVAL_DAY_1 => MFCS_REMINDER_INTERVAL_DAY_1,
     MFCS_REMINDER_INTERVAL_DAY_2 => MFCS_REMINDER_INTERVAL_DAY_2,
     MFCS_REMINDER_INTERVAL_DAY_3 => MFCS_REMINDER_INTERVAL_DAY_3,
@@ -11959,6 +11974,7 @@ function mfcs_get_request_reminders($dates, $type, $interval = NULL, $request_id
     MFCS_REMINDER_INTERVAL_DAY_11 => MFCS_REMINDER_INTERVAL_DAY_11,
     MFCS_REMINDER_INTERVAL_DAY_12 => MFCS_REMINDER_INTERVAL_DAY_12,
     MFCS_REMINDER_INTERVAL_DAY_30 => MFCS_REMINDER_INTERVAL_DAY_30,
+    MFCS_REMINDER_INTERVAL_WEEK_0 => MFCS_REMINDER_INTERVAL_WEEK_0,
     MFCS_REMINDER_INTERVAL_WEEK_1 => MFCS_REMINDER_INTERVAL_WEEK_1,
     MFCS_REMINDER_INTERVAL_WEEK_2 => MFCS_REMINDER_INTERVAL_WEEK_2,
     MFCS_REMINDER_INTERVAL_WEEK_3 => MFCS_REMINDER_INTERVAL_WEEK_3,
