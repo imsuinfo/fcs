@@ -1724,12 +1724,12 @@ function mfcs_request_problems_0_requests_form($form, &$form_state, $page_number
     );
 
     $row['operations'] = array(
-      'data' => '<a href="' . $base_path . 'problems-0/requests/request/' . $item->id . $url_arguments . '" class="operation-link operation-link-details">Details</a>',
+      'data' => '<a href="' . $base_path . 'problems-0/requests/problem/' . $item->id . $url_arguments . '" class="operation-link operation-link-details">Details</a>',
       'class' => $class_operations,
     );
 
     $row['operations']['data'] .= ' <a href="' . $base_path . 'requests/view-0/' . $item->request_id . $url_arguments . '" class="operation-link operation-link-request">Request</a>';
-    $row['operations']['data'] .= ' <a href="' . $base_path . 'problems-0/requests/request/' . $item->id . '/recheck' . $url_arguments . '" class="operation-link operation-link-recheck white-space-nowrap">Re-Check</a>';
+    $row['operations']['data'] .= ' <a href="' . $base_path . 'problems-0/requests/problem/' . $item->id . '/recheck' . $url_arguments . '" class="operation-link operation-link-recheck white-space-nowrap">Re-Check</a>';
 
     $rows[] = $row;
   }
@@ -1971,7 +1971,7 @@ function mfcs_request_problems_0_request_form($form, &$form_state, $problem_id) 
   mfcs_include(MFCS_INCLUDE_MISCELLANEOUS);
   mfcs_include(MFCS_INCLUDE_LIST_OPTIONS);
 
-  mfcs_add_canonical_headers('problems-0/requests/request/' . $problem_id);
+  mfcs_add_canonical_headers('problems-0/requests/problem/' . $problem_id);
 
   $problem_results = mfcs_miscellaneous_problems_request_load($problem_id, TRUE, TRUE);
   if (empty($problem_results)) {
@@ -2739,7 +2739,7 @@ function mfcs_request_problems_0_request_form_submit($form, &$form_state) {
   // redirect after submitting.
   if (empty($form_state['values']['redirect_to'])) {
     if ($return_to_problem_page) {
-      $form_state['redirect'] = mfcs_build_redirect_array('problems-0/requests/request/' . $form['form']['problem']['#value']->id);
+      $form_state['redirect'] = mfcs_build_redirect_array('problems-0/requests/problem/' . $form['form']['problem']['#value']->id);
     }
     else {
       $form_state['redirect'] = mfcs_build_redirect_array('problems-0/requests');
@@ -2776,7 +2776,7 @@ function mfcs_request_problems_0_request_recheck($problem_id) {
     $url_arguments .= '?' . $mfcs_determined['complete'];
   }
 
-  mfcs_add_canonical_headers('problems-0/requests/request/' . $problem_id . '/recheck');
+  mfcs_add_canonical_headers('problems-0/requests/problem/' . $problem_id . '/recheck');
 
   $page_title = 'Facilities Use Problems - Re-Check Problem';
   drupal_set_title($page_title);

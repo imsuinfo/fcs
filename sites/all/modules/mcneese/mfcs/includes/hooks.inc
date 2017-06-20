@@ -1565,7 +1565,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'problems-0',
   );
 
-  $items['problems-0/requests/request/%'] = array(
+  $items['problems-0/requests/problem/%'] = array(
     'title' => 'Request Problems',
     'description' => 'Manage problems detected by the system that are specific to a single request.',
     'page callback' => 'drupal_get_form',
@@ -1578,7 +1578,7 @@ function mfcs_hook_menu_management(&$items, $module_path) {
     'tab_root' => 'problems-0/requests',
   );
 
-  $items['problems-0/requests/request/%/recheck'] = array(
+  $items['problems-0/requests/problem/%/recheck'] = array(
     'title' => 'Request Problems',
     'description' => 'Re-check a single problem for a single request.',
     'page callback' => 'mfcs_request_problems_0_request_recheck',

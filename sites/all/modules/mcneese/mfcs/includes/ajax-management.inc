@@ -1329,9 +1329,9 @@ function mfcs_ajax_problems_0_requests_list($argument_1 = NULL) {
       $row[3] = check_plain(date(MFCS_DATE_FORMAT_DATE_TIME_SQUEEZE, $problem->date));
       $row[4] = isset($problem->reason) ? check_plain($problem->reason) : '';
       $row[5] = (isset($problem->ignore) && $problem->ignore == 1) ? 'Yes' : 'No';
-      $row[6] = '<a href="' . $base_path . 'problems-0/requests/request/' . $problem->id . $url_arguments . '" class="operation-link operation-link-details">Details</a>';
+      $row[6] = '<a href="' . $base_path . 'problems-0/requests/problem/' . $problem->id . $url_arguments . '" class="operation-link operation-link-details">Details</a>';
       $row[6] .= ' <a href="' . $base_path . 'requests/view-0/' . $problem->request_id . $url_arguments . '" class="operation-link operation-link-request">Request</a>';
-      $row[6] .= ' <a href="' . $base_path . 'problems-0/requests/request/' . $problem->id . '/recheck' . $url_arguments . '" class="operation-link operation-link-recheck white-space-nowrap">Re-Check</a>';
+      $row[6] .= ' <a href="' . $base_path . 'problems-0/requests/problem/' . $problem->id . '/recheck' . $url_arguments . '" class="operation-link operation-link-recheck white-space-nowrap">Re-Check</a>';
 
       $response['data'][] = $row;
     }

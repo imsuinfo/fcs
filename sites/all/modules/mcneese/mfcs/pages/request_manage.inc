@@ -254,7 +254,7 @@ function mfcs_request_manage_0_page($request_id) {
     $markup .= '<div class="content content-' . $class_name . '">';
 
     foreach ($request_problems_by_id['results'] as $problem_id => $problem_data) {
-      $markup .= mfcs_request_manage_0_page_create_item_message('<a href="' . $base_path . '/problems-0/requests/request/' . ((int)$problem_id) . $url_arguments . '" class="link link-request_problem">' . check_plain($problem_data->reason) . '</a>.', $class_name);
+      $markup .= mfcs_request_manage_0_page_create_item_message('<a href="' . $base_path . '/problems-0/requests/problem/' . ((int)$problem_id) . $url_arguments . '" class="link link-request_problem">' . check_plain($problem_data->reason) . '</a>.', $class_name);
     }
     unset($problem_id);
     unset($problem_data);
