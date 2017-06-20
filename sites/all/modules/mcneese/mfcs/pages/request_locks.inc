@@ -90,13 +90,19 @@ function mfcs_request_manage_0_locks_form($form, &$form_state, $request_id) {
     'unlocked' => 'Unlocked',
   );
 
+  $options_autocancel = array(
+    'always' => 'Always',
+    'prohibit' => 'Prohibit',
+    'first_time' => 'First Time',
+  );
+
   $default_auto_cancel = 'default';
   if (is_object($locks)) {
     if ($locks->auto_cancel === FALSE) {
-      $default_auto_cancel = 'unlocked';
+      $default_auto_cancel = 'first_time';
     }
     elseif ($locks->auto_cancel === TRUE) {
-      $default_auto_cancel = 'locked';
+      $default_auto_cancel = 'prohibit';
     }
   }
 
@@ -104,14 +110,14 @@ function mfcs_request_manage_0_locks_form($form, &$form_state, $request_id) {
     '#id' => 'request-lock-auto_cancel',
     '#type' => 'select',
     '#title' => 'Auto-Cancel',
-    '#options' => $options_locks,
+    '#options' => $options_autocancel,
     '#default_value' => $default_auto_cancel,
     '#description' => '',
   );
 
-  $form['locks']['auto_cancel']['#description'] .= 'When <strong>enabled (locked)</strong>, the auto-cancel process will be prohibited from auto-locking this request.<br>';
-  $form['locks']['auto_cancel']['#description'] .= 'When set to <strong>default</strong>, the auto-cancel process will be allowed, but uncancelling a request will cause auto-cancel to become locked.<br>';
-  $form['locks']['auto_cancel']['#description'] .= 'When <strong>disabled (unlocked)</strong>, the auto-cancel process will be allowed, but uncancelling a request will never cause auto-cancel to become locked.';
+  $form['locks']['auto_cancel']['#description'] .= 'When set to <strong>always</strong>, the auto-cancel process will be allowed, but uncancelling a request may cause auto-cancel to be triggered again.<br>';
+  $form['locks']['auto_cancel']['#description'] .= 'When set to <strong>prohibit</strong>, the auto-cancel process will be prohibited from cancelling this request.<br>';
+  $form['locks']['auto_cancel']['#description'] .= 'When set to <strong>first time</strong>, the auto-cancel process will be allowed, but uncancelling a request will never cause auto-cancel to become re-cancelled.';
 
   $form['display']['submit'] = array(
     '#id' => 'request-lock-submit',
@@ -205,18 +211,18 @@ function mfcs_request_manage_0_locks_form_submit($form, &$form_state) {
 
   mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
-  $auto_cancel = NULL;
-  $auto_cancel_name = 'Default';
-  if ($form_state['values']['locks']['auto_cancel'] == 'unlocked') {
-    $auto_cancel = 'f';
-    $auto_cancel_name = 'Unlocked';
+  $auto_cancel = array();
+  $auto_cancel_name = 'Always';
+  if ($form_state['values']['locks']['auto_cancel'] == 'first_time') {
+    $auto_cancel = array('auto_cancel' => 'f');
+    $auto_cancel_name = 'First Time';
   }
-  elseif ($form_state['values']['locks']['auto_cancel'] == 'locked') {
-    $auto_cancel = 't';
-    $auto_cancel_name = 'Locked';
+  elseif ($form_state['values']['locks']['auto_cancel'] == 'prohibit') {
+    $auto_cancel = array('auto_cancel' => 't');
+    $auto_cancel_name = 'Prohibit';
   }
 
-  $result = mfcs_set_request_locks($request_id, array('auto_cancel' => $auto_cancel));
+  $result = mfcs_set_request_locks($request_id, $auto_cancel);
   if (!$result) {
     form_set_error('form', 'An error occurred while trying to update the request\'s locks. Please contact the support staff.');
     watchdog(MFCS_WATCHDOG_ID, 'An error occured while trying to update the request\'s locks for the request: @request_id.', array('@request_id' => $request_id), WATCHDOG_ERROR);
@@ -232,14 +238,14 @@ function mfcs_request_manage_0_locks_form_submit($form, &$form_state) {
   // record the change in the request's history log.
   $extra['revisions']['message'] = 'Changed the auto-cancel lock from ';
 
-  if ($form['locks']['auto_cancel']['#default_value'] == 'default') {
-    $extra['revisions']['message'] .= 'Default';
+  if ($form['locks']['auto_cancel']['#default_value'] == 'always') {
+    $extra['revisions']['message'] .= 'Always';
   }
-  elseif ($form['locks']['auto_cancel']['#default_value'] == 'locked') {
-    $extra['revisions']['message'] .= 'Locked';
+  elseif ($form['locks']['auto_cancel']['#default_value'] == 'prohibit') {
+    $extra['revisions']['message'] .= 'Prohibit';
   }
-  elseif ($form['locks']['auto_cancel']['#default_value'] == 'unlocked') {
-    $extra['revisions']['message'] .= 'Unlocked';
+  elseif ($form['locks']['auto_cancel']['#default_value'] == 'first_time') {
+    $extra['revisions']['message'] .= 'First Time';
   }
 
   $extra['revisions']['message'] .= ' to ' . $auto_cancel_name . '.';
