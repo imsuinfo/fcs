@@ -765,6 +765,7 @@ $conf['fcs_testing-email_to-add'] = array(
 );
 $conf['fcs_testing-email_to-remove'] = array(
   'no-reply@mcneese.edu',
+  'no_reply@sandbox.mcneese.edu',
   'facilities_use@sandbox.mcneese.edu',
 );
 $conf['fcs_testing-email_to-whitelist'] = array(
