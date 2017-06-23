@@ -91,6 +91,7 @@
     mcneese_do_print($cf, 'page_title');
   }
 
+
   // float regions - left
   print('<div id="mcneese-float-left" class="expanded fixed">');
   mcneese_do_print($cf, 'menu_tabs');
@@ -99,9 +100,11 @@
   mcneese_do_print($cf, 'side');
   print('</div>');
 
+
   // other regions - first
   mcneese_do_print($cf, 'action_links', FALSE);
   mcneese_do_print($cf, 'watermarks-pre');
+
 
   // main content - inner
   print('<div id="mcneese-content-main" class="mcneese-content-main" role="main">');
@@ -111,6 +114,7 @@
   }
   print('<!--(end-page-main)-->');
   print('</div>');
+
 
   // other regions - last
   mcneese_do_print($cf, 'watermarks-post');

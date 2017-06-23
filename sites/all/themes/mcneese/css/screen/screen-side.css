@@ -152,7 +152,7 @@
 }
 
 .mcneese #mcneese-page-side .workbench_menu:nth-child(1) {
-  border-top: 0px;
+  border-top: 1px solid #888888;
 }
 
 .mcneese #mcneese-page-side .workbench_menu .menu_item {
@@ -191,11 +191,11 @@
 }
 
 .mcneese #mcneese-page-side .workbench_menu .menu_item > .menu_item-children .menu_item.collapsed {
-  padding: 0 0 0 12px;
+  padding: 0px 0px 0px 12px;
 }
 
 .mcneese #mcneese-page-side .workbench_menu .menu_item > .menu_item-children .menu_item.leaf {
-  padding: 0 0 0 12px;
+  padding: 0px 0px 0px 12px;
 }
 
 .mcneese #mcneese-page-side .workbench_menu .menu_item.active > .menu_item-text {
@@ -206,11 +206,9 @@
 .mcneese #mcneese-page-side .workbench_menu .menu_item.depth-0 > .menu_item-text {
   color: #2d2d2d;
   background-color: #eaeaea;
-
   font-weight: bold;
 }
 
-.mcneese #mcneese-page-side .workbench_menu .menu_item > .menu_item-text:hover,
 .mcneese #mcneese-page-side .workbench_menu .menu_item > .menu_item-text:active,
 .mcneese #mcneese-page-side .workbench_menu .menu_item > .menu_item-text:focus {
   color: #ffffff;
@@ -247,6 +245,7 @@
 .mcneese #mcneese-page-side.relative .workbench_menu .menu_item > .menu_item-children .menu_item > .menu_item-text {
   display: inline-block;
 }
+
 
 
 /*** Workbench Menu - Fixed ***/

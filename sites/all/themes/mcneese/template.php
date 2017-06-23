@@ -2789,7 +2789,6 @@ function mcneese_do_print(&$cf, $target, $fixed = TRUE, $float_right = FALSE) {
       }
 
       if ($cf['show']['page']['menus'] || $cf['show']['page']['asides']) {
-
         // do not display title for fixed regions.
         if ($fixed === FALSE) {
           unset($cf['page']['tags']['mcneese_page_' . $target . '_open']['attributes']['title']);

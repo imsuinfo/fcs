@@ -28,17 +28,6 @@
   padding: 0px;
 }
 
-.mcneese.is-user_settings-background_colors.is-workbench-moderated-draft #mcneese-breadcrumb.relative  {
-  color: #0c5491;
-  background-color: #edf5fa;
-}
-
-.mcneese.is-user_settings-background_colors.is-node.is-unpublished:not(.is-workbench-moderated) #mcneese-breadcrumb.relative ,
-.mcneese.is-user_settings-background_colors.is-node.is-unpublished.is-workbench-moderated-live #mcneese-breadcrumb.relative  {
-  color: 0c538f;
-  background-color: #ffeeee;
-}
-
 .mcneese #mcneese-breadcrumb.relative > .html_tag-header {
   display: block;
   visibility: hidden;
@@ -58,6 +47,17 @@
   margin: 0px;
   padding: 0px;
   border: none;
+}
+
+.mcneese.is-user_settings-background_colors.is-workbench-moderated-draft #mcneese-breadcrumb.relative  {
+  color: #0c5491;
+  background-color: #edf5fa;
+}
+
+.mcneese.is-user_settings-background_colors.is-node.is-unpublished:not(.is-workbench-moderated) #mcneese-breadcrumb.relative ,
+.mcneese.is-user_settings-background_colors.is-node.is-unpublished.is-workbench-moderated-live #mcneese-breadcrumb.relative  {
+  color: 0c538f;
+  background-color: #ffeeee;
 }
 
 .mcneese #mcneese-breadcrumb.relative > .navigation_list {
