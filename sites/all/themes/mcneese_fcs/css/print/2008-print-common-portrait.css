@@ -1,0 +1,106 @@
+
+
+
+/*** Calendar Portrait ***/
+@media (orientation:portrait) {
+  /*** Calendar - Month ***/
+  #mfcs-calendar-0-month > .calendar-month {
+    width: 730px;
+    min-width: 730px;
+    max-width: 730px;
+
+    margin: 5px auto;
+
+    font-size: 11px;
+    line-height: 15px;
+  }
+
+  #mfcs-calendar-0-month > .calendar-month > .calendar-title,
+  #mfcs-calendar-0-month > .calendar-month > .calendar-title > h3 {
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  #mfcs-calendar-0-month > .calendar-month > .calendar-header-wrapper > .calendar-header > .calendar-week-wrapper > .calendar-week > .calendar-day-wrapper {
+    width: 103px;
+    min-width: 103px;
+    max-width: 103px;
+
+    padding: 3px 0px;
+  }
+
+  #mfcs-calendar-0-month > .calendar-month > .calendar-body-wrapper > .calendar-body > .calendar-week-wrapper > .calendar-week {
+    min-height: 96px;
+    min-width: 730px;
+  }
+
+  #mfcs-calendar-0-month > .calendar-month > .calendar-body-wrapper > .calendar-body > .calendar-week-wrapper > .calendar-week > .calendar-day-wrapper {
+    width: 103px;
+    min-width: 103px;
+    max-width: 103px;
+  }
+
+  #mfcs-calendar-0-month > .calendar-month > .calendar-body-wrapper > .calendar-body > .calendar-week-wrapper > .calendar-week > .calendar-day-wrapper > .calendar-day {
+    min-height: 96px;
+
+    max-width: 103px;
+  }
+
+  #mfcs-calendar-0-month > .calendar-month > .calendar-body-wrapper > .calendar-body > .calendar-week-wrapper > .calendar-week > .calendar-day-wrapper > .calendar-day > .calendar-item {
+    padding: 2px 4px;
+
+    font-size: 11px;
+    line-height: 15px;
+  }
+
+
+
+  /*** Calendar - Day ***/
+  #mfcs-calendar-0-day > .calendar-day {
+    width: 730px;
+    min-width: 730px;
+    max-width: 730px;
+
+    margin: 5px auto;
+  }
+
+  #mfcs-calendar-0-day > .calendar-day.calendar-all_day > .calendar-header-wrapper > .calendar-header > .calendar-day-wrapper > .calendar-day {
+    width: 718px;
+    min-width: 718px;
+    max-width: 718px;
+  }
+
+  #mfcs-calendar-0-day > .calendar-day.calendar-all_day > .calendar-body-wrapper > .calendar-body {
+    width: 718px;
+    min-width: 718px;
+    max-width: 718px;
+  }
+
+  #mfcs-calendar-0-day > .calendar-day.calendar-range > .calendar-header-wrapper > .calendar-header > .calendar-time_slot-wrapper > .calendar-time_slot > .calendar-time_slot-label-wrapper,
+  #mfcs-calendar-0-day > .calendar-day.calendar-range > .calendar-body-wrapper > .calendar-body > .calendar-time_slot-wrapper > .calendar-time_slot > .calendar-time_slot-label-wrapper {
+    width: 82px;
+    min-width: 82px;
+    max-width: 82px;
+  }
+
+  #mfcs-calendar-0-day > .calendar-day.calendar-range > .calendar-header-wrapper > .calendar-header > .calendar-time_slot-wrapper > .calendar-time_slot > .calendar-time_slot-label-wrapper > .calendar-time_slot-label,
+  #mfcs-calendar-0-day > .calendar-day.calendar-range > .calendar-body-wrapper > .calendar-body > .calendar-time_slot-wrapper > .calendar-time_slot > .calendar-time_slot-label-wrapper > .calendar-time_slot-label {
+    width: 70px;
+    min-width: 70px;
+    max-width: 70px;
+  }
+
+  #mfcs-calendar-0-day > .calendar-day.calendar-range > .calendar-header-wrapper > .calendar-header > .calendar-time_slot-wrapper > .calendar-time_slot > .calendar-time_slot-request-wrapper,
+  #mfcs-calendar-0-day > .calendar-day.calendar-range > .calendar-body-wrapper > .calendar-body > .calendar-time_slot-wrapper > .calendar-time_slot > .calendar-time_slot-request-wrapper {
+    width: 647px;
+    min-width: 647px;
+    max-width: 647px;
+  }
+
+  #mfcs-calendar-0-day > .calendar-day.calendar-range > .calendar-header-wrapper > .calendar-header > .calendar-time_slot-wrapper > .calendar-time_slot > .calendar-time_slot-request-wrapper > .calendar-time_slot-request,
+  #mfcs-calendar-0-day > .calendar-day.calendar-range > .calendar-body-wrapper > .calendar-body > .calendar-time_slot-wrapper > .calendar-time_slot > .calendar-time_slot-request-wrapper > .calendar-time_slot-request {
+    width: 637px;
+    min-width: 637px;
+    max-width: 637px;
+  }
+}

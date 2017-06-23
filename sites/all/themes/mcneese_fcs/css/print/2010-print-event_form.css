@@ -1,0 +1,220 @@
+
+
+
+/*** Event Global ***/
+#mcneese-page-content > .page-title > .html_tag-hgroup > .add-or-remove-shortcuts {
+  display: none;
+}
+
+#mcneese-bulletin-page_title > .page-title > .html_tag-hgroup > .page-title,
+#mcneese-page-content > .page-title > .html_tag-hgroup > .page-title {
+  margin: 0px;
+}
+
+#mcneese-bulletin-page_title > .page-title > .html_tag-hgroup > .add-or-remove-shortcuts {
+  display: none;
+}
+
+
+
+/*** Create/Edit ***/
+#mfcs-request-create-0-form .form-item-wrapper,
+#mfcs-request-edit-0-form .form-item-wrapper {
+  margin: 5px 0px;
+}
+
+#mfcs-request-create-0-form .form-item-wrapper > .form-type-radios > .form-radios > .form-type-radio,
+#mfcs-request-edit-0-form .form-item-wrapper > .form-type-radios > .form-radios > .form-type-radio {
+  margin: 6px 0px;
+}
+
+
+/** Room **/
+#mfcs-request-create-0-form #field-request-room > .form-item > .form-item-delta > .form-item,
+#mfcs-request-edit-0-form #field-request-room > .form-item > .form-item-delta > .form-item {
+  width: 460px;
+
+  min-height: 48px;
+
+  border: 1px outset;
+  padding: 4px;
+  margin: 2px;
+}
+
+#mfcs-request-create-0-form #field-request-room > .form-item > .form-item-delta > .form-item > .form-radio,
+#mfcs-request-edit-0-form #field-request-room > .form-item > .form-item-delta > .form-item > .form-radio {
+  width: 16px;
+  min-width: 16px;
+  max-width: 16px;
+
+  margin: 2px;
+}
+
+#mfcs-request-create-0-form #field-request-room > .form-item > .form-item-delta > .form-item > label,
+#mfcs-request-edit-0-form #field-request-room > .form-item > .form-item-delta > .form-item > label {
+  width: 440px;
+  min-width: 440px;
+  max-width: 440px;
+}
+
+
+/** Dates **/
+#mfcs-request-create-0-form #group-request-dates-date > .group-field-container > .field-request-item,
+#mfcs-request-edit-0-form #group-request-dates-date > .group-field-container > .field-request-item {
+  margin: 4px;
+}
+
+#mfcs-request-create-0-form #group-request-dates-date > .group-field-container > .buttons-request-remove-date,
+#mfcs-request-edit-0-form #group-request-dates-date > .group-field-container > .buttons-request-remove-date {
+  margin: 22px 12px;
+}
+
+
+/** Venue Coordinator **/
+#mfcs-request-create-0-form #section-request-venue_coordinator > .fieldset-wrapper > .form-wrapper,
+#mfcs-request-edit-0-form #section-request-venue_coordinator > .fieldset-wrapper > .form-wrapper {
+  margin: 4px;
+}
+
+
+
+/** Request Coordinator **/
+#mfcs-request-create-0-form #section-request-request_coordinator > .fieldset-wrapper > .form-wrapper,
+#mfcs-request-edit-0-form #section-request-request_coordinator > .fieldset-wrapper > .form-wrapper {
+  margin: 4px;
+}
+
+
+
+/** Information **/
+#mfcs-request-create-0-form #section-request-information > .fieldset-wrapper > .form-wrapper,
+#mfcs-request-edit-0-form #section-request-information > .fieldset-wrapper > .form-wrapper {
+  margin: 4px;
+}
+
+
+
+/*** View ***/
+#mcneese-page-content .request-section-review-log .request-section-review-log-page_title {
+  font-size: 16px;
+  line-height: 20px;
+
+  font-weight: bold;
+
+  margin: 0px auto;
+  padding: 0px;
+}
+
+#mcneese-page-content .request-section-review-log .request-section-review-log-header {
+  font-size: 16px;
+  line-height: 20px;
+}
+
+#mfcs-request-view-0-form .request-section-review-operations {
+  display: none;
+}
+
+#mfcs-request-view-0-form .request-review-log-submit {
+  display: none;
+}
+
+#mfcs-request-view-0-form .request-section-display,
+#mfcs-request-view-0-form .request-section-review-operations,
+#mfcs-request-view-0-form .request-section-review-log {
+  border: 0px none;
+  padding: 0px;
+  margin: 0px;
+  outline: 0px;
+}
+
+#mfcs-request-view-0-form .request-section-display > legend,
+#mfcs-request-view-0-form .request-section-review-operations > legend,
+#mfcs-request-view-0-form .request-section-review-log > legend {
+  display: none;
+}
+
+#mfcs-request-view-0-form .request-section-review {
+  margin: 5px 0px;
+}
+
+#mfcs-request-view-0-form .request-field_groups > .group {
+  page-break-inside: avoid;
+
+  margin: 5px 0px;
+}
+
+#mfcs-request-view-0-form .request-field_groups > .group > .section-request {
+  min-height: 150px;
+
+  margin: 3px;
+  border: 1px outset;
+}
+
+#mfcs-request-view-0-form .request-field_groups > .group > .section-request > .section-request-label-wrapper {
+  background-color: #d0d0d0;
+
+  padding: 0px 2px;
+  margin: 0px;
+}
+
+#mfcs-request-view-0-form .request-field_groups > .group > .section-request > .section-request-label-wrapper > .section-request-cancel,
+#mfcs-request-view-0-form .request-field_groups > .group > .section-request > .section-request-label-wrapper > .section-request-uncancel,
+#mfcs-request-view-0-form .request-field_groups > .group > .section-request > .section-request-label-wrapper > .section-request-ical,
+#mfcs-request-view-0-form .request-field_groups > .group > .section-request > .section-request-label-wrapper > .section-request-agreement,
+#mfcs-request-view-0-form .request-field_groups > .group > .section-request > .section-request-label-wrapper > .section-request-history,
+#mfcs-request-view-0-form .request-field_groups > .group > .section-request > .section-request-label-wrapper > .section-request-edit,
+#mfcs-request-view-0-form .request-field_groups > .group > .section-request > .section-request-label-wrapper > .section-request-clone {
+  padding-left: 2px;
+}
+
+#mfcs-request-view-0-form .request-field_groups > .group > .section-request > .section-request-label-wrapper > .section-request-label {
+  font-size: 16px;
+}
+
+#mfcs-request-view-0-form .request-field_groups > .group > .section-request > .field-request-item-information-user_id > .field-request-item-values > .field-request-item-values-value > .field-request-item-values-value-value > a {
+  text-decoration: none;
+  color: inherit;
+  font-weight: inherit;
+}
+
+#mfcs-request-view-0-form .request-field_groups > .group > .section-request > .item-request {
+  min-height: 20px;
+
+  padding: 5px 2px 2px 5px;
+}
+
+#mfcs-request-view-0-form .request-section-review-log-history > .fieldset-wrapper > .review-item {
+  margin: 5px 0px;
+}
+
+#mfcs-request-view-0-form .request-section-review-log-history > .review-item {
+  margin: 5px auto;
+}
+
+#mfcs-request-view-0-form .request-section-review-log-history > .review-item > .review-item-label {
+  padding: 3px;
+}
+
+#mfcs-request-view-0-form .request-section-review-log.mode-normal {
+  page-break-before: always;
+}
+
+#mfcs-request-view-0-form .request-section-review-log,
+#mfcs-request-view-0-form .request-section-review-operations {
+  margin: 0px auto;
+}
+
+#mfcs-request-view-0-form .request-display-submit {
+  display: none;
+}
+
+#mfcs-request-view-0-form .request-section-review-log-submit {
+  display: none;
+}
+
+
+
+/*** Facilities Use Agreement ***/
+#mfcs-request-agreement #agreement-submit {
+  display: none;
+}

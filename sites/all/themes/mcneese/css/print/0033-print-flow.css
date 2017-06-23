@@ -1,0 +1,74 @@
+
+
+
+/*** Reset ***/
+.mcneese h1 {
+  page-break-before: avoid;
+}
+
+.mcneese h1,
+.mcneese h2,
+.mcneese h3,
+.mcneese h4,
+.mcneese h5,
+.mcneese h6 {
+  page-break-after: avoid;
+}
+
+.mcneese ul,
+.mcneese ol,
+.mcneese dl {
+  page-break-before: avoid;
+}
+
+body.mcneese:first-child h1 {
+  page-break-before: avoid;
+}
+
+
+
+/*** Common ***/
+.mcneese .no-print {
+  display: none;
+}
+
+.html_tag-nav {
+  display: none;
+}
+
+
+
+/*** Headers ***/
+.mcneese #mcneese-header {
+  display: none;
+}
+
+
+
+/*** Search Form ***/
+.mcneese #search-form {
+  display: none;
+}
+
+
+
+/*** Side Area ***/
+.mcneese #mcneese-page-side {
+  display: none;
+}
+
+
+
+/*** Tables (DataTable) ***/
+.mcneese .dataTables_wrapper > .dataTables_length,
+.mcneese .dataTables_wrapper > .dataTables_filter,
+.mcneese .dataTables_wrapper > .ColVis,
+.mcneese .dataTables_wrapper > .dt-buttons,
+.mcneese .dataTables_wrapper > .dataTables_paginate {
+  display: none;
+}
+
+.mcneese ul.dataTables.ColVis_collection,
+.mcneese div.dataTables.ColVis_catcher {
+  display: none !important;
+}

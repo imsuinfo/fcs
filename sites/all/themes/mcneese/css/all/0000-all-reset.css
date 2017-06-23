@@ -1,0 +1,299 @@
+
+
+
+/* Reset CSS derived from "w3c Appendix D. Default style sheet for HTML 4" here: http://www.w3.org/TR/2011/REC-CSS2-20110607/sample.html */
+html,
+.mcneese address,
+.mcneese blockquote,
+.mcneese body,
+.mcneese dd,
+/* .mcneese div, Removed due to IE8 Bug */
+.mcneese dl,
+.mcneese dt,
+.mcneese fieldset,
+.mcneese form,
+.mcneese frame,
+.mcneese frameset,
+.mcneese h1,
+.mcneese h2,
+.mcneese h3,
+.mcneese h4,
+.mcneese h5,
+.mcneese h6,
+.mcneese noframes,
+.mcneese ol,
+.mcneese p,
+.mcneese ul,
+.mcneese center,
+.mcneese dir,
+.mcneese hr,
+.mcneese menu,
+.mcneese pre {
+  display: block;
+  unicode-bidi: embed;
+}
+
+.mcneese li {
+  display: list-item;
+}
+
+.mcneese head {
+  display: none;
+}
+
+.mcneese table {
+  display: table;
+}
+
+.mcneese tr {
+  display: table-row;
+}
+
+.mcneese thead {
+  display: table-header-group;
+}
+
+.mcneese tbody {
+  display: table-row-group;
+}
+
+.mcneese tfoot {
+  display: table-footer-group;
+}
+
+.mcneese col {
+  display: table-column;
+}
+
+.mcneese colgroup {
+  display: table-column-group;
+}
+
+.mcneese td,
+.mcneese th {
+  display: table-cell;
+}
+
+.mcneese caption {
+  display: table-caption;
+}
+
+.mcneese th {
+  font-weight: bolder;
+  text-align: center;
+}
+
+.mcneese caption {
+  text-align: center;
+}
+
+.mcneese body {
+  margin: 0px;
+}
+
+.mcneese h1 {
+  font-size: 2.0em;
+  line-height: 1.1em;
+  margin: 2px 0px;
+}
+
+.mcneese h2 {
+  font-size: 1.8em;
+  line-height: 1.1em;
+  margin: 2px 0px;
+}
+
+.mcneese h3 {
+  font-size: 1.6em;
+  line-height: 1.1em;
+  margin: 2px 0px;
+}
+
+.mcneese h4 {
+  font-size: 1.4em;
+  line-height: 1.1em;
+   margin: 1px 0px;
+}
+
+.mcneese h5 {
+  font-size: 1.2em;
+  line-height: 1.1em;
+  margin: 1px 0px;
+}
+
+.mcneese h6 {
+  font-size: 1.0em;
+  line-height: 1.1em;
+  margin: 1px 0px;
+}
+
+.mcneese p,
+.mcneese form,
+.mcneese fieldset {
+  margin: 0px;
+}
+
+.mcneese blockquote,
+.mcneese ul,
+.mcneese ol,
+.mcneese dl,
+.mcneese dir,
+.mcneese menu {
+  margin: 0px;
+}
+
+.mcneese b,
+.mcneese strong {
+  font-weight: bolder;
+}
+
+.mcneese blockquote {
+  margin-left: 40px;
+  margin-right: 40px;
+}
+
+.mcneese i,
+.mcneese cite,
+.mcneese em,
+.mcneese var,
+.mcneese address {
+  font-style: italic;
+}
+
+.mcneese pre,
+.mcneese tt,
+.mcneese code,
+.mcneese kbd,
+.mcneese samp {
+  font-family: monospace;
+}
+
+.mcneese pre {
+  white-space: pre;
+}
+
+.mcneese button,
+.mcneese textarea,
+.mcneese input,
+.mcneese select {
+  display: inline-block;
+}
+
+.mcneese big {
+  font-size: 20px;
+}
+
+.mcneese small,
+.mcneese sub,
+.mcneese sup {
+  font-size: 13px;
+}
+
+.mcneese sub {
+  vertical-align: sub;
+}
+
+.mcneese sup {
+  vertical-align: super;
+}
+
+.mcneese table {
+  border-spacing: 2px;
+}
+
+.mcneese thead,
+.mcneese tbody,
+.mcneese tfoot {
+  vertical-align: middle;
+}
+
+.mcneese td,
+.mcneese th,
+.mcneese tr {
+  vertical-align: inherit;
+}
+
+.mcneese s,
+.mcneese strike,
+.mcneese del {
+  text-decoration: line-through;
+}
+
+.mcneese hr {
+  border: 1px inset;
+}
+
+.mcneese ol,
+.mcneese ul,
+.mcneese dir,
+.mcneese menu,
+.mcneese dd {
+  margin: 0px;
+  padding: 0px 0px 0px 40px;
+}
+
+.mcneese ol ul,
+.mcneese ul ol,
+.mcneese ul ul,
+.mcneese ol ol {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.mcneese u,
+.mcneese ins {
+  text-decoration: underline;
+}
+
+.mcneese center {
+  text-align: center;
+}
+
+.mcneese a:link,
+.mcneese a:visited {
+  text-decoration: underline;
+}
+
+.mcneese a:focus {
+  outline: thin dotted invert;
+}
+
+.mcneese.agent-name-ie br:before {
+  content: "";
+  white-space: pre-line;
+}
+
+/* Begin bidirectionality settings (do not change) */
+.mcneese BDO[DIR="ltr"] {
+  direction: ltr;
+  unicode-bidi: bidi-override;
+}
+
+.mcneese BDO[DIR="rtl"] {
+  direction: rtl;
+  unicode-bidi: bidi-override;
+}
+
+.mcneese *[DIR="ltr"] {
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
+.mcneese *[DIR="rtl"] {
+  direction: rtl;
+  unicode-bidi: embed;
+}
+
+/* html5 block tags */
+.mcneese article,
+.mcneese section,
+.mcneese aside,
+.mcneese hgroup,
+.mcneese nav,
+.mcneese header,
+.mcneese footer,
+.mcneese figure,
+.mcneese figcaption,
+.mcneese menu {
+  display: block;
+}

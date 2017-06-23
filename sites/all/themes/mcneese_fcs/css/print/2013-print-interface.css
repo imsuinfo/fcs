@@ -1,0 +1,205 @@
+
+
+
+/*** Interface Global ***/
+.mcneese .table_listing-navigator > .table_listing-choice {
+  display: none;
+}
+
+
+/*** Dashboard ***/
+#mfcs-dashboard_page-choices {
+  display: none;
+}
+
+
+
+/*** By Path Alias ***/
+.mcneese.alias-part-0-requests .html_tag-header.page-title {
+  display: none;
+}
+
+.mcneese.alias-part-0-requests .html_tag-header.page-title > .html_tag-hgroup > .add-or-remove-shortcuts {
+  display: none;
+}
+
+.mcneese.alias-part-0-requests.alias-part-1-holiday_0 .html_tag-header.page-title,
+.mcneese.alias-part-0-requests.alias-part-1-unavailable_0 .html_tag-header.page-title,
+.mcneese.alias-part-0-requests.alias-part-1-manage_0 .html_tag-header.page-title,
+.mcneese.alias-part-0-requests.alias-part-1-view_0 .html_tag-header.page-title,
+.mcneese.alias-part-0-requests.alias-part-1-print_0 .html_tag-header.page-title,
+.mcneese.alias-part-0-requests.alias-part-1-pdf_0 .html_tag-header.page-title,
+.mcneese.alias-part-0-requests.alias-part-1-history_0 .html_tag-header.page-title,
+.mcneese.alias-part-0-requests.alias-part-1-agreement_0 .html_tag-header.page-title,
+.mcneese.alias-part-0-requests.alias-part-1-holiday .html_tag-header.page-title,
+.mcneese.alias-part-0-requests.alias-part-1-management .html_tag-header.page-title,
+.mcneese.alias-part-0-requests.alias-part-1-problems_0 .html_tag-header.page-title,
+.mcneese.alias-part-0-requests.alias-part-1-email_log_0 .html_tag-header.page-title,
+.mcneese.alias-part-0-requests.alias-part-1-synchronize_0 .html_tag-header.page-title,
+.mcneese.alias-part-0-requests.alias-part-1-users_0 .html_tag-header.page-title,
+.mcneese.alias-part-0-requests.alias-part-1-troubleshoot_0 .html_tag-header.page-title {
+  display: inherit;
+}
+
+.mcneese.alias-part-0-requests.alias-part-1-holiday_0.alias-requests_holiday_0 .html_tag-header.page-title,
+.mcneese.alias-part-0-requests.alias-part-1-unavailable_0.alias-requests_unavailable_0 .html_tag-header.page-title,
+.mcneese.alias-part-0-requests.alias-part-1-unavailable_0.alias-part-2-all .html_tag-header.page-title,
+.mcneese.alias-part-0-requests.alias-part-1-unavailable_0.alias-part-3-all .html_tag-header.page-title {
+  display: none;
+}
+
+
+
+/*** Statistics Page ***/
+
+
+
+/*** E-mail Log Page ***/
+#mfcs-request-email_log-0-page .email_log-headers-wrapper.collapsed,
+#mfcs-request-email_log-0-page .email_log-raw_body-wrapper.collapsed,
+#mfcs-request-email_log-0-page .email_log-body-wrapper.collapsed {
+  display: none;
+}
+
+#mfcs-request-email_log-0-page .email_log-headers-wrapper > legend > .fieldset-legend > a,
+#mfcs-request-email_log-0-page .email_log-headers-wrapper > legend > .fieldset-legend > a:visited,
+#mfcs-request-email_log-0-page .email_log-headers-wrapper > legend > .fieldset-legend > a:focus,
+#mfcs-request-email_log-0-page .email_log-headers-wrapper > legend > .fieldset-legend > a:active,
+#mfcs-request-email_log-0-page .email_log-headers-wrapper > legend > .fieldset-legend > a:hover,
+#mfcs-request-email_log-0-page .email_log-raw_body-wrapper > legend > .fieldset-legend > a,
+#mfcs-request-email_log-0-page .email_log-raw_body-wrapper > legend > .fieldset-legend > a:visited,
+#mfcs-request-email_log-0-page .email_log-raw_body-wrapper > legend > .fieldset-legend > a:focus,
+#mfcs-request-email_log-0-page .email_log-raw_body-wrapper > legend > .fieldset-legend > a:active,
+#mfcs-request-email_log-0-page .email_log-raw_body-wrapper > legend > .fieldset-legend > a:hover,
+#mfcs-request-email_log-0-page .email_log-body-wrapper > legend > .fieldset-legend > a,
+#mfcs-request-email_log-0-page .email_log-body-wrapper > legend > .fieldset-legend > a:visited,
+#mfcs-request-email_log-0-page .email_log-body-wrapper > legend > .fieldset-legend > a:focus,
+#mfcs-request-email_log-0-page .email_log-body-wrapper > legend > .fieldset-legend > a:active,
+#mfcs-request-email_log-0-page .email_log-body-wrapper > legend > .fieldset-legend > a:hover {
+  color: inherit;
+  background-color: inherit;
+
+  text-decoration: none;
+}
+
+
+
+/*** Reviewers Page ***/
+#mfcs-request-reviewers-0-form #reviewers-reviewer {
+  display: none;
+}
+
+
+
+/*** Proxy Page ***/
+#mfcs-request-proxy-0-form #proxy {
+  display: none;
+}
+
+
+
+/*** Problems ***/
+#mfcs-request-problems-0-request-form #request_problems-submit-submit {
+  display: none;
+}
+
+#mfcs-request-problems-0-request-form .form-item-request_problems-actions-list {
+  display: none;
+}
+
+
+
+/*** Troubleshoot ***/
+#mfcs-request-troubleshoot-0-form > .form-wrapper-inner > .troubleshoot-code > .form-submit {
+  display: none;
+}
+
+#mfcs-request-troubleshoot-0-form > .form-wrapper-inner > .troubleshoot-code > .code-separator {
+  margin-bottom: 5px;
+}
+
+
+
+/*** Users ***/
+#mfcs-request-users-view-page > .view_user-buttons {
+  display: none;
+}
+
+
+
+/*** Statistics ***/
+#mfcs-statistics-page > .statistics-navigation {
+  display: none;
+}
+
+
+
+/*** Help ***/
+#mfcs-section-help-main .no-print {
+  display: none;
+}
+
+#mfcs-section-help-main .paragraph {
+  page-break-inside: avoid;
+}
+
+#mfcs-section-help-main .help-headers.page-break-after-auto-1 {
+  page-break-after: avoid;
+}
+
+#mfcs-section-help-main .paragraph.page-break-auto-1,
+#mfcs-section-help-main .paragraph.page-break-auto-1,
+#mfcs-section-help-main .paragraph ul,
+#mfcs-section-help-main .paragraph ol,
+#mfcs-section-help-main .paragraph.page-break-auto-2 ul,
+#mfcs-section-help-main .paragraph.page-break-auto-2 ol {
+  page-break-inside: auto;
+}
+
+#mfcs-section-help-main .paragraph.page-break-avoid-1,
+#mfcs-section-help-main .paragraph.page-break-avoid-1,
+#mfcs-section-help-main .help-headers +
+#mfcs-section-help-main .paragraph:first-of-type ul,
+#mfcs-section-help-main .help-headers +
+#mfcs-section-help-main .paragraph:first-of-type ol,
+#mfcs-section-help-main .paragraph.page-break-avoid-2 ul,
+#mfcs-section-help-main .paragraph.page-break-avoid-2 ol {
+  page-break-before: avoid;
+}
+
+#mfcs-section-help-main .paragraph.user_guides,
+#mfcs-section-help-main .paragraph.documentation,
+#mfcs-section-help-main .paragraph.presentation {
+  page-break-before: avoid;
+}
+
+#mfcs-section-help-main .term {
+  page-break-inside: avoid;
+}
+
+#mfcs-section-help-main .note {
+  page-break-inside: avoid;
+}
+
+#mfcs-section-help-main .section-help-break {
+  page-break-before: always;
+}
+
+#mfcs-section-help-main .section-help-break:first-of-type {
+  page-break-before: avoid;
+}
+
+
+
+/*** View Request Navigation ***/
+#mfcs-request-view-0-form > .request-navigation,
+#mfcs-request-view-0-form > .form-wrapper-inner > .request-navigation {
+  display: none;
+}
+
+
+
+/*** Requests Listing ***/
+#mfcs-list_0-requests > tbody > tr > .column-date > .item-date-visibility-toggle {
+  display: none;
+}
