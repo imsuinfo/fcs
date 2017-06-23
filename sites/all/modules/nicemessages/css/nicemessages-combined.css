@@ -1,0 +1,184 @@
+.jGrowl {
+  z-index: 999999;
+  color: #ffffff;
+  font-size: 12px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  position: fixed;
+}
+.jGrowl.top-left {
+  left: 0px;
+  top: 0px;
+}
+.jGrowl.top-right {
+  right: 0px;
+  top: 0px;
+}
+.jGrowl.bottom-left {
+  left: 0px;
+  bottom: 0px;
+}
+.jGrowl.bottom-right {
+  right: 0px;
+  bottom: 0px;
+}
+.jGrowl.center {
+  top: 0px;
+  width: 50%;
+  left: 25%;
+}
+.jGrowl.center .jGrowl-notification,
+.jGrowl.center .jGrowl-closer {
+  margin-left: auto;
+  margin-right: auto;
+}
+.jGrowl-notification {
+  background-color: #000000;
+  zoom: 1;
+  width: 250px;
+  padding: 10px;
+  margin: 10px;
+  text-align: left;
+  display: none;
+  border-radius: 5px;
+  min-height: 40px;
+}
+.jGrowl-notification .ui-state-highlight,
+.jGrowl-notification .ui-widget-content .ui-state-highlight,
+.jGrowl-notification .ui-widget-header .ui-state-highlight {
+  border: 1px solid #000;
+  background: #000;
+  color: #fff;
+}
+.jGrowl-notification .jGrowl-header {
+  font-weight: bold;
+  font-size: .85em;
+}
+.jGrowl-notification .jGrowl-close {
+  background-color: transparent;
+  color: inherit;
+  border: none;
+  z-index: 99;
+  float: right;
+  font-weight: bold;
+  font-size: 1em;
+  cursor: pointer;
+}
+.jGrowl-closer {
+  background-color: #000000;
+  zoom: 1;
+  width: 250px;
+  padding: 10px;
+  margin: 10px;
+  text-align: left;
+  display: none;
+  border-radius: 5px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  cursor: pointer;
+  font-size: .9em;
+  font-weight: bold;
+  text-align: center;
+}
+.jGrowl-closer .ui-state-highlight,
+.jGrowl-closer .ui-widget-content .ui-state-highlight,
+.jGrowl-closer .ui-widget-header .ui-state-highlight {
+  border: 1px solid #000;
+  background: #000;
+  color: #fff;
+}
+/** Hide jGrowl when printing **/
+@media print {
+  .jGrowl {
+    display: none;
+  }
+}
+.jGrowl.top-left {
+    top: 40px;
+    left: 0;
+}
+.jGrowl.center {
+    top: 40px;
+    left: 50%;
+    margin: 0 0 0 -140px;
+}
+.jGrowl.top-right {
+    top: 40px;
+    right: 0;
+}
+.jGrowl.bottom-left {
+    bottom: 40px;
+    left: 0;
+}
+.jGrowl.bottom-right {
+    bottom: 40px;
+    right: 0;
+}#jGrowl .jGrowl-notification {
+    background-position: 4px center;
+    background-repeat: no-repeat;
+    padding-left: 34px;
+    padding-right: 14px;
+}
+#jGrowl .jGrowl-notification { color: #f0f0f0; background-color: #000000;}
+
+#jGrowl .jGrowl-notification.status { color: #000000; background-color: #62db51; border: 1px solid #306b28;}
+#jGrowl .jGrowl-notification.status a,
+#jGrowl .jGrowl-notification.status a:visited {
+  color: #00355e;
+}
+#jGrowl .jGrowl-notification.status a:active,
+#jGrowl .jGrowl-notification.status a:hover,
+#jGrowl .jGrowl-notification.status a:focus {
+  color: #00355e;
+  font-weight: bolder;
+}
+
+#jGrowl .jGrowl-notification.warning { color: #000000; background-color: #ffb11a; border: 1px solid #8f630f;}
+#jGrowl .jGrowl-notification.warning a,
+#jGrowl .jGrowl-notification.warning a:visited {
+  color: #00345c;
+}
+
+#jGrowl .jGrowl-notification.warning a:active,
+#jGrowl .jGrowl-notification.warning a:hover,
+#jGrowl .jGrowl-notification.warning a:focus {
+  color: #00345c;
+  font-weight: bolder;
+}
+
+#jGrowl .jGrowl-notification.error { color: #000000; background-color: #ff664e; border: 1px solid #7a3125;}
+#jGrowl .jGrowl-notification.error a,
+#jGrowl .jGrowl-notification.error a:visited {
+  color: #000000;
+}
+
+#jGrowl .jGrowl-notification.error a:active,
+#jGrowl .jGrowl-notification.error a:hover,
+#jGrowl .jGrowl-notification.error a:focus {
+  color: #000000;
+  font-weight: bolder;
+}
+
+#jGrowl .jGrowl-notification a { color: #ffffff; border-bottom: 1px dotted #ffffff; }
+#jGrowl .jGrowl-notification .jGrowl-message { word-wrap: break-word; padding-right: 34px; max-height: 200px; overflow: auto }
+#jGrowl .jGrowl-notification .jGrowl-close { font-size: 1.1em; }
+#jGrowl .jGrowl-closer { padding-right: 24px; padding-left: 24px; background-image: none; }
+.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight {
+    border: 0 none;
+    background-image: none;
+}
+.jGrowl.center {
+    top: 0;
+    left: 50%;
+    width: auto;
+    margin: 0 0 0 -130px;
+}
+
+.jGrowl {
+  box-sizing: border-box;
+  max-width: 85%;
+}
+.jGrowl .jGrowl-notification {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 200px;
+}

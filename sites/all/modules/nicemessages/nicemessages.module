@@ -13,14 +13,30 @@ define('JGROWL_PATH', 'sites/all/libraries/jgrowl');
  *  Implements hook_init().
  */
 function nicemessages_init() {
-  // Attach jGrowl files
-  drupal_add_css(JGROWL_PATH .'/jquery.jgrowl.min.css');
-  drupal_add_js(JGROWL_PATH .'/jquery.jgrowl.min.js');
-  // Attach module files
-  drupal_add_css(drupal_get_path('module', 'nicemessages') . '/css/nicemessages_positions.css');
-  drupal_add_css(drupal_get_path('module', 'nicemessages') . '/css/' . variable_get('nicemessages_style'));
-  if(variable_get('nicemessages_shadows') === 1){drupal_add_css(drupal_get_path('module', 'nicemessages') . '/css/shadows.css');}
-  drupal_add_js(drupal_get_path('module', 'nicemessages') . '/js/nicemessages.js');
+  $style = variable_get('nicemessages_style');
+
+  if ($style == 'nicemessages-combined.css') {
+    $path = drupal_get_path('module', 'nicemessages');
+
+    // combined scripts should include both jgrowl css and js as well as the projects css and js.
+    drupal_add_css($path . '/css/nicemessages-combined.css');
+
+    if (variable_get('nicemessages_shadows') === 1) {
+      drupal_add_css($path . '/css/shadows.css');
+    }
+
+    drupal_add_js($path . '/js/nicemessages-combined.js');
+  }
+  else {
+    // Attach jGrowl files
+    drupal_add_css(JGROWL_PATH .'/jquery.jgrowl.min.css');
+    drupal_add_js(JGROWL_PATH .'/jquery.jgrowl.min.js');
+    // Attach module files
+    drupal_add_css(drupal_get_path('module', 'nicemessages') . '/css/nicemessages_positions.css');
+    drupal_add_css(drupal_get_path('module', 'nicemessages') . '/css/' . $style);
+    if(variable_get('nicemessages_shadows') === 1){drupal_add_css(drupal_get_path('module', 'nicemessages') . '/css/shadows.css');}
+    drupal_add_js(drupal_get_path('module', 'nicemessages') . '/js/nicemessages.js');
+  }
 }
 
 /**
@@ -214,6 +230,7 @@ function nicemessages_settings_form() {
       'nicemessages_jgrowl.css' => t('jGrowl'),
       'nicemessages_drupal.css' => t('Drupal'),
       'nicemessages_facebook.css' => t('Facebook'),
+      'nicemessages-combined.css' => t('Drupal - Combined'),
     ),
     '#description' => t(''
       . 'In the moment Nicemessages supports 3 styles:<br />'
@@ -226,6 +243,8 @@ function nicemessages_settings_form() {
       . '<li><em><strong>Facebook</strong> - '
       . 'imitating the light-grey-blue rounded popup style of Facebook statuses '
       . 'for all message types. Errors get red borders.</em></li>'
+      . '<li><em><strong>Drupal - Combined</strong> - '
+      . 'Drupals default 3 system message type icons & colors, but with css and js files combined into a single file.</em></li>'
       . '</ol>'
       . 'Additional styles can be added by copying and modifying css files in module '
       . '/css folder and changing this description and selection form.'
