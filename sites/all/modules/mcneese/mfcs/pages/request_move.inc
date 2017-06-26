@@ -554,7 +554,7 @@ function mfcs_request_manage_0_move_form_submit($form, &$form_state) {
 
   $request_id = (int) $form['form']['request_id']['#value'];
 
-  if ($clicked_id == 'request-move-submit-cancel') {
+  if ($clicked_id == 'submit-request-cancel') {
     if (empty($form_state['values']['redirect_to'])) {
       if (empty($request_id)) {
         $form_state['redirect'] = mfcs_build_redirect_array('requests');
