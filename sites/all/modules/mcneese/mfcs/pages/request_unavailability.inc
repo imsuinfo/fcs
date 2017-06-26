@@ -958,22 +958,22 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
 
   if ($unavailable->date_start == strtotime('midnight today', $unavailable->date_start) && $unavailable->date_stop == strtotime('midnight tomorrow', $unavailable->date_start)) {
     $date_label = 'Unavailable On:';
-    $date_value = date(MFCS_DATE_FORMAT_DATE_HUMAN, $unavailable->date_start);
+    $date_value = '<a href="' . $base_path . 'requests/calendar-0/day/' . strtolower(date('Y/F/d', $unavailable->date_start)) . $url_arguments . '" class="">' . date(MFCS_DATE_FORMAT_DATE_HUMAN, $unavailable->date_start) . '</a>';
   }
   else {
     if (strtotime('midnight today', $unavailable->date_start) == strtotime('midnight today', $unavailable->date_stop)) {
       $date_label = 'Unavailable From:';
-      $date_value = date(MFCS_DATE_FORMAT_TIME, $unavailable->date_start) . ' to ' . date(MFCS_DATE_FORMAT_TIME, $unavailable->date_stop) . ' on ' . date(MFCS_DATE_FORMAT_DATE_HUMAN, $unavailable->date_start);
+      $date_value = date(MFCS_DATE_FORMAT_TIME, $unavailable->date_start) . ' to ' . date(MFCS_DATE_FORMAT_TIME, $unavailable->date_stop) . ' on <a href="' . $base_path . 'requests/calendar-0/day/' . strtolower(date('Y/F/d', $unavailable->date_start)) . $url_arguments . '" class="">' . date(MFCS_DATE_FORMAT_DATE_HUMAN, $unavailable->date_start) . '</a>';
     }
     elseif ($unavailable->date_start != strtotime('midnight today', $unavailable->date_start) || $unavailable->date_stop != strtotime('midnight today', $unavailable->date_stop)) {
       $date_label = 'Unavailable From:';
-      $date_value = date(MFCS_DATE_FORMAT_DATE_TIME_HUMAN, $unavailable->date_start) . ' to ' . date(MFCS_DATE_FORMAT_DATE_TIME_HUMAN, $unavailable->date_stop);
+      $date_value = date(MFCS_DATE_FORMAT_TIME, $unavailable->date_start) .  ' <a href="' . $base_path . 'requests/calendar-0/day/' . strtolower(date('Y/F/d', $unavailable->date_start)) . $url_arguments . '" class="">'. date(MFCS_DATE_FORMAT_DATE_HUMAN, $unavailable->date_start) . '</a> to ' . date(MFCS_DATE_FORMAT_TIME, $unavailable->date_stop)  . ' <a href="' . $base_path . 'requests/calendar-0/day/' . strtolower(date('Y/F/d', $unavailable->date_stop)) . $url_arguments . '" class="">'. date(MFCS_DATE_FORMAT_DATE_HUMAN, $unavailable->date_stop) . '</a>';
     }
     else {
       // For whatever reason, the culture treats the stop date inclusively when it has no time (but then treats it inclusively when there is a time!).
       // Make sure the stop date that is printed to the screen is an inclusive date (this therefore cannot be used for any calculations)
       $date_label = 'Unavailable From:';
-      $date_value = '' . date(MFCS_DATE_FORMAT_DATE_HUMAN, $unavailable->date_start) . ' to ' . date(MFCS_DATE_FORMAT_DATE_HUMAN, strtotime('midnight yesterday', $unavailable->date_stop));
+      $date_value = '<a href="' . $base_path . 'requests/calendar-0/day/' . strtolower(date('Y/F/d', $unavailable->date_start)) . $url_arguments . '" class="">'. date(MFCS_DATE_FORMAT_DATE_HUMAN, $unavailable->date_start) . '</a> to <a href="' . $base_path . 'requests/calendar-0/day/' . strtolower(date('Y/F/d', strtotime('midnight yesterday', $unavailable->date_stop))) . $url_arguments . '" class="">'. date(MFCS_DATE_FORMAT_DATE_HUMAN, strtotime('midnight yesterday', $unavailable->date_stop)) . '</a>';
     }
   }
 
