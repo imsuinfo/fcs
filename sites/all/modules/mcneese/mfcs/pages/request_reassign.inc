@@ -492,6 +492,28 @@ function mfcs_request_manage_0_reassign_requester_form($form, &$form_state, $req
 }
 
 /**
+ * Pre-Validation for mfcs_request_manage_0_reassign_requester_form().
+ *
+ * @param array $form
+ *   The form array as defined by drupals form api.
+ * @param array $form_state
+ *   The form state array as defined by drupals form api
+ *
+ * @see: mfcs_request_manage_0_move_form()
+ */
+function mfcs_request_manage_0_reassign_requester_form_pre_validate(&$form, &$form_state) {
+  $clicked_id = '';
+  if (isset($form_state['triggering_element']['#id'])) {
+    $clicked_id = $form_state['triggering_element']['#id'];
+  }
+
+  if ($clicked_id == 'request-reassign-submit-cancel') {
+    $form['requester']['user_id']['#required'] = FALSE;
+    return;
+  }
+}
+
+/**
  * Validation for mfcs_request_manage_0_reassign_requester_form().
  *
  * @param array $form
