@@ -65,14 +65,14 @@ function mfcs_request_manage_0_page($request_id) {
   $id_requester = (int) $request['mer']['user_id'][0]->value;
   $id_venue_coordinator = (int) $request['venue_coordinator']['user_id'][0]->value;
 
-  $locks_auto_cancel = 'Always';
+  $locks_auto_cancel = 'First Time';
   $request_locks = mfcs_load_request_locks($request_id);
   if (is_object($request_locks) && isset($request_locks->auto_cancel)) {
     if ($request_locks->auto_cancel === TRUE) {
       $locks_auto_cancel = 'Prohibit';
     }
     else {
-      $locks_auto_cancel = 'First Time';
+      $locks_auto_cancel = 'Always';
     }
   }
 

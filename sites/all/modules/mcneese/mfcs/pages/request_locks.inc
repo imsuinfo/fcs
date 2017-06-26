@@ -91,15 +91,15 @@ function mfcs_request_manage_0_locks_form($form, &$form_state, $request_id) {
   );
 
   $options_autocancel = array(
-    'always' => 'Always',
-    'prohibit' => 'Prohibit',
     'first_time' => 'First Time',
+    'prohibit' => 'Prohibit',
+    'always' => 'Always',
   );
 
-  $default_auto_cancel = 'default';
+  $default_auto_cancel = 'first_time';
   if (is_object($locks)) {
     if ($locks->auto_cancel === FALSE) {
-      $default_auto_cancel = 'first_time';
+      $default_auto_cancel = 'always';
     }
     elseif ($locks->auto_cancel === TRUE) {
       $default_auto_cancel = 'prohibit';
@@ -115,9 +115,9 @@ function mfcs_request_manage_0_locks_form($form, &$form_state, $request_id) {
     '#description' => '',
   );
 
-  $form['locks']['auto_cancel']['#description'] .= 'When set to <strong>always</strong>, the auto-cancel process will be allowed, but uncancelling a request may cause auto-cancel to be triggered again.<br>';
-  $form['locks']['auto_cancel']['#description'] .= 'When set to <strong>prohibit</strong>, the auto-cancel process will be prohibited from cancelling this request.<br>';
   $form['locks']['auto_cancel']['#description'] .= 'When set to <strong>first time</strong>, the auto-cancel process will be allowed, but uncancelling a request will never cause auto-cancel to become re-cancelled.';
+  $form['locks']['auto_cancel']['#description'] .= 'When set to <strong>prohibit</strong>, the auto-cancel process will be prohibited from cancelling this request.<br>';
+  $form['locks']['auto_cancel']['#description'] .= 'When set to <strong>always</strong>, the auto-cancel process will be allowed, but uncancelling a request may allow auto-cancel to be triggered again.<br>';
 
   $form['display']['submit'] = array(
     '#id' => 'request-lock-submit',
@@ -212,10 +212,10 @@ function mfcs_request_manage_0_locks_form_submit($form, &$form_state) {
   mfcs_include(MFCS_INCLUDE_WORKFLOW);
 
   $auto_cancel = array();
-  $auto_cancel_name = 'Always';
-  if ($form_state['values']['locks']['auto_cancel'] == 'first_time') {
+  $auto_cancel_name = 'First Time';
+  if ($form_state['values']['locks']['auto_cancel'] == 'always') {
     $auto_cancel = array('auto_cancel' => 'f');
-    $auto_cancel_name = 'First Time';
+    $auto_cancel_name = 'Always';
   }
   elseif ($form_state['values']['locks']['auto_cancel'] == 'prohibit') {
     $auto_cancel = array('auto_cancel' => 't');
