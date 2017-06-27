@@ -586,6 +586,11 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
     }
   }
 
+  $ignore_past = TRUE;
+  if (isset($form['form']['ignore_past']['#value']) && is_bool($form['form']['ignore_past']['#value'])) {
+    $ignore_past = $form['form']['ignore_past']['#value'];
+  }
+
   $is_venue_coordinator = FALSE;
   $is_power_user = FALSE;
   if (isset($form['form']['user']['#value']->uid)) {
@@ -630,6 +635,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
   $start_timestamp = array(0 => NULL);
   $stop_timestamp = array(0 => NULL);
   $date_in_past = array(0 => FALSE);
+  $date_is_cancelled = array(0 => FALSE);
 
   $holidays = array();
   $unavailabilities = array();
@@ -640,6 +646,10 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
 
     foreach ($location_state['dates']['date'] as $key => &$value) {
       $date_in_past[$key] = FALSE;
+      $date_is_cancelled[$key] = FALSE;
+      if (isset($location_state['dates']['date-cancelled'][$key]) && $location_state['dates']['date-cancelled'][$key] === TRUE) {
+        $date_is_cancelled[$key] = TRUE;
+      }
 
       if (isset($form['form']['existing']['#value']['request']['dates']['date'])) {
         if (array_key_exists($key, $form['form']['existing']['#value']['request']['dates']['date'])) {
@@ -680,24 +690,26 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
         $min_days_by_policy = strtotime('+21 days', $instance);
         $min_days_by_policy = strtotime('midnight today', $min_days_by_policy);
 
-        if ($date_timestamp[$key] < $current_date) {
-          $date_in_past[$key] = TRUE;
+        if (!$date_is_cancelled[$key]) {
+          if ($date_timestamp[$key] < $current_date) {
+            $date_in_past[$key] = TRUE;
 
-          if ($is_power_user) {
-            drupal_set_message(t('<span class="strong uppercase">Warning</span>: The date <strong>@date_nice</strong> is in the past and should not be used.', array('@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $date_timestamp[$key]))), 'warning');
+            if ($is_power_user) {
+              drupal_set_message(t('<span class="strong uppercase">Warning</span>: The date <strong>@date_nice</strong> is in the past and should not be used.', array('@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $date_timestamp[$key]))), 'warning');
+            }
+            else {
+              form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t('The date <strong>@date_nice</strong> is in the past and cannot be used.', array('@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $date_timestamp[$key]))));
+              $passed = FALSE;
+            }
           }
-          else {
-            form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t('The date <strong>@date_nice</strong> is in the past and cannot be used.', array('@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $date_timestamp[$key]))));
-            $passed = FALSE;
-          }
-        }
-        elseif ($date_timestamp[$key] <= $min_days_by_policy) {
-          if ($within_3_weeks_bypass) {
-            drupal_set_message(t('<span class="strong uppercase">Warning</span>: The date <strong>@date_nice</strong> is too soon and should be <a href="//www.mcneese.edu/node/3217#3_week_requirement" class="strong" target="_blank">a minimum of three weeks in advance</a> prior to the event or prior to the expected start date for publicity for the event, whichever comes first.', array('@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $date_timestamp[$key]))), 'warning');
-          }
-          else {
-            form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t('The date <strong>@date_nice</strong> is too soon and must be <a href="//www.mcneese.edu/node/3217#3_week_requirement" class="strong" target="_blank">a minimum of three weeks in advance</a> prior to the event or prior to the expected start date for publicity for the event, whichever comes first.', array('@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $date_timestamp[$key]))));
-            $passed = FALSE;
+          elseif ($date_timestamp[$key] <= $min_days_by_policy) {
+            if ($within_3_weeks_bypass) {
+              drupal_set_message(t('<span class="strong uppercase">Warning</span>: The date <strong>@date_nice</strong> is too soon and should be <a href="//www.mcneese.edu/node/3217#3_week_requirement" class="strong" target="_blank">a minimum of three weeks in advance</a> prior to the event or prior to the expected start date for publicity for the event, whichever comes first.', array('@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $date_timestamp[$key]))), 'warning');
+            }
+            else {
+              form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t('The date <strong>@date_nice</strong> is too soon and must be <a href="//www.mcneese.edu/node/3217#3_week_requirement" class="strong" target="_blank">a minimum of three weeks in advance</a> prior to the event or prior to the expected start date for publicity for the event, whichever comes first.', array('@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $date_timestamp[$key]))));
+              $passed = FALSE;
+            }
           }
         }
 
@@ -706,7 +718,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
       }
 
       // check for holidays.
-      if (!is_null($date_timestamp[$key]) && $date_timestamp[$key] !== FALSE) {
+      if (!is_null($date_timestamp[$key]) && $date_timestamp[$key] !== FALSE && !$date_is_cancelled[$key]) {
         $day_start = strtotime('midnight today', $date_timestamp[$key]);
 
         if (!array_key_exists($day_start, $holidays)) {
@@ -802,7 +814,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
             }
 
             // if a time is related to a day in the past, then restrict changing the field.
-            if (array_key_exists($key, $date_in_past) && $date_in_past[$key]) {
+            if (array_key_exists($key, $date_in_past) && $date_in_past[$key] && !$date_is_cancelled[$key]) {
               if ($form['form']['existing']['#value']['request']['dates']['time_start'][$key] != $value) {
                 if ($is_power_user) {
                   drupal_set_message(t('<span class="strong uppercase">Warning</span>: The time <strong>@time</strong> on <strong>@date_nice</strong> is in the past and should not be used.', array('@time' => $value, '@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $start_timestamp[$key]))), 'warning');
@@ -872,7 +884,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
           }
 
           // if a time is related to a day in the past, then restrict changing the field.
-          if (array_key_exists($key, $date_in_past) && $date_in_past[$key]) {
+          if (array_key_exists($key, $date_in_past) && $date_in_past[$key] && !$date_is_cancelled[$key]) {
             if ($form['form']['existing']['#value']['request']['dates']['time_stop'][$key] != $value) {
               if ($is_power_user) {
                 drupal_set_message(t('<span class="strong uppercase">Warning</span>: The time <strong>@time</strong> on <strong>@date_nice</strong> is in the past and should not be used.', array('@time' => $value, '@date_nice' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $stop_timestamp[$key]))), 'warning');
@@ -944,7 +956,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
         }
 
         // check to see if the times have any requests appearing immediately before or immediately after and present a warning.
-        if ($room !== FALSE) {
+        if ($room !== FALSE && !$date_is_cancelled[$key]) {
           $nearby_requests = mfcs_miscellaneous_nearby_requests($start_timestamp[$key], $stop_timestamp[$key], $location_state['room'][0]);
 
           if (is_array($nearby_requests)) {
@@ -1008,7 +1020,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
         }
 
         // check to see if the times have any requests appearing immediately before or immediately after and present a warning.
-        if ($room !== FALSE) {
+        if ($room !== FALSE && !$date_is_cancelled[$key]) {
           $nearby_requests = mfcs_miscellaneous_nearby_requests($start_timestamp[$key], $stop_timestamp[$key], $location_state['room'][0]);
 
           if (is_array($nearby_requests)) {
@@ -1047,19 +1059,22 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
     }
 
     // check for room availability, but only if the room has been defined.
-    $room_id = (int) $room->room_id;
-    $room_unavailability = mfcs_check_room_availability($room_id, $date_timestamp, $start_timestamp, $stop_timestamp, $request_id);
-    if ($room_unavailability === FALSE) {
-      form_set_error('', 'An internal error occurred while checking the room for availability. Please contact the support staff.');
+    if (!$date_is_cancelled[$key]) {
+      $room_id = (int) $room->room_id;
+      $room_unavailability = mfcs_check_room_availability($room_id, $date_timestamp, $start_timestamp, $stop_timestamp, $request_id, $ignore_past);
+
+      if ($room_unavailability === FALSE) {
+        form_set_error('', 'An internal error occurred while checking the room for availability. Please contact the support staff.');
+      }
+      elseif (!empty($room_unavailability['conflicts']) || !empty($room_unavailability['unavailable'])) {
+        $unavailable_message = '<span class="strong uppercase">Conflict</span>: The specified room is currently unavailable for the following dates: ';
+        $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability, TRUE);
+        form_set_error('review][operations][decision', $unavailable_message);
+        unset($unavailable_message);
+      }
+      unset($room_unavailability);
+      unset($room_id);
     }
-    elseif (!empty($room_unavailability['conflicts']) || !empty($room_unavailability['unavailable'])) {
-      $unavailable_message = '<span class="strong uppercase">Conflict</span>: The specified room is currently unavailable for the following dates: ';
-      $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability, TRUE);
-      form_set_error('review][operations][decision', $unavailable_message);
-      unset($unavailable_message);
-    }
-    unset($room_unavailability);
-    unset($room_id);
   }
 
 

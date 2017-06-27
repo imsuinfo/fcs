@@ -8149,6 +8149,9 @@ function mfcs_get_reviewer_settings_by_user_id($user_id, $disabled = FALSE) {
  *   (optional) When not NULL, this represents the request_id to ignore.
  *   Use this so that when editing an existing request, it does not report
  *   itself as the request using the room.
+ * @param bool $ignore_past
+ *   (optional) When TRUE, any availabilities involving dates in the past are ignored and therefore not checked.
+ *   When FALSE, dates are checked regardless of relationship to past, present, or future.
  *
  * @return array|false
  *   An array with the following keys;
@@ -8156,7 +8159,7 @@ function mfcs_get_reviewer_settings_by_user_id($user_id, $disabled = FALSE) {
  *   - unavailable: an array containing any room unavailability.
  *   FALSE on error.
  */
-function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $request_id = NULL) {
+function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $request_id = NULL, $ignore_past = FALSE) {
   if (!is_int($room)) {
     cf_error::invalid_integer('room');
     return FALSE;
@@ -8182,10 +8185,21 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
     return FALSE;
   }
 
+  if (!is_bool($ignore_past)) {
+    cf_error::invalid_bool('ignore_past');
+    return FALSE;
+  }
+
   $matched_requests = array(
     'conflicts' => array(),
     'unavailable' => array(),
   );
+
+  $midnight_today = NULL;
+  if ($ignore_past) {
+    $midnight_today = strtotime('midnight today', mfcs_instance());
+  }
+
 
   try {
     $query = db_select('mfcs_requests', 'mer');
@@ -8222,8 +8236,12 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
       // don't include itself when searching for a request that conflicts to avoid conflicting with itself!
       $query->condition('mer.id', $request_id, '<>');
     }
-    $results = $query->execute()->fetchAll();
 
+    if ($ignore_past) {
+      $query->condition('mfdd.value', $midnight_today, '>=');
+    }
+
+    $results = $query->execute()->fetchAll();
 
     // when rooms are in use, check the individual times.
     if (!empty($results)) {
@@ -8255,6 +8273,10 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
         if (!is_null($request_id)) {
           // don't include itself when searching for a request that conflicts to avoid conflicting with itself!
           $query->condition('mfdd.request_id', $request_id, '<>');
+        }
+
+        if ($ignore_past) {
+          $query->condition('mfdd.value', $midnight_today, '>=');
         }
 
         $or = db_or();
@@ -8335,6 +8357,12 @@ function mfcs_check_room_availability($room, $dates, $time_start, $time_stop, $r
 
   // process explicit/non-conflict unavailabilities.
   foreach ($dates as $key => $date) {
+    if ($ignore_past) {
+      if (strtotime('midnight today', $date) < $midnight_today) {
+        continue;
+      }
+    }
+
     $year = date('Y', $date);
 
     if (is_null($time_start[$key])) {
@@ -13593,13 +13621,13 @@ function mfcs_get_holidays($year, $timestamp_start = NULL, $timestamp_stop = NUL
         $year_next = strtotime('next year', $year_stamp);
 
         $or = db_or();
-        $or->condition('mh.date_start', $year_next, '<');
-        $or->condition('mh.date_stop', $year_next, '<=');
+        $or->condition('mh.date_start', $year_next, '>=');
+        $or->condition('mh.date_stop', $year_next, '<');
         $query->condition($or);
 
         $and = db_and();
-        $and->condition('mh.date_start', $timestamp_start_midnight, '>=');
-        $and->condition('mh.date_stop', $timestamp_start_midnight, '<');
+        $and->condition('mh.date_start', $timestamp_start_midnight, '<=');
+        $and->condition('mh.date_stop', $timestamp_start_midnight, '>');
         $query->condition($and);
       }
       else {

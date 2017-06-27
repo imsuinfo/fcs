@@ -210,13 +210,19 @@ function mfcs_view_setup_group_path(&$form, $request_id, $group, $presentation_t
  *   A collection of variables to tweak how this value is presented.
  * @param array $request
  *   The request array containing all of the request values.
+ * @param array $date_extras
+ *   (optional) An array of additional date related information to process when building the item structure.
+ *   The array is an array of deltas whose values are arrays with the following structure:
+ *   - 'holidays': An array containing holiday information with each key representing the date delta.
+ *   - 'conflicts': An array containing room conflict information with each key representing the date delta.
+ *   - 'unavailable': An array containing room unavailability information with each key representing the date delta.
  *
  * @return array|bool|null
  *   The built array.
  *   NULL is returned when there should be no array to build.
  *   FALSE is returned on failure.
  */
-function mfcs_view_build_request_item_structure($request_id, $field_group, $field_name, $values, $presentation, $request) {
+function mfcs_view_build_request_item_structure($request_id, $field_group, $field_name, $values, $presentation, $request, $date_extras = array()) {
   if (!cf_is_integer($request_id)) {
     cf_error::invalid_integer('request_id');
     return FALSE;
@@ -239,6 +245,11 @@ function mfcs_view_build_request_item_structure($request_id, $field_group, $fiel
 
   if (!is_array($presentation)) {
     cf_error::invalid_array('presentation');
+    return FALSE;
+  }
+
+  if (!is_array($date_extras)) {
+    cf_error::invalid_array('date_extras');
     return FALSE;
   }
 
@@ -278,10 +289,17 @@ function mfcs_view_build_request_item_structure($request_id, $field_group, $fiel
 
   $label_length = strlen($label);
 
+  $options = array();
+  if ($field_name == 'date') {
+    if (!empty($date_extras)) {
+      $options['date_extras'] = $date_extras;
+    }
+  }
+
   $output = array();
   $no_values = TRUE;
   foreach ($values as $delta => &$value) {
-    $generated = mfcs_view_build_request_value_structure($request_id, $field_group, $field_name, $delta, $value, $presentation, $request);
+    $generated = mfcs_view_build_request_value_structure($request_id, $field_group, $field_name, $delta, $value, $presentation, $request, $options);
 
     if ($generated !== FALSE && !isset($generated['no_values'])) {
       $id = 'field-request-' . $request_id . '-item-' . $field_group . '-' . $field_name . '-' . $delta;
@@ -420,6 +438,11 @@ function mfcs_view_build_request_item_structure($request_id, $field_group, $fiel
  *     fields that have #multiple set to TRUE.
  *   - 'history': If TRUE, handle specific deviations relevant to history presentation.
  *   - 'combine_partial': If TRUE, combined values will be combined into a single field/value, but may have additional information.
+ *   - 'date_extras': (optional) An array of additional date related information to process when building the item structure.
+ *     The array is an array of deltas whose values are arrays with the following structure:
+ *     - 'holidays': An array containing holiday information with each key representing the date delta.
+ *     - 'conflicts': An array containing room conflict information with each key representing the date delta.
+ *     - 'unavailable': An array containing room unavailability information with each key representing the date delta.
  *
  * @return array|bool
  *   The built array.
@@ -648,7 +671,6 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
             '#markup' => ' <span class="item-value-instance-cancelled ' . 'item-value-instance-' . $field_group . '-' . $field_name . '-cancelled">(<strong>Cancelled</strong>)</span>',
           ),
         );
-
       }
       else {
         $cancelled = array(
@@ -664,6 +686,55 @@ function mfcs_view_build_request_value_structure($request_id, $field_group, $fie
 
       if (!isset($output[$value_name]['#attributes']['title'])) {
         $output[$value_name]['#attributes']['title'] = check_plain($output_value);
+      }
+    }
+    elseif (!empty($options['date_extras'][$delta]) && property_exists($value, 'cancelled') && $value->cancelled == '0' && property_exists($value, 'date') && !$options_history) {
+      if (!empty($options['date_extras'][$delta]['holidays'])) {
+        $on_holiday = array(
+          'on_holiday' => array(
+            '#type' => 'markup',
+            '#markup' => '<span class="item-value-instance-on_holiday ' . 'item-value-instance-' . $field_group . '-' . $field_name . '-on_holiday">(On Holiday)</span> ',
+          ),
+        );
+
+        $output[$value_name] = array_merge($on_holiday, $output[$value_name]);
+        $output[$value_name]['#attributes']['class'][] = 'item-on_holiday';
+
+        if (!isset($output[$value_name]['#attributes']['title'])) {
+          $output[$value_name]['#attributes']['title'] = check_plain($output_value);
+        }
+      }
+
+      if (!empty($options['date_extras'][$delta]['unavailable'])) {
+        $room_unavailable = array(
+          'room_unavailable' => array(
+            '#type' => 'markup',
+            '#markup' => '<span class="item-value-instance-room_unavailable ' . 'item-value-instance-' . $field_group . '-' . $field_name . '-room_unavailable">(Room Unavailable)</span> ',
+          ),
+        );
+
+        $output[$value_name] = array_merge($room_unavailable, $output[$value_name]);
+        $output[$value_name]['#attributes']['class'][] = 'item-room_unavailable';
+
+        if (!isset($output[$value_name]['#attributes']['title'])) {
+          $output[$value_name]['#attributes']['title'] = check_plain($output_value);
+        }
+      }
+
+      if (!empty($options['date_extras'][$delta]['conflicts'])) {
+        $room_conflict = array(
+          'room_conflict' => array(
+            '#type' => 'markup',
+            '#markup' => '<span class="item-value-instance-room_conflict ' . 'item-value-instance-' . $field_group . '-' . $field_name . '-room_conflict">(Room Conflict)</span> ',
+          ),
+        );
+
+        $output[$value_name] = array_merge($room_conflict, $output[$value_name]);
+        $output[$value_name]['#attributes']['class'][] = 'item-room_conflict';
+
+        if (!isset($output[$value_name]['#attributes']['title'])) {
+          $output[$value_name]['#attributes']['title'] = check_plain($output_value);
+        }
       }
     }
 

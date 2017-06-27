@@ -367,6 +367,15 @@ function mfcs_request_manage_0_move_form($form, &$form_state, $request_id) {
   $form['markup']['#markup'] .=   '</div>';
   $form['markup']['#markup'] .= '</div>';
 
+  if (isset($form_state['unavailabilities']) && is_array($form_state['unavailabilities']) && !empty($form_state['unavailabilities'])) {
+    $form['markup']['#markup'] .= '<div class="move_request-markup-row column-warnings">';
+    foreach ($form_state['unavailabilities'] as $unavailability) {
+      $form['markup']['#markup'] .= $unavailability;
+    }
+    unset($unavailability);
+    $form['markup']['#markup'] .= '</div>';
+  }
+
   $form['markup']['#markup'] .= '</div>';
 
   return $form;
@@ -396,6 +405,11 @@ function mfcs_request_manage_0_move_form_pre_validate(&$form, &$form_state) {
         $form['request']['room'][0]['#default_value'] = NULL;
         $form_state['values']['request']['building'][0] = NULL;
         $form_state['values']['request']['room'][0] = NULL;
+
+        // only provide 'unavailabilities' when form step is progressing from 'rooms' step.
+        if ($form_state['values']['form']['step'] != 'rooms') {
+          unset($form_state['unavailabilities']);
+        }
       }
     }
     // when the room changes, re-load the building.
@@ -405,6 +419,8 @@ function mfcs_request_manage_0_move_form_pre_validate(&$form, &$form_state) {
         if (is_object($form['form']['room_information']['#value'])) {
           $form_state['values']['request']['building'][0] = $form['form']['room_information']['#value']->building_id;
         }
+
+        unset($form_state['unavailabilities']);
       }
     }
   }
@@ -455,6 +471,8 @@ function mfcs_request_manage_0_move_form_validate($form, &$form_state) {
       $form_state['values']['form']['step'] = 'rooms';
     }
 
+    unset($form_state['unavailabilities']);
+
     return;
   }
 
@@ -465,6 +483,8 @@ function mfcs_request_manage_0_move_form_validate($form, &$form_state) {
     'submit-request-add-date' => TRUE,
     'submit-request-remove-date' => TRUE,
   );
+
+  unset($form_state['unavailabilities']);
 
   if ($clicked_id == 'submit-request-next') {
     if ($form_state['values']['form']['step'] == 'location') {
@@ -498,8 +518,12 @@ function mfcs_request_manage_0_move_form_validate($form, &$form_state) {
         elseif (!empty($room_unavailability['conflicts']) || !empty($room_unavailability['unavailable'])) {
           $unavailable_message = '<span class="strong uppercase">Warning</span>: The specified room is currently unavailable for the following dates: ';
           $unavailable_message .= mfcs_build_room_unavailable_message($room_unavailability, TRUE);
-          drupal_set_message($unavailable_message, 'warning');
-          unset($unavailable_message);
+
+          if (!isset($form_state['unavailabilities'])) {
+            $form_state['unavailabilities'] = array();
+          }
+
+          $form_state['unavailabilities'][] = $unavailable_message;
         }
         unset($room_unavailability);
         unset($room_id);
@@ -511,7 +535,12 @@ function mfcs_request_manage_0_move_form_validate($form, &$form_state) {
           if (is_object($holiday)) {
             $unavailable_message .= '<strong>';
             $unavailable_message .= '@title</a></strong>.';
-            drupal_set_message(t('<span class="strong uppercase">Warning</span>: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'holiday-0/view/@year/' . $holiday->year. '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => $holiday->year, '@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title)), 'warning');
+
+            if (!isset($form_state['unavailabilities'])) {
+              $form_state['unavailabilities'] = array();
+            }
+
+            $form_state['unavailabilities'][] = t('<span class="strong uppercase">Warning</span>: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'holiday-0/view/@year/' . $holiday->year. '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => $holiday->year, '@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title));
           }
           unset($holiday);
         }

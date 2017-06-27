@@ -156,6 +156,12 @@ function mfcs_request_create_0_form($form, &$form_state, $copy_request = NULL) {
     ),
   );
 
+  $form['form']['ignore_past'] = array(
+    '#id' => 'field-form-ignore_past',
+    '#type' => 'value',
+    '#value' => FALSE,
+  );
+
   if (isset($form_state['warnings']) && !empty($form_state['warnings'])) {
     $warnings_markup = NULL;
     foreach ($form_state['warnings'] as $warning_group => $warning) {

@@ -158,6 +158,12 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
     '#value' => $target_section,
   );
 
+  $form['form']['room_unavailabilities'] = array(
+    '#id' => 'field-form-room_unavailabilities',
+    '#type' => 'value',
+    '#value' => TRUE,
+  );
+
 
   // $target_section determines which sections are to be made visible and which aren't.
   if ($target_section == 'request') {

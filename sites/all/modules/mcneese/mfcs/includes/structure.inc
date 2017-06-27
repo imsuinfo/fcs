@@ -286,6 +286,8 @@ function mfcs_get_request_fields($form, &$form_state) {
     if (count($dates) > 1) {
       $first_key = TRUE;
       foreach ($dates as $date_key => $date_value) {
+        $is_cancelled = isset($request_state['dates']['date-cancelled'][$date_key]) && $request_state['dates']['date-cancelled'][$date_key] === TRUE;
+
         $remove_button = array(
           '#id' => 'buttons-request-remove-date-' . $date_key,
           '#type' => 'container',
@@ -308,7 +310,7 @@ function mfcs_get_request_fields($form, &$form_state) {
           ),
         );
 
-        if ($first_key) {
+        if ($first_key || $is_cancelled) {
           $first_key = FALSE;
           $fields['dates']['group_dates'][$date_key]['date_container']['remove'] = $remove_button;
           $fields['dates']['group_dates'][$date_key]['date_container']['remove']['#weight'] = 0;
@@ -1147,7 +1149,7 @@ function mfcs_get_request_group_dates_date($form, &$form_state, &$fields, &$requ
       mfcs_get_request_field_dates_time_stop($form, $form_state, $fields['dates']['group_dates'][$key], $request_state, $new_ps, $key);
       mfcs_get_request_field_dates_category($form, $form_state, $fields['dates']['group_dates'][$key], $request_state, $new_ps, $key);
 
-      if ($first_key) {
+      if ($first_key || isset($request_state['dates']['date-cancelled'][$key]) && $request_state['dates']['date-cancelled'][$key] === TRUE) {
         $fields['dates']['group_dates'][$key]['date_container'] = array(
           '#type' => 'container',
           '#attributes' => array(
@@ -1164,15 +1166,25 @@ function mfcs_get_request_group_dates_date($form, &$form_state, &$fields, &$requ
           '#weight' => 100,
         );
 
-        $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= '<div id="mfcs-markup-request-dates-date_note" class="markup-request">';
-        $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= 'Please give separate times for ' . $options_string . '.<br>';
-        $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= '<br>';
-        $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= 'Providing a true breakdown may keep you from being overcharged by MSU PD for security fees.<br>';
-        $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= '<br>';
-        $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= 'Please remember to indicate on the next screen under "additional special setup" what time you will need the venue opened by MSU PD, if applicable.<br>';
-        $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= '</div>';
+        if ($first_key) {
+          $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= '<div id="mfcs-markup-request-dates-date_note" class="markup-request">';
+          $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= 'Please give separate times for ' . $options_string . '.<br>';
+          $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= '<br>';
+          $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= 'Providing a true breakdown may keep you from being overcharged by MSU PD for security fees.<br>';
+          $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= '<br>';
+          $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= 'Please remember to indicate on the next screen under "additional special setup" what time you will need the venue opened by MSU PD, if applicable.<br>';
+          $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= '</div>';
 
-        $first_key = FALSE;
+          $first_key = FALSE;
+        }
+
+        if (isset($request_state['dates']['date-cancelled'][$key]) && $request_state['dates']['date-cancelled'][$key] === TRUE) {
+          $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= '<div id="mfcs-markup-request-dates-date_note-is_cancelled" class="markup-request">';
+          $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= 'This date has been cancelled.';
+          $fields['dates']['group_dates'][$key]['date_container']['note']['#markup'] .= '</div>';
+
+          $fields['dates']['group_dates'][$key]['#attributes']['class'][] = 'date-is-cancelled';
+        }
       }
     }
   }
@@ -6926,6 +6938,7 @@ function mfcs_get_request_existing_values($request) {
       unset($current);
       $path_parts = explode('][', $field_structure['path']);
       $current = &$processed;
+      $up_one = &$current;
 
       while (!empty($path_parts)) {
         $part = array_shift($path_parts);
@@ -6935,6 +6948,7 @@ function mfcs_get_request_existing_values($request) {
         }
 
         if (is_array($current[$part])) {
+          $up_one = &$current;
           $current = &$current[$part];
         }
         else {
@@ -7022,6 +7036,20 @@ function mfcs_get_request_existing_values($request) {
               }
               else {
                 $current[$field_object->delta] = NULL;
+              }
+
+              // special case for date fields where 'cancelling' functionality was added later on as a column 'cancelled'.
+              // instead of making significant changes to the structure of the project, just add another field array with '-cancelled' appended to the name.
+              if (array_key_exists('cancelling', $field_structure) && property_exists($field_object, 'cancelled')) {
+                if (!array_key_exists($field_name . '-cancelled', $up_one)) {
+                  $up_one[$field_name . '-cancelled'] = array();
+                }
+
+                $up_one[$field_name . '-cancelled'][$field_object->delta] = FALSE;
+
+                if ($field_object->cancelled == 1) {
+                  $up_one[$field_name . '-cancelled'][$field_object->delta] = TRUE;
+                }
               }
             }
             else {
