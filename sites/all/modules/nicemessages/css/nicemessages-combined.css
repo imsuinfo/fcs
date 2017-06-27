@@ -159,7 +159,7 @@
 }
 
 #jGrowl .jGrowl-notification a { color: #ffffff; border-bottom: 1px dotted #ffffff; }
-#jGrowl .jGrowl-notification .jGrowl-message { word-wrap: break-word; padding-right: 34px; max-height: 200px; overflow: auto }
+#jGrowl .jGrowl-notification .jGrowl-message { word-wrap: break-word; padding-right: 34px; max-height: 200px; }
 #jGrowl .jGrowl-notification .jGrowl-close { font-size: 1.1em; }
 #jGrowl .jGrowl-closer { padding-right: 24px; padding-left: 24px; background-image: none; }
 .ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight {
