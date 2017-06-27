@@ -176,6 +176,7 @@
 .jGrowl {
   box-sizing: border-box;
   max-width: 85%;
+  min-width: 40%;
 }
 .jGrowl .jGrowl-notification {
   box-sizing: border-box;
