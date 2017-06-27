@@ -687,9 +687,24 @@ function mfcs_ical_generate_holidays(&$ical, $holidays, $date_settings, $ical_eo
   $room_options = mfcs_get_request_room_list_options(NULL, NULL, TRUE, TRUE);
   $building_options = mfcs_get_request_building_list_options(NULL, NULL, TRUE, TRUE);
 
+  $date_format = MFCS_DATE_FORMAT_DATE;
+  if (isset($date_settings['day_format'])) {
+    $date_format = $date_settings['day_format'];
+  }
+
   foreach ($holidays as $holiday) {
-    if (!isset($holiday->date)) {
+    if (!isset($holiday->date_start)) {
       continue;
+    }
+
+
+    if ($holiday->date_stop == strtotime('tomorrow', $holiday->date_start) ) {
+      $date_text = date($date_format, $holiday->date_start);
+      $date_markup = '<strong>' . date($date_format, $holiday->date_start) . '</strong>';
+    }
+    else {
+      $date_text = date($date_format, $holiday->date_start) . ' to ' . date($date_format, strtotime('yesterday', $holiday->date_stop));
+      $date_markup = '<strong>' . date($date_format, $holiday->date_start) . '</strong> to <strong>' . date($date_format, strtotime('yesterday', $holiday->date_stop)) . '</strong>';
     }
 
     $holiday_categories = array();
@@ -699,9 +714,12 @@ function mfcs_ical_generate_holidays(&$ical, $holidays, $date_settings, $ical_eo
     $holiday_url = $base_url . '/holiday-0/view/' . $holiday->year . '/' . $holiday->id;
 
     $holiday_description_begin = '';
-    $holiday_description_begin .= $holiday->title . ' is a holiday, break, or office closure for McNeese State University on: ' . date(MFCS_DATE_FORMAT_DATE, $holiday->date) . '.' . "\n";
-    $holiday_description_begin .=  "\n";
-    $holiday_description_begin .= $holiday->description . "\n";
+    $holiday_description_begin .= $holiday->title . ' is a holiday, break, or office closure for McNeese State University on: ' . $date_text . '.' . "\n";
+
+    if (strlen($holiday->description) > 0) {
+      $holiday_description_begin .=  "\n";
+      $holiday_description_begin .= $holiday->description . "\n";
+    }
 
     $holiday_description_end = "\n";
     $holiday_description_end .= 'You may view the holiday at: '  . $holiday_url. ".\n";
@@ -712,9 +730,12 @@ function mfcs_ical_generate_holidays(&$ical, $holidays, $date_settings, $ical_eo
 
     $holiday_description_markup_end = '';
 
-    $holiday_description_markup_begin .= '<strong>' . $holiday->title . '</strong> is a holiday, break, or office closure for McNeese State University on: <strong>' . date(MFCS_DATE_FORMAT_DATE, $holiday->date) . '</strong>.<br>';
-    $holiday_description_markup_begin .= '<br>';
-    $holiday_description_markup_begin .= $holiday->description . '<br>';
+    $holiday_description_markup_begin .= '<strong>' . $holiday->title . '</strong> is a holiday, break, or office closure for McNeese State University on: ' . $date_markup . '.<br>';
+
+    if (strlen($holiday->description) > 0) {
+      $holiday_description_markup_begin .= '<br>';
+      $holiday_description_markup_begin .= $holiday->description . '<br>';
+    }
 
     $holiday_description_markup_end .= '<br>';
     $holiday_description_markup_end .= 'You may view the holiday at: <a href="' . $holiday_url . '">' . $holiday_url . '</a>.<br>';
@@ -724,9 +745,9 @@ function mfcs_ical_generate_holidays(&$ical, $holidays, $date_settings, $ical_eo
 
     // see: https://tools.ietf.org/html/rfc5545#section-3.8.2
     date_default_timezone_set(MFCS_TIMEZONE_ICALENDAR);
-    $date_start = 'DTSTART;VALUE=DATE:' . date($date_settings['format_all_day'], $holiday->date);
-    $date_stop = 'DTEND;VALUE=DATE:' . date($date_settings['format_all_day'], strtotime('midnight tomorrow', $holiday->date));
-    $date_text = date($date_settings['day_format'], $holiday->date);
+
+    $date_start = 'DTSTART;VALUE=DATE:' . date($date_settings['format_all_day'], $holiday->date_start);
+    $date_stop = 'DTEND;VALUE=DATE:' . date($date_settings['format_all_day'], $holiday->date_stop);
 
     mfcs_ical_populate_array($ical, 'BEGIN:VEVENT');
     mfcs_ical_populate_array($ical, mfcs_ical_wordwrap('UID:holiday-' . $holiday->id . '@' . $fcs_site_url));

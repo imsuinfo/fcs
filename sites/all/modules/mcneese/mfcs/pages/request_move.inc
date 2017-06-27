@@ -506,7 +506,11 @@ function mfcs_request_manage_0_move_form_validate($form, &$form_state) {
 
           $holidays = mfcs_get_holidays((int) date('Y', $form['form']['request']['#value']['dates']['date'][$date_delta]->value), $form['form']['request']['#value']['dates']['date'][$date_delta]->value);
           if (is_array($holidays)) {
-            $all_holidays = array_merge($all_holidays, $holidays);
+            if (!isset($all_holidays[$all_dates[$date_delta]])) {
+              $all_holidays[$all_dates[$date_delta]] = array();
+            }
+
+            $all_holidays[$all_dates[$date_delta]]= array_merge($all_holidays[$all_dates[$date_delta]], $holidays);
           }
           unset($holidays);
         }
@@ -530,19 +534,21 @@ function mfcs_request_manage_0_move_form_validate($form, &$form_state) {
 
         // check for holidays.
         if (!empty($all_holidays)) {
-          // there currently can only be a single holiday per day, so only process a single holiday.
-          $holiday = reset($all_holidays);
-          if (is_object($holiday)) {
-            $unavailable_message .= '<strong>';
-            $unavailable_message .= '@title</a></strong>.';
+          foreach ($all_holidays as $conflicting_date => $holidays) {
+            // there currently can only be a single holiday per day, so only process a single holiday.
+            $holiday = reset($holidays);
+            if (is_object($holiday)) {
+              $unavailable_message .= '<strong>@title</strong>.';
 
-            if (!isset($form_state['unavailabilities'])) {
-              $form_state['unavailabilities'] = array();
+              if (!isset($form_state['unavailabilities'])) {
+                $form_state['unavailabilities'] = array();
+              }
+
+              $form_state['unavailabilities'][] = t('<span class="strong uppercase">Warning</span>: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'holiday-0/view/@year/' . $holiday->year. '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => $holiday->year, '@date' => date(MFCS_DATE_FORMAT_DATE, $conflicting_date), '@holiday' => $holiday->title));
             }
-
-            $form_state['unavailabilities'][] = t('<span class="strong uppercase">Warning</span>: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'holiday-0/view/@year/' . $holiday->year. '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => $holiday->year, '@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title));
+            unset($holiday);
           }
-          unset($holiday);
+          unset($holidays);
         }
         unset($all_holidays);
       }

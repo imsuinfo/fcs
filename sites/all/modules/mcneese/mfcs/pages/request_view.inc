@@ -1591,7 +1591,11 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
             $holidays = mfcs_get_holidays((int) date('Y', $request['dates']['date'][$date_delta]->value), $request['dates']['date'][$date_delta]->value);
             if (is_array($holidays)) {
-              $all_holidays = array_merge($all_holidays, $holidays);
+              if (!isset($all_holidays[$all_dates[$date_delta]])) {
+                $all_holidays[$all_dates[$date_delta]] = array();
+              }
+
+              $all_holidays[$all_dates[$date_delta]]= array_merge($all_holidays[$all_dates[$date_delta]], $holidays);
             }
             unset($holidays);
           }
@@ -1604,9 +1608,11 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
           $conflict_message .= '<div class="warning-holidays">';
           $conflict_message .= '<div class="warning-holidays-title"><span class="strong uppercase">Warning</span>: This request is scheduled on the same dates as the following:</div>';
           $conflict_message .= '<ul class="warning-holidays-list">';
-          foreach ($all_holidays as $holiday) {
-            $conflict_message .= '<li class="warning-holidays-list-item">' . t('<strong>@holiday</strong> on: <em>@date</em>.', array('@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title)) . '</li>';
+          foreach ($all_holidays as $conflicting_date => $holiday) {
+            $conflict_message .= '<li class="warning-holidays-list-item">' . t('<strong>@holiday</strong> on: <em>@date</em>.', array('@date' => date(MFCS_DATE_FORMAT_DATE, $conflicting_date), '@holiday' => $holiday->title)) . '</li>';
           }
+          unset($conflicting_date);
+          unset($holiday);
           $conflict_message .= '</ul>';
           $conflict_message .= '</div>';
         }
@@ -2463,7 +2469,11 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
 
         $holidays = mfcs_get_holidays((int) date('Y', $request['dates']['date'][$date_delta]->value), $request['dates']['date'][$date_delta]->value);
         if (is_array($holidays)) {
-          $all_holidays = array_merge($all_holidays, $holidays);
+          if (!isset($all_holidays[$all_dates[$date_delta]])) {
+            $all_holidays[$all_dates[$date_delta]] = array();
+          }
+
+          $all_holidays[$all_dates[$date_delta]]= array_merge($all_holidays[$all_dates[$date_delta]], $holidays);
         }
         unset($holidays);
       }
@@ -2486,11 +2496,14 @@ function mfcs_request_view_0_form_validate($form, &$form_state) {
       // check for holidays.
       if (!empty($all_holidays)) {
         // there currently can only be a single holiday per day, so only process a single holiday.
-        $holiday = reset($all_holidays);
-        if (is_object($holiday)) {
-          drupal_set_message(t('<span class="strong uppercase">Warning</span>: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'holiday-0/view/@year/' . $holiday->year. '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => $holiday->year, '@date' => date(MFCS_DATE_FORMAT_DATE, $holiday->date), '@holiday' => $holiday->title)), 'warning');
+        foreach ($all_holidays as $conflicting_date => $holidays) {
+          $holiday = reset($holidays);
+          if (is_object($holiday)) {
+            drupal_set_message(t('<span class="strong uppercase">Warning</span>: <strong>@date</strong> may not available because of: <strong><a href="' . $base_path . 'holiday-0/view/@year/' . $holiday->year. '/' . $holiday->id . $url_arguments . '" title="View details about holiday.">@holiday</a></strong>.', array('@year' => $holiday->year, '@date' => date(MFCS_DATE_FORMAT_DATE, $conflicting_date), '@holiday' => $holiday->title)), 'warning');
+          }
+          unset($holiday);
         }
-        unset($holiday);
+        unset($holidays);
       }
       unset($all_holidays);
     }
