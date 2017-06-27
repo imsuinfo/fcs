@@ -8470,7 +8470,7 @@ function mfcs_build_room_unavailable_message($availability_issues, $blank_target
         }
         else {
           // all day, over more than one days.
-          $unavailable_message .= '<strong>' . check_plain(date(MFCS_DATE_FORMAT_DATE, $unavailable->date_start)) . '</strong> to <strong>' . check_plain(date(MFCS_DATE_FORMAT_DATE, $unavailable->date_stop)) . '</strong>';
+          $unavailable_message .= '<strong>' . check_plain(date(MFCS_DATE_FORMAT_DATE, $unavailable->date_start)) . '</strong> to <strong>' . check_plain(date(MFCS_DATE_FORMAT_DATE, strtotime('yesterday', $unavailable->date_stop))) . '</strong>';
         }
       }
       elseif ($start_day == $stop_day || $unavailable->date_stop == strtotime('midnight tomorrow', $start_day)) {
