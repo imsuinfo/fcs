@@ -728,7 +728,12 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
       // prevent invalid all-day/partial-day date combinations from being used.
       if (!is_null($date_timestamp[$key])) {
         if (empty($location_state['dates']['time_start'][$key])) {
-          $all_day[$date_timestamp[$key]] = $key;
+          if (array_key_exists($date_timestamp[$key], $all_day)) {
+            form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t('<strong>@date</strong> has already been specified.', array('@date' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $date_timestamp[$key]))));
+          }
+          else {
+            $all_day[$date_timestamp[$key]] = $key;
+          }
         }
         else {
           $partial_day[$date_timestamp[$key]] = $key;
@@ -739,8 +744,7 @@ function mfcs_validate_request_fields_dates($form, &$form_state, $path_string_pr
     // detect and report errors for invalid date combinations.
     foreach ($all_day as $datestamp => $key) {
       if (array_key_exists($datestamp, $partial_day)) {
-        $date_string = date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $datestamp);
-        form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t('<strong>@date</strong> is set to all day, but there are also partial day times in use for that same day. Please use either all day or partial day times but not both.', array('@date' => $date_string)));
+        form_set_error($path_string_prefix . '][dates][date][' . $key . '][date', t('<strong>@date</strong> is set to all day, but there are also partial day times in use for that same day. Please use either all day or partial day times but not both.', array('@date' => date(MFCS_DATE_FORMAT_DATE_SQUEEZE, $datestamp))));
         $passed = FALSE;
       }
     }
