@@ -946,9 +946,10 @@ function mfcs_request_unavailability_0_page($year, $room_id, $unavailability_id)
   $conflict_message = NULL;
   $conflicts = mfcs_unavailability_rooms_conflicts($unavailability_id);
   if (!empty($conflicts)) {
-    $conflict_message = '<span class="strong uppercase">Warning</span>: the following requests are scheduled on unavailable dates:<ul>';
+    $conflict_message = '<span class="strong uppercase">Warning</span>: the following requests are scheduled on unavailable dates:';
+    $conflict_message .= '<ul class="unavailable-room_conflicts">';
     foreach ($conflicts as $conflict) {
-      $conflict_message .= '<li><a href="' . $base_path . 'requests/view-0/' . $conflict['id'] . $url_arguments . '">' . check_plain($conflict['title']) . '</a></li>';
+      $conflict_message .= '<li class="unavailable-room_conflicts-conflict"><a href="' . $base_path . 'requests/view-0/' . $conflict['id'] . $url_arguments . '">' . check_plain($conflict['title']) . '</a> <span class="request_id">(Request ID: ' . (int) $conflict['id'] . ')</span></li>';
     }
     $conflict_message .= '</ul>';
   }

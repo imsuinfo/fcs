@@ -1641,19 +1641,19 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
                   if (isset($request_using_room->time_start)) {
                     $problematic_date_key =  '' . $request_using_room->date . '-' . $request_using_room->time_start . '-' . $request_using_room->time_stop;
                     $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->date) . '</strong> from <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->time_start) . '</strong> to <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->time_stop) . '</strong>  ';
-                    $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '">' . $request_using_room->title . '</a></strong>.';
+                    $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '">' . $request_using_room->title . '</a></strong> <span class="request_id">(' . $request_using_room->id . ')</span>.';
                     $problematic_dates[$problematic_date_key] = $problematic_date;
                   }
                   else {
                     $problematic_date_key =  '' . $request_using_room->date;
                     $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->date) . '</strong> (all day) ';
-                    $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '">' . $request_using_room->title . '</a></strong>.';
+                    $problematic_date .= '<strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '">' . $request_using_room->title . '</a></strong> <span class="request_id">(' . $request_using_room->id . ')</span>.';
                     $problematic_dates[$problematic_date_key] = $problematic_date;
                   }
                 }
                 elseif (isset($request_using_room->reserved_day)) {
                   $problematic_date_key =  '' . $request_using_room->reserved_day . '-' . $request_using_room->reserved_time_start . '-' . $request_using_room->reserved_time_stop;
-                  $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->reserved_day) . '</strong> from <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->reserved_time_start) . '</strong> to <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->reserved_time_stop) . '</strong> ' . $request_using_room->title . '.';
+                  $problematic_date = '<strong>' . date(MFCS_DATE_FORMAT_DATE, $request_using_room->reserved_day) . '</strong> from <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->reserved_time_start) . '</strong> to <strong>' . date(MFCS_DATE_FORMAT_TIME, $request_using_room->reserved_time_stop) . '</strong> <strong><a href="' . $base_path . 'requests/view-0/' . $request_using_room->request_id . $url_arguments . '">' . $request_using_room->title . '</a></strong> <span class="request_id">(' . $request_using_room->id . ')</span>.';
                   $problematic_dates[$problematic_date_key] = $problematic_date;
                 }
               }
@@ -1662,7 +1662,7 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
               ksort($problematic_dates);
               foreach ($problematic_dates as $date) {
-                $conflicting_message .= '<li>' . $date . '</li>';
+                $conflicting_message .= '<li class="problematic_dates-date">' . $date . '</li>';
               }
               unset($date);
             }

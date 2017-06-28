@@ -394,7 +394,7 @@ function mfcs_request_holiday_0_page($year, $holiday_id) {
   if (is_array($conflicts) && !empty($conflicts)) {
     $warnings = '<div class="mfcs-holiday_page-warnings">The following requests are scheduled during this holiday:<br><ul class="holiday_conflict-warning-list">';
     foreach ($conflicts as $conflict) {
-      $warnings .= '<li class="holiday_conflict-warning-list-item"><a href="' . $base_path . 'requests/view-0/' . $conflict->id . $url_arguments . '">' . check_plain($conflict->title) . '</a></li>';
+      $warnings .= '<li class="holiday_conflict-warning-list-item"><a href="' . $base_path . 'requests/view-0/' . $conflict->id . $url_arguments . '">' . check_plain($conflict->title) . '</a> <span class="request_id">(Request ID: ' . $conflict->id .')</span></li>';
     }
     $warnings .= '</ul></div>';
   }
