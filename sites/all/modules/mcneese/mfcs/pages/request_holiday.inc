@@ -388,6 +388,18 @@ function mfcs_request_holiday_0_page($year, $holiday_id) {
     $formatted_date .= '<strong>' . date(MFCS_DATE_FORMAT_DATE, strtotime('midnight yesterday', $holiday->date_stop)) . '</strong>';
   }
 
+  // search for and report any holiday conflicts
+  $warnings = NULL;
+  $conflicts = mfcs_request_holiday_0_check_for_conflicts($holiday->id);
+  if (is_array($conflicts) && !empty($conflicts)) {
+    $warnings = '<div class="mfcs-holiday_page-warnings">The following requests are scheduled during this holiday:<br><ul class="holiday_conflict-warning-list">';
+    foreach ($conflicts as $conflict) {
+      $warnings .= '<li class="holiday_conflict-warning-list-item"><a href="' . $base_path . 'requests/view-0/' . $conflict->id . $url_arguments . '">' . check_plain($conflict->title) . '</a></li>';
+    }
+    $warnings .= '</ul></div>';
+  }
+  unset($conflicts);
+
   $title = check_plain($holiday->title);
   $type = check_plain($holiday->type_human_name);
   $description = check_plain($holiday->description);
@@ -418,8 +430,11 @@ function mfcs_request_holiday_0_page($year, $holiday_id) {
 
     $markup .= '<br class="clear">';
   }
-
   $markup .= '</div>';
+
+  if (is_string($warnings)) {
+    $markup .= $warnings;
+  }
 
   return $markup;
 }
@@ -756,22 +771,6 @@ function mfcs_request_holiday_0_copy_form_submit($form, &$form_state) {
     $form_state['submitted'] = FALSE;
 
     return;
-  }
-
-  // search for and report any holiday conflicts
-  global $base_path;
-  foreach ($holidays_to_check as $holiday_id => $holiday_title) {
-    $conflicts = mfcs_request_holiday_0_check_for_conflicts($holiday_id);
-    if (!empty($conflicts)) {
-      $warning = 'The holiday, <strong>' . check_plain($holiday_title) . '</strong>, is in conflict with the following requests:<br><ul class="holiday_conflict-warning-list">';
-      foreach ($conflicts as $conflict) {
-        $warning .= '<li class="holiday_conflict-warning-list-item"><a href="' . $base_path . 'requests/view-0/' . $conflict->id . $url_arguments . '">' . check_plain($conflict->title) . '</a></li>';
-      }
-      $warning .= '</ul>';
-
-      drupal_set_message($warning, 'warning');
-      unset($warning);
-    }
   }
 
   // redirect after submitting.
@@ -1374,21 +1373,6 @@ function mfcs_request_holiday_0_edit_form_submit($form, &$form_state) {
     $form_state['submitted'] = FALSE;
 
     return;
-  }
-
-  // search for and report any holiday conflicts
-  $conflicts = mfcs_request_holiday_0_check_for_conflicts($holiday_id);
-  if (!empty($conflicts)) {
-    global $base_path;
-
-    $warning = 'The holiday, <strong>' . check_plain($form_state['values']['holiday']['title']) . '</strong>, is in conflict with the following requests:<br><ul class="holiday_conflict-warning-list">';
-    foreach ($conflicts as $conflict) {
-      $warning .= '<li class="holiday_conflict-warning-list-item"><a href="' . $base_path . 'requests/view-0/' . $conflict->id . $url_arguments . '">' . check_plain($conflict->title) . '</a></li>';
-    }
-    $warning .= '</ul>';
-
-    drupal_set_message($warning, 'warning');
-    unset($warning);
   }
 
   // redirect after submitting.
