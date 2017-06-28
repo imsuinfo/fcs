@@ -212,6 +212,9 @@ function mcneese_filters_rss_feed_text_only_process($text, $filter, $format, $la
   $text = $dom->get_markup();
   $text = trim(strip_tags($text, '<br>'));
 
+  // replace space placeholders with actual spaces.
+  $text = preg_replace('/&nbsp;/i', ' ', $text);
+
   // only allow at most 3 consecutive newlines.
   $text = preg_replace("/\n\n(\n)+/", "\n\n\n", $text);
 

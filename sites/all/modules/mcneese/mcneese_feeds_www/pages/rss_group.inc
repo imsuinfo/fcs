@@ -225,6 +225,7 @@ function mcneese_feeds_www_rss_group($group) {
         $teaser = strip_tags($teaser);
         $teaser = preg_replace("/( |\t)+/", ' ', $teaser);
         $teaser = preg_replace("/(\r)+/", '', $teaser);
+        $teaser = preg_replace('/&nbsp;/i', ' ', $teaser);
         $teaser = text_summary($teaser, NULL, MCNEESE_FEEDS_WWW_FEED_TEASER_LIMIT);
 
         $date_changed = (int) $result->changed;
@@ -271,8 +272,7 @@ function mcneese_feeds_www_rss_group($group) {
   // making checksums specific to the generated page would result in different checksums for the same data due to the presence of timestamps.
   $results_string = print_r($results, TRUE);
 
-  #$checksum = mcneese_feeds_save_cache($feed_url, $results_string);
-  $checksum = NULL;
+  $checksum = mcneese_feeds_save_cache($feed_url, $results_string);
 
   mcneese_feeds_send_output($feed_url, $output, $checksum);
 }
