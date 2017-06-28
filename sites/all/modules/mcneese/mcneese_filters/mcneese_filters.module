@@ -34,6 +34,14 @@ function mcneese_filters_filter_info() {
   $data['mcneese_filters_replace_redirect']['weight'] = -20;
   #$data['mcneese_filters_replace_redirect']['cache'] = FALSE;
 
+  $data['mcneese_filters_rss_feed_newline'] = array();
+  $data['mcneese_filters_rss_feed_newline']['title'] = t("McNeese Filters - Text Only");
+  $data['mcneese_filters_rss_feed_newline']['description'] = t("This helps make text-only content that preserves newlines.");
+  $data['mcneese_filters_rss_feed_newline']['process callback'] = 'mcneese_filters_rss_feed_text_only_process';
+  $data['mcneese_filters_rss_feed_newline']['settings callback'] = 'mcneese_filters_rss_feed_text_block_settings';
+  $data['mcneese_filters_rss_feed_newline']['weight'] = -20;
+
+
   return $data;
 }
 
@@ -173,6 +181,40 @@ function mcneese_filters_replace_redirects_process($text, $filter, $format, $lan
   }
 
   $text = $dom->get_markup();
+  return $text;
+}
+
+/**
+ * Process callback, used by mcneese_filters_filter_info().
+ *
+ * @param string $text
+ *    Text to purify
+ * @param object $filter
+ *   The filter object containing settings for the given format.
+ * @param object $format
+ *    The format object of the text to be filtered.
+ * @param string $langcode
+ *    The language code of the text to be filtered.
+ * @param boolean $cache
+ *    Whether or not to check the cache.
+ * @param int $cache_id
+ *    The ID of the filtered text in {cache_filter}, if $cache is TRUE.
+ */
+function mcneese_filters_rss_feed_text_only_process($text, $filter, $format, $langcode, $cache, $cache_id) {
+  if (empty($text)) return $text;
+
+  $dom = new cf_dom(TRUE, TRUE, TRUE, $text);
+  $body = $dom->get_body();
+  if (is_null($body)) {
+    return $text;
+  }
+
+  $text = $dom->get_markup();
+  $text = trim(strip_tags($text, '<br>'));
+
+  // only allow at most 3 consecutive newlines.
+  $text = preg_replace("/\n\n(\n)+/", "\n\n\n", $text);
+
   return $text;
 }
 

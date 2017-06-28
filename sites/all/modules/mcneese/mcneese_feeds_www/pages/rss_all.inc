@@ -199,7 +199,8 @@ function mcneese_feeds_www_rss_all($type = NULL) {
         }
 
         $teaser = strip_tags($teaser);
-        $teaser = preg_replace('/\s+/', ' ', $teaser);
+        $teaser = preg_replace("/( |\t)+/", ' ', $teaser);
+        $teaser = preg_replace("/(\r)+/", '', $teaser);
         $teaser = text_summary($teaser, NULL, MCNEESE_FEEDS_WWW_FEED_TEASER_LIMIT);
 
         $date_changed = (int) $result->changed;
