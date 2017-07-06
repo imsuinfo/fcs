@@ -676,10 +676,14 @@ function cf_theme_generate_headers(array $cf) {
   $supported_link_rel[] = 'index';
   $supported_link_rel[] = 'next';
   $supported_link_rel[] = 'prev';
+  $supported_link_rel[] = 'first';
+  $supported_link_rel[] = 'last';
+  $supported_link_rel[] = 'up';
   $supported_link_rel[] = 'section';
   $supported_link_rel[] = 'shortlink';
   $supported_link_rel[] = 'start';
   $supported_link_rel[] = 'stylesheet';
+  $supported_link_rel[] = 'alternate stylesheet';
   $supported_link_rel[] = 'subsection';
   $supported_link_rel[] = 'shortcut icon';
   $supported_link_rel[] = 'apple-touch-icon';
