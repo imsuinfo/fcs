@@ -38,6 +38,7 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
     }
 
     mfcs_add_canonical_headers('requests/statistics-0/' . $year);
+    mfcs_add_alternate_link('pdf-0/statistics/' . $year, 'application/pdf', 'View as PDF');
 
     drupal_set_title('Request Statistics for the year ' . $year);
   }
@@ -45,6 +46,7 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
     $month = strtolower(date('F', $statistics['month_start']));
     $year = date('Y', $statistics['month_start']);
     mfcs_add_canonical_headers('requests/statistics-0/' . $year . '/' . $month);
+    mfcs_add_alternate_link('pdf-0/statistics/' . $year . '/' . $month, 'application/pdf', 'View as PDF');
 
     drupal_set_title('Request Statistics for ' . $statistics['month_name'] . ' ' . $year);
   }
@@ -54,6 +56,7 @@ function mfcs_request_statistics_0_page($year = NULL, $month = NULL, $day = NULL
     $day = date('d', $statistics['day_start']);
 
     mfcs_add_canonical_headers('requests/statistics-0/' . $year . '/' . $month . '/' . $day);
+    mfcs_add_alternate_link('pdf-0/statistics/' . $year . '/' . $month . '/' . $day, 'application/pdf', 'View as PDF');
 
     drupal_set_title('Request Statistics for ' . $statistics['month_name'] . ' ' . $day . ', ' . $year);
   }
@@ -90,6 +93,7 @@ function mfcs_request_statistics_0_page_pdf($year = NULL, $month = NULL, $day = 
     }
 
     mfcs_add_canonical_headers('pdf-0/statistics/' . $year);
+    mfcs_add_alternate_link('requests/statistics-0/' . $year, 'text/html', 'View as HTML');
 
     $title = 'Request Statistics for the year ' . $year;
     $statistics_name = $year;
@@ -99,6 +103,7 @@ function mfcs_request_statistics_0_page_pdf($year = NULL, $month = NULL, $day = 
     $year = date('Y', $statistics['month_start']);
 
     mfcs_add_canonical_headers('pdf-0/statistics/' . $year . '/' . $month);
+    mfcs_add_alternate_link('requests/statistics-0/' . $year . '/' . $month, 'text/html', 'View as HTML');
 
     $title = 'Request Statistics for ' . $statistics['month_name'] . ' ' . $year;
     $statistics_name = $year . '_' . $month;
@@ -109,6 +114,7 @@ function mfcs_request_statistics_0_page_pdf($year = NULL, $month = NULL, $day = 
     $day = date('d', $statistics['day_start']);
 
     mfcs_add_canonical_headers('pdf-0/statistics/' . $year . '/' . $month . '/' . $day);
+    mfcs_add_alternate_link('requests/statistics-0/' . $year . '/' . $month . '/' . $day, 'text/html', 'View as HTML');
 
     $title = 'Request Statistics for ' . $statistics['month_name'] . ' ' . $day . ', ' . $year;
     $statistics_name = $year . '_' . $month . '_' . $day;

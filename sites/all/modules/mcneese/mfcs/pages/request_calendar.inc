@@ -128,6 +128,7 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   $month = strtolower(date('F', $specific_date));
   $year = date('Y', $specific_date);
   mfcs_add_canonical_headers('requests/calendar-0/month/' . $year . '/' . $month);
+  mfcs_add_alternate_link('pdf-0/calendar/' . $year . '/' . $month, 'application/pdf', 'View as PDF');
 
   $page_title = 'Request Calendar - ' . date('F Y', $specific_date);
   drupal_set_title($page_title);
@@ -605,6 +606,7 @@ function mfcs_request_calendar_month_0_page_pdf($year, $month) {
   $month_stamp = strtotime($month . ' 1, ' . $year);
 
   mfcs_add_canonical_headers('pdf-0/calendar/' . $year . '/' . $month);
+  mfcs_add_alternate_link('requests/calendar-0/month/' . $year . '/' . $month, 'text/html', 'View as HTML');
 
   $page_title = 'Request Calendar - ' . date('F Y', $month_stamp);
   drupal_set_title($page_title);
@@ -830,6 +832,7 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
   $year = date('Y', $specific_date);
   $day = date('d', $specific_date);
   mfcs_add_canonical_headers('requests/calendar-0/day/' . $year . '/' . $month . '/' . $day);
+  mfcs_add_alternate_link('pdf-0/calendar/' . $year . '/' . $month . '/' . $day . '/' . $page_number, 'application/pdf', 'View as PDF');
 
   $page_title = 'Request Calendar - ' . date('F j, Y', $day_start);
   drupal_set_title($page_title);
@@ -1373,6 +1376,7 @@ function mfcs_request_calendar_day_0_page_pdf($year, $month, $day, $page_number)
   $day_stamp = strtotime($month . ' ' . $day . ', ' . $year);
 
   mfcs_add_canonical_headers('pdf-0/calendar/' . $year . '/' . $month . '/' . $day . '/' . $page_number);
+  mfcs_add_alternate_link('requests/calendar-0/month/' . $year . '/' . $month . '/' . $day . '/' . $page_number, 'text/html', 'View as HTML');
 
   $page_title = 'Request Calendar - ' . date('F j, Y', $day_stamp);
   drupal_set_title($page_title);

@@ -57,6 +57,7 @@ function mfcs_request_agreement_0_form($form, &$form_state, $request_id, $contai
   global $base_path;
 
   mfcs_add_canonical_headers('requests/agreement-0/' . $request_id);
+  mfcs_add_alternate_link('requests/agreement-0/' . $request_id . '/pdf', 'application/pdf', 'View as PDF');
 
   $page_title = 'Facilities Use Agreement';
   if (!empty($request['information']['title'][0]->value)) {
@@ -436,6 +437,7 @@ function mfcs_request_agreement_0_pdf($request_id) {
   }
 
   mfcs_add_canonical_headers('requests/agreement-0/' . $request_id . '/pdf');
+  mfcs_add_alternate_link('requests/agreement-0/' . $request_id, 'text/html', 'View as HTML');
 
   $page_title = "Facilities Use Agreement";
   if (!empty($request['information']['title'][0]->value)) {

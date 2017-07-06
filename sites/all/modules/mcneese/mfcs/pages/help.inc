@@ -73,11 +73,13 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
     mfcs_add_canonical_headers('help');
 
     $pdf_url = 'glossary';
+    mfcs_add_alternate_link('help-0/presentation/pdf/' . $pdf_url, 'application/pdf', 'View as PDF');
   }
   elseif (is_null($section)) {
     $topic = strtolower($topic);
 
     mfcs_add_canonical_headers('help/' . $topic);
+    mfcs_add_alternate_link('help-0/presentation/pdf/' . $topic, 'application/pdf', 'View as PDF');
 
     $title = 'Help - ' . mfcs_help_url_cleanup_for_title($topic);
     $pdf_url = $topic;
@@ -87,6 +89,7 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
     $section = strtolower($section);
 
     mfcs_add_canonical_headers('help/' . $topic . '/' . $section);
+    mfcs_add_alternate_link('help-0/presentation/pdf/' . $topic . '/' . $section, 'application/pdf', 'View as PDF');
 
     $title = 'Help - ' . mfcs_help_url_cleanup_for_title($topic) . ' - ' . mfcs_help_url_cleanup_for_title($section);
     $pdf_url = $topic . '/' . $section;
@@ -97,6 +100,7 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
     $sub_section = strtolower($sub_section);
 
     mfcs_add_canonical_headers('help/' . $topic . '/' . $section . '/' . $sub_section);
+    mfcs_add_alternate_link('help-0/presentation/pdf/' . $topic . '/' . $section . '/' . $sub_section, 'application/pdf', 'View as PDF');
 
     $title = 'Help - ' . mfcs_help_url_cleanup_for_title($topic) . ' - ' . mfcs_help_url_cleanup_for_title($section) . ' - ' . mfcs_help_url_cleanup_for_title($sub_section);
     $pdf_url = $topic . '/' . $section . '/' . $sub_section;

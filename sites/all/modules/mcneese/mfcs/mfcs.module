@@ -12157,10 +12157,87 @@ function mfcs_add_canonical_headers($unique_path, $short_path = NULL) {
     'href' => $base_path . $short_path,
   );
 
-  $link = '<' . $base_path . $short_path . '>; rel="shortlink", <' . $base_url . '/' . $unique_path . '>; rel="canonical"';
-
   // provide content-location http header.
   drupal_add_http_header('content-location', $base_path . $unique_path, FALSE);
+
+  $link_headers = drupal_get_http_header('link');
+
+  $link = '';
+  if (is_array($link_headers) && isset($link_headers['value'])) {
+    $link = $link_headers['value'] . ', ';
+  }
+
+  $link = '<' . $base_path . str_replace('"', '\'', $short_path) . '>; rel="shortlink", <' . $base_url . '/' . str_replace('"', '\'', $unique_path) . '>; rel="canonical"';
+
+  drupal_add_http_header('link', $link, FALSE);
+
+  return TRUE;
+}
+
+/**
+ * Adds an alternate format for the current page.
+ *
+ * This is added as both an HTML header alternate link and an HTTP header alternate link.
+ *
+ * @fixme: This uses $mfcs_canonical because it is available and already written, despite being incorrect.
+ *         Future versions should correct this.
+ *
+ * @param string $alternate_path
+ *   The path to an alternate representation/format of this content.
+ * @param string $alternate_type
+ *   The type the alternate representation/format is presented as.
+ * @param null|string $title
+ *   (optional) A title to associate with the alternate content.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function mfcs_add_alternate_link($alternate_path, $alternate_type, $title = NULL) {
+  if (!is_string($alternate_path)) {
+    cf_error::invalid_string('alternate_path');
+    return FALSE;
+  }
+
+  if (!is_string($alternate_type)) {
+    cf_error::invalid_string('alternate_type');
+    return FALSE;
+  }
+
+  if (!is_null($title) && !is_string($title)) {
+    cf_error::invalid_string('title');
+    return FALSE;
+  }
+
+  global $base_path;
+
+  // expose settings as a static variable so that the theme can find and process.
+  $mfcs_canonical = &drupal_static('mfcs_canonical', array());
+
+  $canonical = array(
+    'rel' => 'alternate',
+    'href' => $base_path . $alternate_path,
+    'type' => $alternate_type,
+  );
+
+  if (is_string($title)) {
+    $canonical['title'] = $title;
+  }
+
+  $mfcs_canonical[] = $canonical;
+
+  $link_headers = drupal_get_http_header('link');
+
+  $link = '';
+  if (is_array($link_headers) && isset($link_headers['value'])) {
+    $link = $link_headers['value'] . ', ';
+  }
+
+  $link .= '<' . $base_path . str_replace('"', '\'', $alternate_path) . '>; rel="alternate"; type="' . str_replace('"', '\'', $alternate_type) . '"';
+
+  if (is_string($title)) {
+    $link .= '; title="' . str_replace('"', '\'', $title) . '"';
+  }
+
   drupal_add_http_header('link', $link, FALSE);
 
   return TRUE;
