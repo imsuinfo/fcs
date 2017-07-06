@@ -2208,65 +2208,6 @@ function mfcs_hook_menu_help(&$items, $module_path) {
     'tab_parent' => 'requests',
     'tab_root' => 'requests',
   );
-
-  // @todo: provide custom pdf downloading for help pages
-  /*
-  $items['pdf-0/help'] = array(
-    'title' => 'Help PDF',
-    'description' => 'Download Help PDF',
-    'page callback' => 'mfcs_help_0_pdf_page',
-    'page arguments' => array(),
-    'file' => 'help.inc',
-    'file path' => $module_path . '/pages',
-    'access callback' => 'mfcs_page_generic_access',
-    'access arguments' => array('help'),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
-  );
-
-  $items['pdf-0/help/%'] = array(
-    'title' => 'Help PDF',
-    'description' => 'Download Help PDF',
-    'page callback' => 'mfcs_help_0_pdf_page',
-    'page arguments' => array(2),
-    'file' => 'help.inc',
-    'file path' => $module_path . '/pages',
-    'access callback' => 'mfcs_page_generic_access',
-    'access arguments' => array('help'),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
-  );
-
-  $items['pdf-0/help/%/%'] = array(
-    'title' => 'Help PDF',
-    'description' => 'Download Help PDF',
-    'page callback' => 'mfcs_help_0_pdf_page',
-    'page arguments' => array(2, 3),
-    'file' => 'help.inc',
-    'file path' => $module_path . '/pages',
-    'access callback' => 'mfcs_page_generic_access',
-    'access arguments' => array('help'),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
-  );
-
-  $items['pdf-0/help/%/%/%'] = array(
-    'title' => 'Help PDF',
-    'description' => 'Download Help PDF',
-    'page callback' => 'mfcs_help_0_pdf_page',
-    'page arguments' => array(2, 3, 4),
-    'file' => 'help.inc',
-    'file path' => $module_path . '/pages',
-    'access callback' => 'mfcs_page_generic_access',
-    'access arguments' => array('help'),
-    'tab_parent' => 'requests',
-    'tab_root' => 'requests',
-    'type' => MENU_CALLBACK,
-  );
-  */
 }
 
 /**
