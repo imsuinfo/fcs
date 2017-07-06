@@ -6329,6 +6329,7 @@ DayGrid.mixin({
 					' href="' + htmlEscape(event.url) + '"' :
 					''
 					) +
+				((event.url && event.rel) ? ' rel="' + htmlEscape(event.rel) + '"' : '') +
 				(skinCss ?
 					' style="' + skinCss + '"' :
 					''
@@ -7746,6 +7747,7 @@ TimeGrid.mixin({
 				' href="' + htmlEscape(event.url) + '"' :
 				''
 				) +
+			((event.url && event.rel) ? ' rel="' + htmlEscape(event.rel) + '"' : '') +
 			(skinCss ?
 				' style="' + skinCss + '"' :
 				''
@@ -14195,7 +14197,7 @@ var ListViewGrid = Grid.extend({
 				'></span>' +
 			'</td>' +
 			'<td class="fc-list-item-title ' + view.widgetContentClass + '">' +
-				'<a' + (url ? ' href="' + htmlEscape(url) + '"' : '') + '>' +
+				'<a' + (url ? ' href="' + htmlEscape(url) + '"' : '') + ((url && event.rel) ? ' rel="' + htmlEscape(event.rel) + '"' : '') + '>' +
 					htmlEscape(seg.event.title || '') +
 				'</a>' +
 				(event.displayEventTimeExtra ?
