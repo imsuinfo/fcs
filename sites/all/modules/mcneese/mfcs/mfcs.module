@@ -411,7 +411,7 @@ function mfcs_init() {
   // enforce default timezone to ensure consistency.
   date_default_timezone_set(MFCS_TIMEZONE_LOCAL);
 
-  global $base_path;
+  global $base_path, $meta_robots;
   $module_path = drupal_get_path('module', 'mfcs');
 
   drupal_add_js($module_path . '/js/printing-fieldsets.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));

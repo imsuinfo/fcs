@@ -158,6 +158,14 @@ function mfcs_request_calendar_month_0_page($year = NULL, $month = NULL) {
   #  $absolute_stop = $month_stop;
   #}
 
+  // if the month is in the past, then tell robots to neither index nor archive this.
+  if ($instance >= $month_stop) {
+    global $meta_robots;
+    $meta_robots = array();
+    $meta_robots['noindex'] = 'noindex';
+    $meta_robots['noarchive'] = 'noarchive';
+  }
+
   $search = mfcs_miscellaneous_generate_requests_by_date_search($absolute_start, $absolute_stop);
 
   if (!empty($mfcs_determined['filters'])) {
@@ -825,6 +833,14 @@ function mfcs_request_calendar_day_0_page($year = NULL, $month = NULL, $day = NU
 
   $page_title = 'Request Calendar - ' . date('F j, Y', $day_start);
   drupal_set_title($page_title);
+
+  // if the month is in the past, then tell robots to neither index nor archive this.
+  if ($instance >= $day_stop) {
+    global $meta_robots;
+    $meta_robots = array();
+    $meta_robots['noindex'] = 'noindex';
+    $meta_robots['noarchive'] = 'noarchive';
+  }
 
   $search = mfcs_miscellaneous_generate_requests_by_date_search($day_start, $day_stop);
 
