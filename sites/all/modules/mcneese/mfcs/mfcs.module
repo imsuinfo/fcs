@@ -12244,6 +12244,136 @@ function mfcs_add_alternate_link($alternate_path, $alternate_type, $title = NULL
 }
 
 /**
+ * Adds an document flow urls relative to this document.
+ *
+ * This is added as both an HTML header flow link and an HTTP header flow link.
+ *
+ * @fixme: This uses $mfcs_canonical because it is available and already written, despite being incorrect.
+ *         Future versions should correct this.
+ *
+ * @param null|string $first
+ *   (optional) The path to the first url in the document flow.
+ * @param null|string $last
+ *   (optional) The path to the last url in the document flow.
+ * @param null|string $previous
+ *   (optional) The path to the previous url in the document flow.
+ * @param null|string $next
+ *   (optional) The path to the next url in the document flow.
+ * @param null|string $up
+ *   (optional) The path to the up url in the document flow.
+ * @param string $base_path
+ *   (optional) The base path to assign to the links.
+ *   If already specified in individual links, then leave this as an empty string.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function mfcs_add_relational_links($first, $last, $previous, $next, $up, $base_path = '') {
+  if (!is_null($first) && !is_string($first)) {
+    cf_error::invalid_string('first');
+    return FALSE;
+  }
+
+  if (!is_null($last) && !is_string($last)) {
+    cf_error::invalid_string('last');
+    return FALSE;
+  }
+
+  if (!is_null($previous) && !is_string($previous)) {
+    cf_error::invalid_string('previous');
+    return FALSE;
+  }
+
+  if (!is_null($next) && !is_string($next)) {
+    cf_error::invalid_string('next');
+    return FALSE;
+  }
+
+  if (!is_null($up) && !is_string($up)) {
+    cf_error::invalid_string('up');
+    return FALSE;
+  }
+
+  if (!is_string($base_path)) {
+    cf_error::invalid_string('base_path');
+    return FALSE;
+  }
+
+  // expose settings as a static variable so that the theme can find and process.
+  $mfcs_canonical = &drupal_static('mfcs_canonical', array());
+
+  $link = NULL;
+
+  if (is_string($first)) {
+    $canonical = array(
+      'rel' => 'first',
+      'href' => $base_path . $first,
+    );
+
+    $mfcs_canonical[] = $canonical;
+
+    $link .= '<' . $base_path . str_replace('"', '\'', $first) . '>; rel="first"';
+  }
+
+  if (is_string($last)) {
+    $canonical = array(
+      'rel' => 'last',
+      'href' => $base_path . $last,
+    );
+
+    $mfcs_canonical[] = $canonical;
+
+    $link .= '<' . $base_path . str_replace('"', '\'', $last) . '>; rel="last"';
+  }
+
+  if (is_string($previous)) {
+    $canonical = array(
+      'rel' => 'prev',
+      'href' => $base_path . $previous,
+    );
+
+    $mfcs_canonical[] = $canonical;
+
+    $link .= '<' . $base_path . str_replace('"', '\'', $previous) . '>; rel="prev"';
+  }
+
+  if (is_string($next)) {
+    $canonical = array(
+      'rel' => 'next',
+      'href' => $base_path . $next,
+    );
+
+    $mfcs_canonical[] = $canonical;
+
+    $link .= '<' . $base_path . str_replace('"', '\'', $next) . '>; rel="next"';
+  }
+
+  if (is_string($up)) {
+    $canonical = array(
+      'rel' => 'up',
+      'href' => $base_path . $up,
+    );
+
+    $mfcs_canonical[] = $canonical;
+
+    $link .= '<' . $base_path . str_replace('"', '\'', $up) . '>; rel="up"';
+  }
+
+  if (is_string($link)) {
+    $link_headers = drupal_get_http_header('link');
+
+    if (is_array($link_headers) && isset($link_headers['value'])) {
+      drupal_add_http_header('link', $link_headers['value'] . ', ' . $link, FALSE);
+    }
+    else {
+      drupal_add_http_header('link', $link, FALSE);
+    }
+  }
+
+  return TRUE;
+}
+
+/**
  * Load a unix timestamp instance.
  *
  * This functions similar to REQUEST_TIME, except it is updatable within a

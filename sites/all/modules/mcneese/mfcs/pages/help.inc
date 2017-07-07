@@ -152,13 +152,13 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
 
   if (!is_null($navigation_urls['top'])) {
     if (!empty($navigation_urls['previous'])) {
-      $section_information['navigation'] .= '<a href="' . $navigation_urls['previous'] . '" title="' . $navigation_urls['tooltip-previous'] . '" class="help-navigation_link link-previous">Previous</a>';
+      $section_information['navigation'] .= '<a href="' . $navigation_urls['previous'] . '" title="' . $navigation_urls['tooltip-previous'] . '" class="help-navigation_link link-previous" rel="prev">Previous</a>';
     }
 
-    $section_information['navigation'] .= '<a href="' . $navigation_urls['top'] . '" title="' . $navigation_urls['tooltip-top'] . '" class="help-navigation_link link-top">Top</a>';
+    $section_information['navigation'] .= '<a href="' . $navigation_urls['top'] . '" title="' . $navigation_urls['tooltip-top'] . '" class="help-navigation_link link-top" rel="up">Top</a>';
 
     if (!empty($navigation_urls['next'])) {
-      $section_information['navigation'] .= '<a href="' . $navigation_urls['next'] . '" title="' . $navigation_urls['tooltip-next'] . '" class="help-navigation_link link-next">Next</a>';
+      $section_information['navigation'] .= '<a href="' . $navigation_urls['next'] . '" title="' . $navigation_urls['tooltip-next'] . '" class="help-navigation_link link-next" rel="next">Next</a>';
     }
   }
 
@@ -650,6 +650,8 @@ function mfcs_help_0_page($topic = NULL, $section = NULL, $sub_section = NULL) {
     // failsafe.
     return mfcs_help_topic_not_found($topic, $section, $sub_section);
   }
+
+  mfcs_add_relational_links($navigation_urls['first'], $navigation_urls['last'], $navigation_urls['previous'], $navigation_urls['next'], $navigation_urls['top']);
 
   return $markup;
 }
@@ -1722,6 +1724,8 @@ function mfcs_help_url_cleanup_for_title($text) {
 function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $section = NULL, $sub_section = NULL) {
   $determined = array(
     'top' => NULL,
+    'first' => NULL,
+    'last' => NULL,
     'next' => NULL,
     'previous' => NULL,
     'tooltip-top' => NULL,
@@ -1772,6 +1776,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
 
     $determined['next'] = $base_path . 'help-0/create_a_request' . $url_arguments;
     $determined['tooltip-next'] = 'User Guide: Create a Request';
+
+    $determined['first'] = $base_path . 'help-0/navigate_the_system' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/customizing_a_user' . $url_arguments;
   }
   elseif ($topic == 'create_a_request') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -1782,6 +1789,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
 
     $determined['previous'] = $base_path . 'help-0/navigate_the_system' . $url_arguments;
     $determined['tooltip-previous'] = 'User Guide: Navigate the System';
+
+    $determined['first'] = $base_path . 'help-0/navigate_the_system' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/customizing_a_user' . $url_arguments;
   }
   elseif ($topic == 'edit_a_request') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -1792,6 +1802,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
 
     $determined['previous'] = $base_path . 'help-0/create_a_request' . $url_arguments;
     $determined['tooltip-previous'] = 'User Guide: Create a Request';
+
+    $determined['first'] = $base_path . 'help-0/navigate_the_system' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/customizing_a_user' . $url_arguments;
   }
   elseif ($topic == 'cancel_a_request') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -1802,6 +1815,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
 
     $determined['previous'] = $base_path . 'help-0/edit_a_request' . $url_arguments;
     $determined['tooltip-previous'] = 'User Guide: Edit a Request';
+
+    $determined['first'] = $base_path . 'help-0/navigate_the_system' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/customizing_a_user' . $url_arguments;
   }
   elseif ($topic == 'uncancel_a_request') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -1812,6 +1828,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
 
     $determined['previous'] = $base_path . 'help-0/cancel_a_request' . $url_arguments;
     $determined['tooltip-previous'] = 'User Guide: Cancel a Request';
+
+    $determined['first'] = $base_path . 'help-0/navigate_the_system' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/customizing_a_user' . $url_arguments;
   }
   elseif ($topic == 'copy_a_request') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -1822,6 +1841,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
 
     $determined['previous'] = $base_path . 'help-0/uncancel_a_request' . $url_arguments;
     $determined['tooltip-previous'] = 'User Guide: Uncancel a Request';
+
+    $determined['first'] = $base_path . 'help-0/navigate_the_system' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/customizing_a_user' . $url_arguments;
   }
   elseif ($topic == 'find_a_request') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -1842,6 +1864,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
 
     $determined['previous'] = $base_path . 'help-0/copy_a_request' . $url_arguments;
     $determined['tooltip-previous'] = 'User Guide: Copy a Request';
+
+    $determined['first'] = $base_path . 'help-0/navigate_the_system' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/customizing_a_user' . $url_arguments;
   }
   elseif ($topic == 'review_a_request') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -1858,6 +1883,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
 
     $determined['previous'] = $base_path . 'help-0/find_a_request' . $url_arguments;
     $determined['tooltip-previous'] = 'User Guide: Find a Request';
+
+    $determined['first'] = $base_path . 'help-0/navigate_the_system' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/customizing_a_user' . $url_arguments;
   }
   elseif ($topic == 'manage_a_request') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -1874,6 +1902,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
       $determined['previous'] = $base_path . 'help-0/find_a_request' . $url_arguments;
       $determined['tooltip-previous'] = 'User Guide: Find a Request';
     }
+
+    $determined['first'] = $base_path . 'help-0/navigate_the_system' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/customizing_a_user' . $url_arguments;
   }
   elseif ($topic == 'manage_a_holiday') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -1884,6 +1915,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
 
     $determined['previous'] = $base_path . 'help-0/manage_a_request' . $url_arguments;
     $determined['tooltip-previous'] = 'User Guide: Manage a Request';
+
+    $determined['first'] = $base_path . 'help-0/navigate_the_system' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/customizing_a_user' . $url_arguments;
   }
   elseif ($topic == 'manage_a_room_unavailability') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -1894,6 +1928,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
 
     $determined['previous'] = $base_path . 'help-0/manage_a_holiday' . $url_arguments;
     $determined['tooltip-previous'] = 'User Guide: Manage a Holiday';
+
+    $determined['first'] = $base_path . 'help-0/navigate_the_system' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/customizing_a_user' . $url_arguments;
   }
   elseif ($topic == 'troubleshoot_requests_and_users') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -1904,6 +1941,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
 
     $determined['previous'] = $base_path . 'help-0/manage_a_room_unavailability' . $url_arguments;
     $determined['tooltip-previous'] = 'User Guide: Manage a Room Unavailability';
+
+    $determined['first'] = $base_path . 'help-0/navigate_the_system' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/customizing_a_user' . $url_arguments;
   }
   elseif ($topic == 'using_the_calendar') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -1924,6 +1964,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
       $determined['previous'] = $base_path . 'help-0/find_a_request' . $url_arguments;
       $determined['tooltip-previous'] = 'User Guide: Find a Request';
     }
+
+    $determined['first'] = $base_path . 'help-0/navigate_the_system' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/customizing_a_user' . $url_arguments;
   }
   elseif ($topic == 'exporting_the_calendar') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -1934,6 +1977,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
 
     $determined['previous'] = $base_path . 'help-0/using_the_calendar' . $url_arguments;
     $determined['tooltip-previous'] = 'User Guide: Using the Calendar';
+
+    $determined['first'] = $base_path . 'help-0/navigate_the_system' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/customizing_a_user' . $url_arguments;
   }
   elseif ($topic == 'customizing_a_user') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -1941,6 +1987,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
 
     $determined['previous'] = $base_path . 'help-0/exporting_the_calendar' . $url_arguments;
     $determined['tooltip-previous'] = 'User Guide: Exporting the Calendar';
+
+    $determined['first'] = $base_path . 'help-0/navigate_the_system' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/customizing_a_user' . $url_arguments;
   }
 
   // documentation
@@ -1950,6 +1999,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
 
     $determined['next'] = $base_path . 'help-0/requests' . $url_arguments;
     $determined['tooltip-next'] = 'Documentation: Requests';
+
+    $determined['first'] = $base_path . 'help-0/introduction' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/terminology' . $url_arguments;
   }
   elseif ($topic == 'requests') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -2006,6 +2058,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
       $determined['previous'] = $base_path . 'help-0/introduction' . $url_arguments;
       $determined['tooltip-previous'] = 'Documentation: Introduction';
     }
+
+    $determined['first'] = $base_path . 'help-0/introduction' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/terminology' . $url_arguments;
   }
   elseif ($topic == 'review' && in_array('review', $allowed_topics)) {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -2058,6 +2113,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
       $determined['previous'] = $base_path . 'help-0/requests' . $url_arguments;
       $determined['tooltip-previous'] = 'Documentation: Requests';
     }
+
+    $determined['first'] = $base_path . 'help-0/introduction' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/terminology' . $url_arguments;
   }
   elseif ($topic == 'manage' && in_array('manage', $allowed_topics)) {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -2120,6 +2178,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
         $determined['tooltip-previous'] = 'Documentation: Requests';
       }
     }
+
+    $determined['first'] = $base_path . 'help-0/introduction' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/terminology' . $url_arguments;
   }
   elseif ($topic == 'email') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -2190,6 +2251,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
         $determined['tooltip-previous'] = 'Documentation: Requests';
       }
     }
+
+    $determined['first'] = $base_path . 'help-0/introduction' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/terminology' . $url_arguments;
   }
   elseif ($topic == 'calendar') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -2200,6 +2264,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
 
     $determined['previous'] = $base_path . 'help-0/email' . $url_arguments;
     $determined['tooltip-previous'] = 'Documentation: E-Mail';
+
+    $determined['first'] = $base_path . 'help-0/introduction' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/terminology' . $url_arguments;
   }
   elseif ($topic == 'faq') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -2210,6 +2277,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
 
     $determined['previous'] = $base_path . 'help-0/calendar' . $url_arguments;
     $determined['tooltip-previous'] = 'Documentation: Calendar';
+
+    $determined['first'] = $base_path . 'help-0/introduction' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/terminology' . $url_arguments;
   }
   elseif ($topic == 'terminology') {
     $determined['top'] = $base_path . 'help-0' . $url_arguments;
@@ -2243,6 +2313,9 @@ function mfcs_help_determine_next_previous_top($allowed_topics, $topic = NULL, $
       $determined['previous'] = $base_path . 'help-0/faq' . $url_arguments;
       $determined['tooltip-previous'] = 'Section: Frequently Asked Questions';
     }
+
+    $determined['first'] = $base_path . 'help-0/introduction' . $url_arguments;
+    $determined['last'] = $base_path . 'help-0/terminology' . $url_arguments;
   }
 
   return $determined;
@@ -2286,6 +2359,10 @@ function mfcs_help_topic_not_found($topic = NULL, $section = NULL, $sub_section 
 
     return FALSE;
   }
+
+  global $base_path;
+
+  mfcs_add_relational_links(NULL, NULL, NULL, NULL, 'help-0', $base_path);
 
   $headers = array(
     0 => array('markup' => 'No Valid Help Path Found'),
@@ -3189,7 +3266,7 @@ function mfcs_help_topic_introduction($allowed_topics, $section_information, $as
 
   if (!$as_inline) {
     $markup .= '<div class="continue_on no-print">';
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/requests' . $url_arguments . '" class="item-link no_print_links_as_link" title="Documentation: Requests">Documentation: Requests</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/requests' . $url_arguments . '" class="item-link no_print_links_as_link" title="Documentation: Requests" rel="next">Documentation: Requests</a>. ';
     $markup .= '</div>';
   }
 
@@ -3367,13 +3444,13 @@ function mfcs_help_topic_requests($allowed_topics, $section_information, $as_inl
     $markup .= '<br>';
 
     if (in_array('review', $allowed_topics)) {
-      $markup .= 'Continue on to <a href="' . $base_path . 'help-0/review' . $url_arguments . '" class="item-link">Documentation: Review</a>. ';
+      $markup .= 'Continue on to <a href="' . $base_path . 'help-0/review' . $url_arguments . '" class="item-link" rel="next">Documentation: Review</a>. ';
     }
     elseif (in_array('manage', $allowed_topics)) {
-      $markup .= 'Continue on to <a href="' . $base_path . 'help-0/manage' . $url_arguments . '" class="item-link">Documentation: Manage</a>. ';
+      $markup .= 'Continue on to <a href="' . $base_path . 'help-0/manage' . $url_arguments . '" class="item-link" rel="next">Documentation: Manage</a>. ';
     }
     else {
-      $markup .= 'Continue on to <a href="' . $base_path . 'help-0/email' . $url_arguments . '" class="item-link">Documentation: E-Mail</a>. ';
+      $markup .= 'Continue on to <a href="' . $base_path . 'help-0/email' . $url_arguments . '" class="item-link" rel="next">Documentation: E-Mail</a>. ';
     }
     $markup .= '</div>';
   }
@@ -3451,7 +3528,7 @@ function mfcs_help_topic_requests_section_employee($allowed_topics, $section_inf
 
   if (!$as_inline) {
     $markup .= '<div class="continue_on no-print">';
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/requests/student' . $url_arguments . '" class="item-link">Documentation: Student Organization Requests</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/requests/student' . $url_arguments . '" class="item-link" rel="next">Documentation: Student Organization Requests</a>. ';
     $markup .= '<br>';
     $markup .= '</div>';
   }
@@ -3539,7 +3616,7 @@ function mfcs_help_topic_requests_section_student_organization($allowed_topics, 
 
   if (!$as_inline) {
     $markup .= '<div class="continue_on no-print">';
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/requests/camps' . $url_arguments . '" class="item-link">Documentation: Camps Requests</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/requests/camps' . $url_arguments . '" class="item-link" rel="next">Documentation: Camps Requests</a>. ';
     $markup .= '<br>';
     $markup .= '</div>';
   }
@@ -3617,7 +3694,7 @@ function mfcs_help_topic_requests_section_camps($allowed_topics, $section_inform
 
   if (!$as_inline) {
     $markup .= '<div class="continue_on no-print">';
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/requests/external' . $url_arguments . '" class="item-link">Documentation: External Requests</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/requests/external' . $url_arguments . '" class="item-link" rel="next">Documentation: External Requests</a>. ';
     $markup .= '<br>';
     $markup .= '</div>';
   }
@@ -3811,10 +3888,10 @@ function mfcs_help_topic_review($allowed_topics, $section_information, $as_inlin
 
     $markup .= '<div class="continue_on no-print">';
     if (in_array('manage', $allowed_topics)) {
-      $markup .= 'Continue on to <a href="' . $base_path . 'help-0/manage' . $url_arguments . '" class="item-link">Documentation: Manage</a>. ';
+      $markup .= 'Continue on to <a href="' . $base_path . 'help-0/manage' . $url_arguments . '" class="item-link" rel="next">Documentation: Manage</a>. ';
     }
     else {
-      $markup .= 'Continue on to <a href="' . $base_path . 'help-0/email' . $url_arguments . '" class="item-link">Documentation: E-Mail</a>. ';
+      $markup .= 'Continue on to <a href="' . $base_path . 'help-0/email' . $url_arguments . '" class="item-link" rel="next">Documentation: E-Mail</a>. ';
     }
     $markup .= '</div>';
   }
@@ -3909,7 +3986,7 @@ function mfcs_help_topic_review_section_venue_available($allowed_topics, $sectio
 
   if (!$as_inline) {
     $markup .= '<div class="continue_on no-print">';
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/review/review' . $url_arguments . '" class="item-link">Documentation: Review - Review</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/review/review' . $url_arguments . '" class="item-link" rel="next">Documentation: Review - Review</a>. ';
     $markup .= '</div>';
   }
 
@@ -4006,7 +4083,7 @@ function mfcs_help_topic_review_section_review($allowed_topics, $section_informa
 
   if (!$as_inline) {
     $markup .= '<div class="continue_on no-print">';
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/review/final_decision' . $url_arguments . '" class="item-link">Documentation: Review - Final Decision</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/review/final_decision' . $url_arguments . '" class="item-link" rel="next">Documentation: Review - Final Decision</a>. ';
     $markup .= '</div>';
   }
 
@@ -4098,7 +4175,7 @@ function mfcs_help_topic_review_section_final_decision($allowed_topics, $section
 
   if (!$as_inline) {
     $markup .= '<div class="continue_on no-print">';
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/review/completed' . $url_arguments . '" class="item-link">Documentation: Review - Completed</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/review/completed' . $url_arguments . '" class="item-link" rel="next">Documentation: Review - Completed</a>. ';
     $markup .= '</div>';
   }
 
@@ -4258,7 +4335,7 @@ function mfcs_help_topic_manage($allowed_topics, $section_information, $as_inlin
     $markup .= '<br>';
 
     $markup .= '<div class="continue_on no-print">';
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/email' . $url_arguments . '" class="item-link">Documentation: E-Mail</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/email' . $url_arguments . '" class="item-link" rel="next">Documentation: E-Mail</a>. ';
     $markup .= '</div>';
   }
 
@@ -4359,7 +4436,7 @@ function mfcs_help_topic_manage_section_requests($allowed_topics, $section_infor
 
   if (!$as_inline) {
     $markup .= '<div class="continue_on no-print">';
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/manage/users' . $url_arguments . '" class="item-link">Section: Users Management</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/manage/users' . $url_arguments . '" class="item-link" rel="next">Section: Users Management</a>. ';
     $markup .= '</div>';
   }
 
@@ -4594,7 +4671,7 @@ function mfcs_help_topic_manage_section_users($allowed_topics, $section_informat
 
   if (!$as_inline) {
     $markup .= '<div class="continue_on no-print">';
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/manage/problems' . $url_arguments . '" class="item-link">Section: Problems Management</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/manage/problems' . $url_arguments . '" class="item-link" rel="next">Section: Problems Management</a>. ';
     $markup .= '</div>';
   }
 
@@ -4908,7 +4985,7 @@ function mfcs_help_topic_manage_section_problems($allowed_topics, $section_infor
 
   if (!$as_inline) {
     $markup .= '<div class="continue_on no-print">';
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/manage/availability' . $url_arguments . '" class="item-link">Section: Availability Management</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/manage/availability' . $url_arguments . '" class="item-link" rel="next">Section: Availability Management</a>. ';
     $markup .= '</div>';
   }
 
@@ -5054,7 +5131,7 @@ function mfcs_help_topic_manage_section_availability($allowed_topics, $section_i
 
   if (!$as_inline) {
     $markup .= '<div class="continue_on no-print">';
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/manage/logs' . $url_arguments . '" class="item-link">Section: Logs Management</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/manage/logs' . $url_arguments . '" class="item-link" rel="next">Section: Logs Management</a>. ';
     $markup .= '</div>';
   }
 
@@ -5256,7 +5333,7 @@ function mfcs_help_topic_email($allowed_topics, $section_information, $as_inline
     $markup .= '<br>';
     $markup .= '<br>';
 
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/calendar' . $url_arguments . '" class="item-link">Documentation: Calendar</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/calendar' . $url_arguments . '" class="item-link" rel="next">Documentation: Calendar</a>. ';
     $markup .= '</div>';
   }
 
@@ -5532,7 +5609,7 @@ function mfcs_help_topic_email_section_advanced($allowed_topics, $section_inform
     $markup .= '<br>';
     $markup .= '<br>';
 
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/calendar' . $url_arguments . '" class="item-link">Documentation: Calendar</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/calendar' . $url_arguments . '" class="item-link" rel="next">Documentation: Calendar</a>. ';
     $markup .= '</div>';
   }
 
@@ -6634,7 +6711,7 @@ function mfcs_help_topic_calendar($allowed_topics, $section_information, $as_inl
 
   if (!$as_inline) {
     $markup .= '<div class="continue_on no-print">';
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/faq' . $url_arguments . '" class="item-link">Documentation: Frequently Asked Questions</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/faq' . $url_arguments . '" class="item-link" rel="next">Documentation: Frequently Asked Questions</a>. ';
     $markup .= '</div>';
   }
 
@@ -6732,7 +6809,7 @@ function mfcs_help_topic_faq($allowed_topics, $section_information, $as_inline =
 
   if (!$as_inline) {
     $markup .= '<div class="continue_on no-print">';
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/terminology' . $url_arguments . '" class="item-link">Documentation: Terminology</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/terminology' . $url_arguments . '" class="item-link" rel="next">Documentation: Terminology</a>. ';
     $markup .= '</div>';
   }
 
@@ -7309,7 +7386,7 @@ function mfcs_help_topic_terminology_section_facilities_use($allowed_topics, $se
 
   if (!$as_inline) {
     $markup .= '<div class="continue_on no-print">';
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/terminology/system' . $url_arguments . '" class="item-link">Documentation: Terminology - System</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/terminology/system' . $url_arguments . '" class="item-link" rel="next">Documentation: Terminology - System</a>. ';
     $markup .= '</div>';
   }
 
@@ -7493,7 +7570,7 @@ function mfcs_help_topic_terminology_section_system($allowed_topics, $section_in
 
   if (!$as_inline) {
     $markup .= '<div class="continue_on no-print">';
-    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/terminology/documentation' . $url_arguments . '" class="item-link">Documentation: Terminology - Documentation</a>. ';
+    $markup .= 'Continue on to <a href="' . $base_path . 'help-0/terminology/documentation' . $url_arguments . '" class="item-link" rel="next">Documentation: Terminology - Documentation</a>. ';
     $markup .= '</div>';
   }
 
