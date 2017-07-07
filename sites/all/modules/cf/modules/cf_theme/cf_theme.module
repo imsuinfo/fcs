@@ -651,17 +651,6 @@ function cf_theme_generate_headers(array $cf) {
   */
 
   // handle custom links
-  $supported_link_media = array();
-  $supported_link_media[] = 'screen';
-  $supported_link_media[] = 'tty';
-  $supported_link_media[] = 'tv';
-  $supported_link_media[] = 'projection';
-  $supported_link_media[] = 'handheld';
-  $supported_link_media[] = 'print';
-  $supported_link_media[] = 'braille';
-  $supported_link_media[] = 'aural';
-  $supported_link_media[] = 'all';
-
   $supported_link_rel = array();
   $supported_link_rel[] = 'alternate';
   $supported_link_rel[] = 'alternate stylesheet';
@@ -721,11 +710,6 @@ function cf_theme_generate_headers(array $cf) {
           if (in_array($link['rel'], $supported_link_rel)) {
             $output .= ' rel="' . $link['rel'] . '"';
           }
-        }
-      }
-      else if ($type == 'media') {
-        if (!empty($link['media']) && in_array($link['media'], $supported_link_media)) {
-          $output .= ' media="' . $link['media'] . '"';
         }
       }
       else {
