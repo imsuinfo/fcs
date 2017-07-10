@@ -4,7 +4,7 @@ core = 7.x
 php = 5.3
 package = McNeese
 
-# project is not hosted on drupal.org, so manual versioning is needed.
+; project is not hosted on drupal.org, so manual versioning is needed.
 version = "7.x-1.0"
 
 files[] = mcneese_init.module
