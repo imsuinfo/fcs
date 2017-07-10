@@ -3319,6 +3319,8 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf($request_id, $revision_id, $h
 
   // when not ignored, the PDF does not get generated.
   $wk_options['ignoreWarnings'] = TRUE;
+  $wk_options['load-error-handling'] = 'ignore';
+  $wk_options['load-media-error-handling '] = 'ignore';
 
   $wrapper = file_stream_wrapper_get_instance_by_scheme('temporary');
   if (is_object($wrapper)) {
@@ -3408,6 +3410,8 @@ function mfcs_request_pdf_0_page_using_wkhtmltopdf_generic($filename, $html, $lo
 
   // when not ignored, the PDF does not get generated.
   $wk_options['ignoreWarnings'] = TRUE;
+  $wk_options['load-error-handling'] = 'ignore';
+  $wk_options['load-media-error-handling '] = 'ignore';
 
   $wrapper = file_stream_wrapper_get_instance_by_scheme('temporary');
   if (is_object($wrapper)) {
