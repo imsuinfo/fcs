@@ -3843,6 +3843,9 @@ function drupal_aggregate_css(&$css_groups) {
  * this function to work correctly even if modules have implemented custom
  * logic for grouping and aggregating files.
  *
+ * New boolean variable called 'drupal_disable_at_import' can be used to disable
+ * the '@import' workaround for IE.
+ *
  * @param $element
  *   A render array containing:
  *   - '#items': The CSS items as returned by drupal_add_css() and altered by
@@ -3896,6 +3899,9 @@ function drupal_pre_render_styles($elements) {
     ),
   );
 
+  // disable the use of @import.
+  $drupal_enable_at_import = !variable_get('drupal_disable_at_import', FALSE);
+
   // Loop through each group.
   foreach ($elements['#groups'] as $group) {
     switch ($group['type']) {
@@ -3931,7 +3937,7 @@ function drupal_pre_render_styles($elements) {
         }
         // The group can be aggregated, but hasn't been: combine multiple items
         // into as few STYLE tags as possible.
-        elseif ($group['preprocess']) {
+        elseif ($group['preprocess'] && $drupal_enable_at_import) {
           $import = array();
           foreach ($group['items'] as $item) {
             // A theme's .info file may have an entry for a file that doesn't
@@ -4114,6 +4120,9 @@ function drupal_build_css_cache($css) {
     $uri = $map[$key];
   }
 
+  // disable the use of @import.
+  $drupal_enable_at_import = !variable_get('drupal_disable_at_import', FALSE);
+
   if (empty($uri) || !file_exists($uri)) {
     // Build aggregate CSS file.
     foreach ($css as $stylesheet) {
@@ -4139,10 +4148,12 @@ function drupal_build_css_cache($css) {
 
     // Per the W3C specification at http://www.w3.org/TR/REC-CSS2/cascade.html#at-import,
     // @import rules must proceed any other style, so we move those to the top.
-    $regexp = '/@import[^;]+;/i';
-    preg_match_all($regexp, $data, $matches);
-    $data = preg_replace($regexp, '', $data);
-    $data = implode('', $matches[0]) . $data;
+    if ($drupal_enable_at_import) {
+      $regexp = '/@import[^;]+;/i';
+      preg_match_all($regexp, $data, $matches);
+      $data = preg_replace($regexp, '', $data);
+      $data = implode('', $matches[0]) . $data;
+    }
 
     // Prefix filename to prevent blocking by firewalls which reject files
     // starting with "ad*".
