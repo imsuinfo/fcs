@@ -653,6 +653,12 @@ $conf['batch_foreground'] = array();
 $conf['batch_foreground'][] = 'webform_results_download_form';
 $conf['batch_background'] = array();
 
+/**
+ * Set the default theme title.
+ * Set this to NULL to disable the default theme entirely.
+ */
+$conf['drupal_default_css_theme'] = 'Default Theme';
+
 
 /**
  * Workbench access settings
