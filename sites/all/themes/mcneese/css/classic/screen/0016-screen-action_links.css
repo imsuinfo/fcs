@@ -36,7 +36,7 @@
 
 .mcneese #mcneese-action_links.relative > .navigation_list > li > a,
 .mcneese #mcneese-action_links.relative > .navigation_list > li > a:visited {
-  background-image: url('../../images/action_link.png');
+  background-image: url('../../../images/action_link.png');
   background-repeat: no-repeat;
   background-position: 3px 50%;
 
@@ -50,7 +50,7 @@
 .mcneese #mcneese-action_links.relative > .navigation_list > li > a:active,
 .mcneese #mcneese-action_links.relative > .navigation_list > li > a:focus {
   color: #ffffff;
-  background-image: url('../../images/action_link-alt.png');
+  background-image: url('../../../images/action_link-alt.png');
   background-color: #447ead;
 
   text-shadow: 0px 1px 0px #333333;
@@ -65,7 +65,7 @@
 }
 
 .mcneese #mcneese-action_links.fixed.collapsed {
-  background-image: url(../../images/action_links.png);
+  background-image: url(../../../images/action_links.png);
   background-color: #dadada;
 }
 

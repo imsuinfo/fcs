@@ -154,18 +154,18 @@
 }
 
 .mcneese #mcneese-tabs.relative.expanded > .navigation_list > .tab-command-1 > a {
-  background-image: url(../../images/toggle-left.png);
+  background-image: url(../../../images/toggle-left.png);
 }
 
 .mcneese #mcneese-tabs.relative.collapsed > .navigation_list > .tab-command-1 > a {
-  background-image: url(../../images/toggle-right.png);
+  background-image: url(../../../images/toggle-right.png);
 }
 
 
 
 /*** Tabs - Fixed ***/
 .mcneese #mcneese-tabs.fixed.collapsed {
-  background-image: url(../../images/menu_tabs.png);
+  background-image: url(../../../images/menu_tabs.png);
   background-color: #dadada;
 }
 

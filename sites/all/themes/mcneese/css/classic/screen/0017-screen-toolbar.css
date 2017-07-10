@@ -93,7 +93,7 @@
 .mcneese #mcneese-toolbar > .mcneese-toolbar-menu {
   color: #ffffff;
   background-color: #1e1e1e;
-  background-image: url(../../images/background-marble-black.png);
+  background-image: url(../../../images/background-marble-black.png);
 
   transition: display 0.25s;
   -moz-transition: display 0.25s;
@@ -128,7 +128,7 @@
 .mcneese #mcneese-toolbar > .mcneese-toolbar-menu > .navigation_list > .item > .link:active,
 .mcneese #mcneese-toolbar > .mcneese-toolbar-menu > .navigation_list > .item > .link:focus {
   background-color: #447ead;
-  background-image: url(../../images/background-marble-light_blue.png);
+  background-image: url(../../../images/background-marble-light_blue.png);
 }
 
 .mcneese #mcneese-toolbar > .mcneese-toolbar-menu > .navigation_list > .item > .link.active:hover,
@@ -148,7 +148,7 @@
 .mcneese #mcneese-toolbar > .mcneese-toolbar-menu > .navigation_list > .item.mcneese-toolbar-home > .link {
   display: block;
 
-  background-image: url(../../images/home.png);
+  background-image: url(../../../images/home.png);
   background-repeat: no-repeat;
   background-position: center;
 
@@ -189,11 +189,11 @@
 }
 
 .mcneese.is-toolbar-shortcuts-collapsed #mcneese-toolbar > .mcneese-toolbar-menu > .navigation_list > .item.mcneese-toolbar-toggle > .link {
-  background-image: url(../../images/toggle-up.png);
+  background-image: url(../../../images/toggle-up.png);
 }
 
 .mcneese.is-toolbar-shortcuts-expanded #mcneese-toolbar > .mcneese-toolbar-menu > .navigation_list > .item.mcneese-toolbar-toggle > .link {
-  background-image: url(../../images/toggle-down.png);
+  background-image: url(../../../images/toggle-down.png);
 }
 
 .mcneese #mcneese-toolbar > .mcneese-toolbar-menu > .navigation_list > .item.mcneese-toolbar-user {
@@ -203,7 +203,7 @@
 .mcneese #mcneese-toolbar > .mcneese-toolbar-shortcuts {
   color: #000000;
   background-color: #003259;
-  background-image: url(../../images/background-marble-deep_blue.png);
+  background-image: url(../../../images/background-marble-deep_blue.png);
 
   min-height: 25px;
 
@@ -257,7 +257,7 @@
 .mcneese #mcneese-toolbar > .mcneese-toolbar-shortcuts > .navigation_list > .item > .link:focus {
   color: #000000;
   background-color: #fad703;
-  background-image: url(../../images/background-marble-yellow.png);
+  background-image: url(../../../images/background-marble-yellow.png);
   text-shadow: none;
 }
 
@@ -290,23 +290,23 @@
 }
 
 .mcneese #mcneese-toolbar.fixed > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky > .link {
-  background-image: url(../../images/sticky-off.png);
+  background-image: url(../../../images/sticky-off.png);
 }
 
 .mcneese #mcneese-toolbar.relative > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky > .link {
-  background-image: url(../../images/sticky-on.png);
+  background-image: url(../../../images/sticky-on.png);
 }
 
 .mcneese #mcneese-toolbar.fixed > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky > .link:hover,
 .mcneese #mcneese-toolbar.fixed > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky > .link:active,
 .mcneese #mcneese-toolbar.fixed > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky > .link:focus {
-  background-image: url(../../images/sticky-off-alt.png);
+  background-image: url(../../../images/sticky-off-alt.png);
 }
 
 .mcneese #mcneese-toolbar.relative > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky > .link:hover,
 .mcneese #mcneese-toolbar.relative > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky > .link:active,
 .mcneese #mcneese-toolbar.relative > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky > .link:focus {
-  background-image: url(../../images/sticky-on-alt.png);
+  background-image: url(../../../images/sticky-on-alt.png);
 }
 
 .mcneese #mcneese-toolbar.noscript > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky {

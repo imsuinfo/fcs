@@ -210,7 +210,7 @@
   line-height: 0px;
   text-decoration: none;
 
-  background-image: url(../../images/logo.png);
+  background-image: url(../../../images/logo.png);
   background-repeat: no-repeat;
 
   cursor: pointer;
@@ -465,16 +465,16 @@
 }
 
 .mcneese #mcneese-search-box > .search_box-box > .search_block_form > .form-wrapper-inner > .search_block_form-section > .form-actions > .form-submit {
-  background-image: url(../../images/search_button.png);
+  background-image: url(../../../images/search_button.png);
 }
 
 .mcneese #mcneese-search-box > .search_box-box > .search_block_form > .form-wrapper-inner > .search_block_form-section > .form-actions > .form-submit:focus,
 .mcneese #mcneese-search-box > .search_box-box > .search_block_form > .form-wrapper-inner > .search_block_form-section > .form-actions > .form-submit:hover {
-  background-image: url(../../images/search_button-alt.png);
+  background-image: url(../../../images/search_button-alt.png);
 }
 
 .mcneese #mcneese-search-box > .search_box-box > .search_block_form > .form-wrapper-inner > .search_block_form-section > .form-actions > .form-submit:active {
-  background-image: url(../../images/search_button-down.png);
+  background-image: url(../../../images/search_button-down.png);
 }
 
 .mcneese #mcneese-search-box > .search_box-box > .search_block_form > .form-wrapper-inner > .search_block_form-section > .form-actions > .form-submit,
@@ -609,7 +609,7 @@
 }
 
 .mcneese #mcneese-bulletin-wrapper-inner.additional {
-  background-image: url(../../images/bulletin-background.png);
+  background-image: url(../../../images/bulletin-background.png);
   background-repeat: repeat-x;
   background-attachment: scroll;
   background-color: rgba(0, 0, 0, 0);
@@ -662,7 +662,7 @@
 
 /*** Bulletin - No Additional ***/
 .mcneese #mcneese-bulletin-wrapper-inner.no_additional {
-  background-image: url(../../images/bulletin-background-small.png);
+  background-image: url(../../../images/bulletin-background-small.png);
   background-repeat: repeat-x;
   background-attachment: scroll;
   background-color: rgba(0, 0, 0, 0);
@@ -2155,7 +2155,7 @@ table.system-status-report > tbody > tr.ok,
 
 /*** Messages Region - Fixed ***/
 .mcneese #mcneese-messages.fixed {
-  background-image: url(../../images/messages.png);
+  background-image: url(../../../images/messages.png);
 }
 
 .mcneese #mcneese-messages.fixed.collapsed {
@@ -2259,7 +2259,7 @@ html.mcneese-ckeditor > body {
 
 /*** Information Region - Fixed ***/
 .mcneese #mcneese-information.fixed {
-  background-image: url(../../images/information.png);
+  background-image: url(../../../images/information.png);
   background-repeat: no-repeat;
 }
 
@@ -2342,7 +2342,7 @@ html.mcneese-ckeditor > body {
 
 /*** Page Side Region - Fixed ***/
 .mcneese #mcneese-page-side.fixed {
-  background-image: url(../../images/side.png);
+  background-image: url(../../../images/side.png);
   background-color: #dadada;
 }
 
@@ -2726,18 +2726,18 @@ html.mcneese-ckeditor > body {
 }
 
 .mcneese #mcneese-tabs.relative.expanded > .navigation_list > .tab-command-1 > a {
-  background-image: url(../../images/toggle-left.png);
+  background-image: url(../../../images/toggle-left.png);
 }
 
 .mcneese #mcneese-tabs.relative.collapsed > .navigation_list > .tab-command-1 > a {
-  background-image: url(../../images/toggle-right.png);
+  background-image: url(../../../images/toggle-right.png);
 }
 
 
 
 /*** Tabs - Fixed ***/
 .mcneese #mcneese-tabs.fixed.collapsed {
-  background-image: url(../../images/menu_tabs.png);
+  background-image: url(../../../images/menu_tabs.png);
   background-color: #dadada;
 }
 
@@ -2987,7 +2987,7 @@ html.mcneese-ckeditor > body {
 }
 
 .mcneese #mcneese-breadcrumb.relative > .navigation_list > .crumb > .link-home {
-  background-image: url(../../images/home-blue.png);
+  background-image: url(../../../images/home-blue.png);
   background-repeat: no-repeat;
   background-position: 5px 6px;
 
@@ -3018,7 +3018,7 @@ html.mcneese-ckeditor > body {
 .mcneese #mcneese-breadcrumb.relative > .navigation_list > .crumb > .link-home:active,
 .mcneese #mcneese-breadcrumb.relative > .navigation_list > .crumb > .link-home:hover,
 .mcneese #mcneese-breadcrumb.relative > .navigation_list > .crumb > .link-home:focus {
-  background-image: url(../../images/home-gray.png);
+  background-image: url(../../../images/home-gray.png);
 }
 
 .mcneese #mcneese-breadcrumb.relative > .navigation_list > .crumb-node_id,
@@ -3063,7 +3063,7 @@ html.mcneese-ckeditor > body {
 }
 
 .mcneese #mcneese-breadcrumb.fixed.collapsed {
-  background-image: url(../../images/breadcrumb.png);
+  background-image: url(../../../images/breadcrumb.png);
   background-color: #dadada;
 }
 
@@ -3248,7 +3248,7 @@ html.mcneese-ckeditor > body {
 
 .mcneese #mcneese-action_links.relative > .navigation_list > li > a,
 .mcneese #mcneese-action_links.relative > .navigation_list > li > a:visited {
-  background-image: url('../../images/action_link.png');
+  background-image: url('../../../images/action_link.png');
   background-repeat: no-repeat;
   background-position: 3px 50%;
 
@@ -3262,7 +3262,7 @@ html.mcneese-ckeditor > body {
 .mcneese #mcneese-action_links.relative > .navigation_list > li > a:active,
 .mcneese #mcneese-action_links.relative > .navigation_list > li > a:focus {
   color: #ffffff;
-  background-image: url('../../images/action_link-alt.png');
+  background-image: url('../../../images/action_link-alt.png');
   background-color: #447ead;
 
   text-shadow: 0px 1px 0px #333333;
@@ -3277,7 +3277,7 @@ html.mcneese-ckeditor > body {
 }
 
 .mcneese #mcneese-action_links.fixed.collapsed {
-  background-image: url(../../images/action_links.png);
+  background-image: url(../../../images/action_links.png);
   background-color: #dadada;
 }
 
@@ -3500,7 +3500,7 @@ html.mcneese-ckeditor > body {
 .mcneese #mcneese-toolbar > .mcneese-toolbar-menu {
   color: #ffffff;
   background-color: #1e1e1e;
-  background-image: url(../../images/background-marble-black.png);
+  background-image: url(../../../images/background-marble-black.png);
 
   transition: display 0.25s;
   -moz-transition: display 0.25s;
@@ -3535,7 +3535,7 @@ html.mcneese-ckeditor > body {
 .mcneese #mcneese-toolbar > .mcneese-toolbar-menu > .navigation_list > .item > .link:active,
 .mcneese #mcneese-toolbar > .mcneese-toolbar-menu > .navigation_list > .item > .link:focus {
   background-color: #447ead;
-  background-image: url(../../images/background-marble-light_blue.png);
+  background-image: url(../../../images/background-marble-light_blue.png);
 }
 
 .mcneese #mcneese-toolbar > .mcneese-toolbar-menu > .navigation_list > .item > .link.active:hover,
@@ -3555,7 +3555,7 @@ html.mcneese-ckeditor > body {
 .mcneese #mcneese-toolbar > .mcneese-toolbar-menu > .navigation_list > .item.mcneese-toolbar-home > .link {
   display: block;
 
-  background-image: url(../../images/home.png);
+  background-image: url(../../../images/home.png);
   background-repeat: no-repeat;
   background-position: center;
 
@@ -3596,11 +3596,11 @@ html.mcneese-ckeditor > body {
 }
 
 .mcneese.is-toolbar-shortcuts-collapsed #mcneese-toolbar > .mcneese-toolbar-menu > .navigation_list > .item.mcneese-toolbar-toggle > .link {
-  background-image: url(../../images/toggle-up.png);
+  background-image: url(../../../images/toggle-up.png);
 }
 
 .mcneese.is-toolbar-shortcuts-expanded #mcneese-toolbar > .mcneese-toolbar-menu > .navigation_list > .item.mcneese-toolbar-toggle > .link {
-  background-image: url(../../images/toggle-down.png);
+  background-image: url(../../../images/toggle-down.png);
 }
 
 .mcneese #mcneese-toolbar > .mcneese-toolbar-menu > .navigation_list > .item.mcneese-toolbar-user {
@@ -3610,7 +3610,7 @@ html.mcneese-ckeditor > body {
 .mcneese #mcneese-toolbar > .mcneese-toolbar-shortcuts {
   color: #000000;
   background-color: #003259;
-  background-image: url(../../images/background-marble-deep_blue.png);
+  background-image: url(../../../images/background-marble-deep_blue.png);
 
   min-height: 25px;
 
@@ -3664,7 +3664,7 @@ html.mcneese-ckeditor > body {
 .mcneese #mcneese-toolbar > .mcneese-toolbar-shortcuts > .navigation_list > .item > .link:focus {
   color: #000000;
   background-color: #fad703;
-  background-image: url(../../images/background-marble-yellow.png);
+  background-image: url(../../../images/background-marble-yellow.png);
   text-shadow: none;
 }
 
@@ -3697,23 +3697,23 @@ html.mcneese-ckeditor > body {
 }
 
 .mcneese #mcneese-toolbar.fixed > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky > .link {
-  background-image: url(../../images/sticky-off.png);
+  background-image: url(../../../images/sticky-off.png);
 }
 
 .mcneese #mcneese-toolbar.relative > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky > .link {
-  background-image: url(../../images/sticky-on.png);
+  background-image: url(../../../images/sticky-on.png);
 }
 
 .mcneese #mcneese-toolbar.fixed > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky > .link:hover,
 .mcneese #mcneese-toolbar.fixed > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky > .link:active,
 .mcneese #mcneese-toolbar.fixed > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky > .link:focus {
-  background-image: url(../../images/sticky-off-alt.png);
+  background-image: url(../../../images/sticky-off-alt.png);
 }
 
 .mcneese #mcneese-toolbar.relative > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky > .link:hover,
 .mcneese #mcneese-toolbar.relative > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky > .link:active,
 .mcneese #mcneese-toolbar.relative > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky > .link:focus {
-  background-image: url(../../images/sticky-on-alt.png);
+  background-image: url(../../../images/sticky-on-alt.png);
 }
 
 .mcneese #mcneese-toolbar.noscript > .mcneese-toolbar-shortcuts > .navigation_list > .item.mcneese-toolbar-sticky {
@@ -3755,7 +3755,7 @@ html.mcneese-ckeditor > body {
 
 /*** Help Region - Fixed ***/
 .mcneese #mcneese-help.fixed {
-  background-image: url(../../images/help.png);
+  background-image: url(../../../images/help.png);
 }
 
 .mcneese #mcneese-help.fixed.collapsed {
@@ -3859,11 +3859,11 @@ html.mcneese-ckeditor > body {
 }
 
 .mcneese #mcneese-work_area_menu > .html_tag-list > .html_tag-list_item > #mcneese-work_area_menu-page_width.work_area-state-on {
-  background-image: url(../../images/toggle-page_width-flex.png);
+  background-image: url(../../../images/toggle-page_width-flex.png);
 }
 
 .mcneese #mcneese-work_area_menu > .html_tag-list > .html_tag-list_item > #mcneese-work_area_menu-page_width.work_area-state-off {
-  background-image: url(../../images/toggle-page_width-fixed.png);
+  background-image: url(../../../images/toggle-page_width-fixed.png);
 }
 
 

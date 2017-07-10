@@ -34,7 +34,7 @@
 
 /*** Help Region - Fixed ***/
 .mcneese #mcneese-help.fixed {
-  background-image: url(../../images/help.png);
+  background-image: url(../../../images/help.png);
 }
 
 .mcneese #mcneese-help.fixed.collapsed {

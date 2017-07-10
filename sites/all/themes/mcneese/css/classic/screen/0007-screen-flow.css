@@ -210,7 +210,7 @@
   line-height: 0px;
   text-decoration: none;
 
-  background-image: url(../../images/logo.png);
+  background-image: url(../../../images/logo.png);
   background-repeat: no-repeat;
 
   cursor: pointer;
@@ -465,16 +465,16 @@
 }
 
 .mcneese #mcneese-search-box > .search_box-box > .search_block_form > .form-wrapper-inner > .search_block_form-section > .form-actions > .form-submit {
-  background-image: url(../../images/search_button.png);
+  background-image: url(../../../images/search_button.png);
 }
 
 .mcneese #mcneese-search-box > .search_box-box > .search_block_form > .form-wrapper-inner > .search_block_form-section > .form-actions > .form-submit:focus,
 .mcneese #mcneese-search-box > .search_box-box > .search_block_form > .form-wrapper-inner > .search_block_form-section > .form-actions > .form-submit:hover {
-  background-image: url(../../images/search_button-alt.png);
+  background-image: url(../../../images/search_button-alt.png);
 }
 
 .mcneese #mcneese-search-box > .search_box-box > .search_block_form > .form-wrapper-inner > .search_block_form-section > .form-actions > .form-submit:active {
-  background-image: url(../../images/search_button-down.png);
+  background-image: url(../../../images/search_button-down.png);
 }
 
 .mcneese #mcneese-search-box > .search_box-box > .search_block_form > .form-wrapper-inner > .search_block_form-section > .form-actions > .form-submit,
@@ -609,7 +609,7 @@
 }
 
 .mcneese #mcneese-bulletin-wrapper-inner.additional {
-  background-image: url(../../images/bulletin-background.png);
+  background-image: url(../../../images/bulletin-background.png);
   background-repeat: repeat-x;
   background-attachment: scroll;
   background-color: rgba(0, 0, 0, 0);
@@ -662,7 +662,7 @@
 
 /*** Bulletin - No Additional ***/
 .mcneese #mcneese-bulletin-wrapper-inner.no_additional {
-  background-image: url(../../images/bulletin-background-small.png);
+  background-image: url(../../../images/bulletin-background-small.png);
   background-repeat: repeat-x;
   background-attachment: scroll;
   background-color: rgba(0, 0, 0, 0);

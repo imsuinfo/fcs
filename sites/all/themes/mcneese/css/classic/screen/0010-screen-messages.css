@@ -34,7 +34,7 @@
 
 /*** Messages Region - Fixed ***/
 .mcneese #mcneese-messages.fixed {
-  background-image: url(../../images/messages.png);
+  background-image: url(../../../images/messages.png);
 }
 
 .mcneese #mcneese-messages.fixed.collapsed {
