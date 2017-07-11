@@ -12147,12 +12147,12 @@ function mfcs_add_canonical_headers($unique_path, $short_path = NULL) {
   // expose settings as a static variable so that the theme can find and process.
   $mfcs_canonical = &drupal_static('mfcs_canonical', array());
 
-  $mfcs_canonical[] = array(
+  $mfcs_canonical['canonical'] = array(
     'rel' => 'canonical',
     'href' => $base_url . '/' . $unique_path,
   );
 
-  $mfcs_canonical[] = array(
+  $mfcs_canonical['shortlink'] = array(
     'rel' => 'shortlink',
     'href' => $base_path . $short_path,
   );
@@ -12223,7 +12223,7 @@ function mfcs_add_alternate_link($alternate_path, $alternate_type, $title = NULL
     $canonical['title'] = $title;
   }
 
-  $mfcs_canonical[] = $canonical;
+  $mfcs_canonical['alternate'] = $canonical;
 
   $link_headers = drupal_get_http_header('link');
 
