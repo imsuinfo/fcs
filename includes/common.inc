@@ -3846,6 +3846,12 @@ function drupal_aggregate_css(&$css_groups) {
  * New boolean variable called 'drupal_disable_at_import' can be used to disable
  * the '@import' workaround for IE.
  *
+ * New boolean/NULL drupal static called 'drupal_require_css_via_import' has been
+ * added. This can be used as a work-around for applications such as a PDF
+ * generator that fails to handle content appropriately. This is only meant to
+ * be used in specific situations and is only provided as a temporary/static
+ * variable. This will override 'drupal_disable_at_import'.
+ *
  * @param $element
  *   A render array containing:
  *   - '#items': The CSS items as returned by drupal_add_css() and altered by
@@ -3901,6 +3907,10 @@ function drupal_pre_render_styles($elements) {
 
   // disable the use of @import.
   $drupal_enable_at_import = !variable_get('drupal_disable_at_import', FALSE);
+  $drupal_require_css_via_import = &drupal_static('drupal_require_css_via_import', FALSE);
+  if ($drupal_require_css_via_import) {
+    $drupal_enable_at_import = TRUE;
+  }
 
   // Loop through each group.
   foreach ($elements['#groups'] as $group) {
@@ -4122,6 +4132,10 @@ function drupal_build_css_cache($css) {
 
   // disable the use of @import.
   $drupal_enable_at_import = !variable_get('drupal_disable_at_import', FALSE);
+  $drupal_require_css_via_import = &drupal_static('drupal_require_css_via_import', FALSE);
+  if ($drupal_require_css_via_import) {
+    $drupal_enable_at_import = TRUE;
+  }
 
   if (empty($uri) || !file_exists($uri)) {
     // Build aggregate CSS file.
@@ -4315,9 +4329,13 @@ function drupal_load_stylesheet_content($contents, $optimize = FALSE) {
     $contents .= "\n";
   }
 
+  $drupal_require_css_via_import = &drupal_static('drupal_require_css_via_import', FALSE);
+
   // Replaces @import commands with the actual stylesheet content.
   // This happens recursively but omits external files.
-  $contents = preg_replace_callback('/@import\s*(?:url\(\s*)?[\'"]?(?![a-z]+:)(?!\/\/)([^\'"\()]+)[\'"]?\s*\)?\s*;/', '_drupal_load_stylesheet', $contents);
+  if (!$drupal_require_css_via_import) {
+    $contents = preg_replace_callback('/@import\s*(?:url\(\s*)?[\'"]?(?![a-z]+:)(?!\/\/)([^\'"\()]+)[\'"]?\s*\)?\s*;/', '_drupal_load_stylesheet', $contents);
+  }
   return $contents;
 }
 
