@@ -497,8 +497,8 @@ function mfcs_request_view_0_form($form, &$form_state, $request_id, $mode = MFCS
 
       if (isset($room_unavailability['conflicts']) && is_array($room_unavailability['conflicts'])) {
         foreach ($room_unavailability['conflicts'] as $conflict) {
-          $room_unavailabilities['conflicts'][$conflict->id] = $conflict;
-          $date_extras[$date_delta]['conflicts'][$conflict->id] = $conflict;
+          $room_unavailabilities['conflicts'][$conflict->request_id] = $conflict;
+          $date_extras[$date_delta]['conflicts'][$conflict->request_id] = $conflict;
         }
         unset($conflict);
       }
