@@ -135,10 +135,27 @@ function mfcs_pre_validate_request_fields(&$form, &$form_state, $dont_validate =
         }
       }
       else {
-        // the submit button is not allowed when not in a custom target section.
-        if (isset($form['form']['target_section']) && array_key_exists('#value', $form['form']['target_section']) && !is_null($form['form']['target_section']['#value'])) {
-          form_set_error('submit-request-submit', 'This request cannot be submitted during this step at this time. Try using the Continue button.');
-          $passed = FALSE;
+        $cannot_submit_not_quick_meeting = FALSE;
+        if ($is_new_request) {
+          if ($form['form']['step']['#value'] != 'details') {
+            $cannot_submit_not_quick_meeting = TRUE;
+          }
+        }
+        else {
+          if (isset($location_state['target_section']['#value'])) {
+            if ($location_state['target_section']['#value'] == 'request' && $location_form['step']['#value'] == 'standard') {
+              $cannot_submit_not_quick_meeting = TRUE;
+            }
+          }
+          else {
+            if ($form['form']['step']['#value'] == 'standard') {
+              $cannot_submit_not_quick_meeting = TRUE;
+            }
+          }
+        }
+
+        if ($cannot_submit_not_quick_meeting) {
+          form_set_error($ps_p . '][information][type][0', t('The form may only be submitted during this step if the request type is a <strong>@term_name</strong>. Use the continue button instead.', array('@term_name' => 'Quick Meeting')));
         }
       }
     }
@@ -361,6 +378,11 @@ function mfcs_validate_request_fields($form, &$form_state) {
     $clicked_id = $form_state['triggering_element']['#id'];
   }
 
+  $is_new_request = NULL;
+  if (isset($form['form']['new']['#value'])) {
+    $is_new_request = $form['form']['new']['#value'];
+  }
+
   $is_quick_meeting = FALSE;
   if (isset($location_state['information']['type'][0]) && $location_state['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
     $is_quick_meeting = TRUE;
@@ -404,14 +426,29 @@ function mfcs_validate_request_fields($form, &$form_state) {
         }
       }
     }
-    else {
-      $not_custom_section = FALSE;
-      if (isset($form['form']['target_section']) && array_key_exists('#value', $form['form']['target_section']) && !is_null($form['form']['target_section']['#value'])) {
-        $not_custom_section = TRUE;
+    elseif ($clicked_id == 'submit-request-submit') {
+      // this check is performed in the pre-process and may be redundant, but I am leaving it here as a failsafe (may be removed in the future).
+      $cannot_submit_not_quick_meeting = FALSE;
+      if ($is_new_request) {
+        if ($form['form']['step']['#value'] != 'details') {
+          $cannot_submit_not_quick_meeting = TRUE;
+        }
+      }
+      else {
+        if (isset($location_state['target_section']['#value'])) {
+          if ($location_state['target_section']['#value'] == 'request' && $location_form['step']['#value'] == 'standard') {
+            $cannot_submit_not_quick_meeting = TRUE;
+          }
+        }
+        else {
+          if ($form['form']['step']['#value'] == 'standard') {
+            $cannot_submit_not_quick_meeting = TRUE;
+          }
+        }
       }
 
-      if ($clicked_id == 'submit-request-submit' && $not_custom_section) {
-        form_set_error($clicked_id, t('The form may only be submitted during this step if a <strong>@term_name</strong> is used. Use the continue button instead.', array('@term_name' => $quick_meeting_name)));
+      if ($cannot_submit_not_quick_meeting) {
+        form_set_error($ps_p . '][information][type][0', t('The form may only be submitted during this step if the request type is a <strong>@term_name</strong>. Use the continue button instead.', array('@term_name' => $quick_meeting_name)));
       }
     }
 

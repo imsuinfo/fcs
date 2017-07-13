@@ -472,7 +472,14 @@ function mfcs_request_edit_0_form_validate($form, &$form_state) {
           }
           else {
             if (array_key_exists($form_state['values']['request']['information']['type'][0], $request_type_options)) {
-              $form_state['values']['form']['step'] = 'details';
+              if ($clicked_id == 'submit-request-submit') {
+                if ($form_state['values']['request']['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
+                  $form_state['rebuild'] = FALSE;
+                }
+              }
+              else {
+                $form_state['values']['form']['step'] = 'details';
+              }
             }
             else {
               form_set_error('request][information][type][0', 'An invalid <strong>' . $form['request']['information']['type'][0]['#title'] . '</strong> is selected.');
