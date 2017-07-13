@@ -4115,6 +4115,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
   unset($header_name);
   unset($header_value);
 
+  $drupal_warning_messages = NULL;
   if ($testing && $debugging_email) {
     $debug_accounts = array();
 
@@ -4137,7 +4138,7 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
 
     foreach ($email_to as $to) {
       if (!in_array($to, $email_whitelist) && !in_array($to, $debug_accounts)) {
-        drupal_set_message(t('<span class="strong uppercase">Warning</span>: not sending mail to @to while testing the system.', array('@to' => $to)), 'warning');
+        $drupal_warning_messages .= t('<div class="message-warning"><span class="strong uppercase">Warning</span>: not sending mail to @to while testing the system.</div>', array('@to' => $to));
         #watchdog('debug', 'Warning: not sending mail to @to while testing the system.', array('@to' => $to), WATCHDOG_WARNING);
         continue;
       }
@@ -4179,6 +4180,10 @@ function mfcs_send_workflow_emails($request_id, $parameters) {
         }
       }
     }
+  }
+
+  if (is_string($drupal_warning_messages)) {
+    drupal_set_message($drupal_warning_messages, 'warning');
   }
 
   return TRUE;
