@@ -2904,6 +2904,10 @@ function mfcs_request_users_get_users($search = '', $order_by = array(), $offset
       $arguments[':status'] = $limit_users_by_status;
     }
 
+    if (preg_match('/' . $regex_safe_search . '/i', 'Problems') > 0) {
+      $where_string .= 'or problems <> 0 ';
+    }
+
     $liked = db_like($search);
 
     if (preg_match('/' . $regex_safe_search . '/i', 'Never') > 0) {
