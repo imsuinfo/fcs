@@ -1887,9 +1887,10 @@ function mfcs_request_access($operation, $request, $user = NULL, $section = NULL
           'dates',
         );
 
-        if (!in_array($section, $allowed_sections_quick_meeting)) {
-          return FALSE;
-        }
+        // disabled as per fcs-100.
+        #if (!in_array($section, $allowed_sections_quick_meeting)) {
+        #  return FALSE;
+        #}
       }
     }
 

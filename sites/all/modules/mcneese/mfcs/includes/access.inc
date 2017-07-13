@@ -211,11 +211,12 @@ function mfcs_page_request_access_operation_edit(&$request_ids, &$processed, &$a
             $processed[$id] = array_key_exists($id, $access_results);
             $access[$id] = $processed[$id];
 
-            if ($processed[$id] && $access_results[$id]->type === MFCS_REQUEST_TYPE_QUICK_MEETING) {
-              if ($section_restricted_quick_meeting) {
-                $access[$id] = FALSE;
-              }
-            }
+            // disabled as per fcs-100.
+            #if ($processed[$id] && $access_results[$id]->type === MFCS_REQUEST_TYPE_QUICK_MEETING) {
+            #  if ($section_restricted_quick_meeting) {
+            #    $access[$id] = FALSE;
+            #  }
+            #}
           }
         }
 

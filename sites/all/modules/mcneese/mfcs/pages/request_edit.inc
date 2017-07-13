@@ -205,11 +205,13 @@ function mfcs_request_edit_0_form($form, &$form_state, $request_id, $target_sect
         '#name' => 'submit-request-next',
         '#type' => 'submit',
         '#default_value' => 'Continue',
-        '#states' => array(
-          'invisible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . 'information][type][0]' . '"]' => array('value' => MFCS_REQUEST_TYPE_QUICK_MEETING),
-          ),
-        ),
+
+        // disabled as per fcs-100.
+        #'#states' => array(
+        #  'invisible' => array(
+        #    ':input[name="' . $form['form']['parents']['#value']['path'] . 'information][type][0]' . '"]' => array('value' => MFCS_REQUEST_TYPE_QUICK_MEETING),
+        #  ),
+        #),
       );
 
       $form['request']['submit'] = array(

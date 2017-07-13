@@ -396,7 +396,8 @@ function mfcs_validate_request_fields($form, &$form_state) {
     // quick meetings can only be used by venue coordinators.
     if ($is_quick_meeting) {
       if ($clicked_id == 'submit-request-next') {
-        form_set_error($clicked_id, t('The form has no additional steps when \'@term_name\' is used. Use the submit button instead.', array('@term_name' => $quick_meeting_name)));
+        # disabled as per fcs-100.
+        #form_set_error($clicked_id, t('The form has no additional steps when \'@term_name\' is used. Use the submit button instead.', array('@term_name' => $quick_meeting_name)));
       }
       elseif ($clicked_id == 'submit-request-submit') {
         $cannot_perform_quick_meetings = TRUE;

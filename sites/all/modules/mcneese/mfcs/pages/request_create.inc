@@ -252,11 +252,13 @@ function mfcs_request_create_0_form($form, &$form_state, $copy_request = NULL) {
         '#name' => 'submit-request-next',
         '#type' => 'submit',
         '#default_value' => 'Continue',
-        '#states' => array(
-          'invisible' => array(
-            ':input[name="' . $form['form']['parents']['#value']['path'] . 'information][type][0]' . '"]' => array('value' => MFCS_REQUEST_TYPE_QUICK_MEETING),
-          ),
-        ),
+
+        // disabled as per fcs-100.
+        #'#states' => array(
+        #  'invisible' => array(
+        #    ':input[name="' . $form['form']['parents']['#value']['path'] . 'information][type][0]' . '"]' => array('value' => MFCS_REQUEST_TYPE_QUICK_MEETING),
+        #  ),
+        #),
       );
 
       $form['request']['submit'] = array(
@@ -432,7 +434,7 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
       }
       elseif ($clicked_id == 'submit-request-submit' || $clicked_id == 'submit-request-next') {
         // @todo: fixme unavailability must be processed.
-        if (isset($form_state['values']['request']['information']['type'][0]) && $form_state['values']['request']['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
+        if (isset($form_state['values']['request']['information']['type'][0]) && $form_state['values']['request']['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING && $clicked_id == 'submit-request-submit') {
           if (!empty($form['form']['user']['#value']) && user_access('mfcs manage', $form['form']['user']['#value'])) {
             $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED;
             $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
@@ -628,7 +630,38 @@ function mfcs_request_create_0_form_validate($form, &$form_state) {
         $form_state['values']['form']['step'] = 'standard';
       }
       elseif ($clicked_id == 'submit-request-submit') {
-        $form_state['rebuild'] = FALSE;
+        // @todo: fixme unavailability must be processed.
+        if (isset($form_state['values']['request']['information']['type'][0]) && $form_state['values']['request']['information']['type'][0] == MFCS_REQUEST_TYPE_QUICK_MEETING) {
+          if (!empty($form['form']['user']['#value']) && user_access('mfcs manage', $form['form']['user']['#value'])) {
+            $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED;
+            $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
+            $form_state['rebuild'] = FALSE;
+          }
+          elseif (!empty($form_state['values']['request']['venue_coordinator']['user_id'][0]) && !empty($form['form']['user']['#value']->uid)) {
+            if ($form_state['values']['request']['venue_coordinator']['user_id'][0] == $form['form']['user']['#value']->uid) {
+              $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED;
+              $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
+              $form_state['rebuild'] = FALSE;
+            }
+            else {
+              $proxies_returned = mfcs_get_proxy_venue_coordinators(array('mpvc.user_id' => $form_state['values']['request']['venue_coordinator']['user_id'][0], 'mpvc.disabled' => 0));
+              if (empty($proxies_returned['results'])) {
+                form_set_error('request][information][type][0', 'You are not authorized to create a quick meeting.');
+              }
+              else {
+                $form_state['values']['request']['status'][0] = MFCS_REQUEST_STATUS_CLOSED_ACCEPTED;
+                $form_state['values']['request']['step'][0] = MFCS_REVIEW_STEP_COMPLETED;
+                $form_state['rebuild'] = FALSE;
+              }
+            }
+          }
+          else {
+            form_set_error('request][information][type][0', 'An internal error occured while trying to validating the submit process for a quick meeting. Please contact the support staff.');
+          }
+        }
+        else {
+          $form_state['rebuild'] = FALSE;
+        }
       }
     }
     elseif ($form_state['values']['form']['step'] == 'copy') {
