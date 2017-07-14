@@ -11693,6 +11693,9 @@ function mfcs_get_requests_not_providing_insurance($date_from = NULL, $date_to =
 
     $query->condition('mer.step', $allowed_steps, 'IN');
 
+    // quick meeting are generally auto-approved but in case weird cases exist, make sure quick meetings are not included in the alerts.
+    $query->condition('mer.type', MFCS_REQUEST_TYPE_QUICK_MEETING, '<>');
+
     if (!is_null($date_from)) {
       if (is_null($date_to)) {
         $query->condition('mfdd.value', $date_from);
