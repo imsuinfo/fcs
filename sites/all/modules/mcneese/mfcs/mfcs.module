@@ -405,6 +405,11 @@ define('MFCS_TIMEZONE_LOCAL', 'America/Chicago');
 define('MFCS_TIMEZONE_ICALENDAR', 'UTC');
 
 /**
+ * Special Case Information
+ */
+define('MFCS_BANNER_LOCATION_VENUE_COORDINATOR', -1);
+
+/**
  * Implements hook_init().
  */
 function mfcs_init() {
@@ -3186,12 +3191,15 @@ function mfcs_load_buildings($location = NULL, $building = NULL, $disabled = FAL
  *   (optional) When specified, load the room associated with the room id.
  * @param bool $disabled
  *   (optional) When TRUE, will also load the disabled rooms.
+ * @param int|null $coordinator_id
+ *   (optional) The coordinator ID to use when MFCS_BANNER_LOCATION_VENUE_COORDINATOR is in use.
+ *   Otherwise this is ignored.
  *
  * @return array|object|bool
  *   An array of rooms or a single room array.
  *   FALSE is returned on error.
  */
-function mfcs_load_rooms($location = NULL, $building = NULL, $room = NULL, $disabled = FALSE) {
+function mfcs_load_rooms($location = NULL, $building = NULL, $room = NULL, $disabled = FALSE, $coordinator_id = NULL) {
   if (!is_null($location) && !cf_is_integer($location)) {
     cf_error::invalid_integer('location');
     return FALSE;
@@ -3212,6 +3220,11 @@ function mfcs_load_rooms($location = NULL, $building = NULL, $room = NULL, $disa
     return FALSE;
   }
 
+  if (!is_null($coordinator_id) && !cf_is_integer($coordinator_id)) {
+    cf_error::invalid_integer('coordinator_id');
+    return FALSE;
+  }
+
   $cache_id = __function__;
 
   if (!is_null($location) || !is_null($building)) {
@@ -3223,19 +3236,52 @@ function mfcs_load_rooms($location = NULL, $building = NULL, $room = NULL, $disa
     $cache_id .= '_disabled';
   }
 
-  $items = &drupal_static($cache_id, NULL);
-  if (is_array($items)) {
-    if (is_null($room)) {
-      return $items;
+  $do_cache = TRUE;
+  $can_review = FALSE;
+  if ($location == MFCS_BANNER_LOCATION_VENUE_COORDINATOR) {
+    $do_cache = FALSE;
+
+    $coordinator_ids = array();
+    if (is_null($coordinator_id)) {
+      $user = cf_current_user();
+      $coordinator_ids[(int) $user->uid] = (int) $user->uid;
+      $can_review = mfcs_page_request_access('review', NULL, $user->uid);
+    }
+    else {
+      $coordinator_ids[(int) $coordinator_id] = (int) $coordinator_id;
+      $can_review = mfcs_page_request_access('review', NULL, $coordinator_id);
     }
 
-    if (array_key_exists($room, $items)) {
-      return $items[$room];
+    if ($can_review) {
+      $proxy_as = mfcs_get_proxy_venue_coordinator(reset($coordinator_ids));
+      if (!empty($proxy_as)) {
+        foreach ($proxy_as as $proxy_id) {
+          $coordinator_ids[(int) $proxy_id] = (int) $proxy_id;
+        }
+        $has_reviewer_role = TRUE;
+      }
+      unset($proxy_as);
     }
   }
 
-  // don't override cached items.
-  if (is_null($items)) {
+  if ($do_cache) {
+    $items = &drupal_static($cache_id, NULL);
+    if (is_array($items)) {
+      if (is_null($room)) {
+        return $items;
+      }
+
+      if (array_key_exists($room, $items)) {
+        return $items[$room];
+      }
+    }
+
+    // don't override cached items.
+    if (is_null($items)) {
+      $items = array();
+    }
+  }
+  else {
     $items = array();
   }
 
@@ -3248,19 +3294,29 @@ function mfcs_load_rooms($location = NULL, $building = NULL, $room = NULL, $disa
     }
 
     if (!is_null($location)) {
-      $query->innerJoin('mfcs_banner_building_to_location', 'mbbl', 'mbb.id = mbbl.building AND mbr.building = mbbl.building');
-      $query->innerJoin('mfcs_banner_locations', 'mbl', 'mbbl.location = mbl.id');
+      if ($location == MFCS_BANNER_LOCATION_VENUE_COORDINATOR) {
+        $or = db_or();
 
-      $query->condition('mbl.id', $location);
+        $or->condition('mbr.venue_coordinator_id', $coordinator_ids, 'IN');
+        $or->condition('mbr.room_coordinator_id', $coordinator_ids, 'IN');
 
-      $query->addField('mbl', 'id', 'location_id');
-      $query->addField('mbl', 'machine_name', 'location_code');
-      $query->addField('mbl', 'human_name', 'location_name');
+        $query->condition($or);
+      }
+      else {
+        $query->innerJoin('mfcs_banner_building_to_location', 'mbbl', 'mbb.id = mbbl.building AND mbr.building = mbbl.building');
+        $query->innerJoin('mfcs_banner_locations', 'mbl', 'mbbl.location = mbl.id');
 
-      $query->orderBy('mbl.human_name');
+        $query->condition('mbl.id', $location);
 
-      if (!$disabled) {
-        $query->condition('mbl.disabled', 0);
+        $query->addField('mbl', 'id', 'location_id');
+        $query->addField('mbl', 'machine_name', 'location_code');
+        $query->addField('mbl', 'human_name', 'location_name');
+
+        $query->orderBy('mbl.human_name');
+
+        if (!$disabled) {
+          $query->condition('mbl.disabled', 0);
+        }
       }
     }
 
@@ -3312,6 +3368,76 @@ function mfcs_load_rooms($location = NULL, $building = NULL, $room = NULL, $disa
     else {
       $items[$room] = FALSE;
     }
+  }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Returns a list of locations associated with a given room.
+ *
+ * @param int|null $room
+ *   (optional) When specified, load the room associated with the room id.
+ * @param bool $disabled
+ *   (optional) When TRUE, will also load the disabled locations.
+ *
+ * @return array|object|bool
+ *   An array of rooms or a single room array.
+ *   FALSE is returned on error.
+ */
+function mfcs_load_locations_by_room($room, $disabled = FALSE) {
+  if (!is_null($room) && !cf_is_integer($room)) {
+    cf_error::invalid_integer('room');
+    return FALSE;
+  }
+
+  if (!is_bool($disabled)) {
+    cf_error::invalid_bool('disabled');
+    return FALSE;
+  }
+
+  try {
+    $query = db_select('mfcs_banner_locations', 'mbl');
+    $query->innerJoin('mfcs_banner_building_to_location', 'mbbl', 'mbl.id = mbbl.location');
+    $query->innerJoin('mfcs_banner_buildings', 'mbb', 'mbbl.building = mbb.id');
+    $query->innerJoin('mfcs_banner_rooms', 'mbr', 'mbb.id = mbr.building');
+
+    $query->addField('mbl', 'id', 'location_id');
+    $query->addField('mbl', 'machine_name', 'machine_name');
+    $query->addField('mbl', 'human_name', 'location_name');
+
+    if ($disabled) {
+      $query->addField('mbl', 'disabled', 'disabled');
+      $query->addField('mbl', 'date', 'date');
+    }
+    else {
+      $query->condition('mbl.disabled', 0);
+    }
+
+    $query->condition('mbr.id', $room);
+
+    $query->orderBy('mbl.human_name');
+
+    $results = $query->execute()->fetchAllAssoc('location_id');
+
+    $items = array();
+    if (!empty($results)) {
+      foreach ($results as $rid => $r) {
+        $items[$rid] = $r;
+      }
+    }
+
+    return $items;
   }
   catch (Error $e) {
     cf_error::on_query_execution($e);
@@ -8030,6 +8156,73 @@ function mfcs_get_venue_coordinator_proxy($venue_coordinator_id) {
   }
 
   return $proxies[$venue_coordinator_id];
+}
+
+/**
+ * Returns if the specified user is a venue coordinator or a room coordinator.
+ *
+ * @param int $user_id
+ *   The ID of the user to check.
+ * @param bool $check_proxy
+ *   (optional) When TRUE, this will test to see if the user can proxy as another
+ *   venue or room coordinator.
+ *   When FALSE, no proxy check is performed.
+ *
+ * @param bool
+ *   TRUE is returned if the user is a venue coordinator or a room coordinator.
+ *   FALSE is returned otherwise.
+ */
+function mfcs_is_venue_coordinator_or_room_coordinator($user_id, $check_proxy = TRUE) {
+  if (!cf_is_integer($user_id)) {
+    cf_error::invalid_integer('user_id');
+    return FALSE;
+  }
+
+  if (!is_bool($check_proxy)) {
+    cf_error::invalid_bool('check_proxy');
+    return FALSE;
+  }
+
+  try {
+    $query = db_select('mfcs_banner_rooms', 'mbr');
+
+    $query->addExpression('count(mbr.id)');
+
+    $or = db_or();
+    $or->condition('mbr.venue_coordinator_id', $user_id);
+    $or->condition('mbr.room_coordinator_id', $user_id);
+    $query->condition($or);
+
+    $total = $query->execute()->fetchAll();
+    if ($total > 0) {
+      return TRUE;
+    }
+
+    if ($check_proxy) {
+      $query = db_select('mfcs_proxy_venue_coordinator', 'mpvc');
+
+      $query->addExpression('count(mpvc.id)');
+
+      $query->condition('mpvc.proxy_id', $user_id);
+
+      $total = $query->execute()->fetchField();
+      if ($total > 0) {
+        return TRUE;
+      }
+    }
+  }
+  catch (Error $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+  catch (Exception $e) {
+    cf_error::on_query_execution($e);
+
+    return FALSE;
+  }
+
+  return FALSE;
 }
 
 /**

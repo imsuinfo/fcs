@@ -872,12 +872,20 @@ function mfcs_get_request_field_location($form, &$form_state, &$fields, &$reques
 
     drupal_add_js($module_path . '/js/images-locations.js', array('type' => 'file', 'group' => JS_DEFAULT, 'preprocess' => TRUE));
 
+    $list_options = mfcs_get_request_location_list_options('radios');
+
+    $user = cf_current_user();
+    $is_venue_coordinator = mfcs_is_venue_coordinator_or_room_coordinator($user->uid);
+    if ($is_venue_coordinator) {
+      $list_options[MFCS_BANNER_LOCATION_VENUE_COORDINATOR] = 'Your Rooms as Venue Coordinator';
+    }
+
     foreach ($values as $key => $value) {
       $fields['location'][$key] = array(
         '#id' => 'field-request-location-' . $key,
         '#type' => 'radios',
         '#title' => '<span class="strong underline">' . $field_title . '</span>',
-        '#options' => mfcs_get_request_location_list_options('radios'),
+        '#options' => $list_options,
         '#default_value' => $value,
         '#required' => TRUE,
         '#attributes' => array(

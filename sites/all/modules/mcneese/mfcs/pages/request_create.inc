@@ -593,6 +593,13 @@ function mfcs_request_create_0_form_submit($form, &$form_state) {
   $instance = mfcs_instance();
   $user = cf_current_user();
 
+  // The 'Venue Coordinator' location is not a real location, so find the first available location for the room and use it on save.
+  if ($form_state['values']['request']['location'][0] == MFCS_BANNER_LOCATION_VENUE_COORDINATOR) {
+    $locations = mfcs_load_locations_by_room($form_state['values']['request']['room'][0]);
+    $location = reset($locations);
+    $form_state['values']['request']['location'][0] = (int) $location->location_id;
+  }
+
   $changes = array(
     'status' =>  $form_state['values']['request']['status'][0],
     'step' => $form_state['values']['request']['step'][0],
