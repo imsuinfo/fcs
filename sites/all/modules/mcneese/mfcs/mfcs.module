@@ -7925,7 +7925,7 @@ function mfcs_get_proxy_venue_coordinators($conditions = array(), $options = arr
 }
 
 /**
- * Loads the venue coordiantors the user can proxy as.
+ * Loads the venue coordinators the user can proxy as.
  *
  * This is a wrapper to mfcs_get_proxy_venue_coordinators() that will cache
  * the information. Use this for functions that cache would be a benefit to,
